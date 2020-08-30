@@ -259,7 +259,7 @@ void resetboard(char board[8][8])
                             {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
                             {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
 
-                        };
+                            };
 
     memcpy(board, board_reset, sizeof(board_reset));
 }
