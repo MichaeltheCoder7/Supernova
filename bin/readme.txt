@@ -1,3 +1,3 @@
-Name: Dark Knight
-Author: Michael Yang
+Name: Supernova
+Author: Minkai Yang
 Version: 1.0
