@@ -10,7 +10,7 @@
 int CheckMove_wpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
 {
     /* 1 for legal move, 0 for illegal move*/
-	/*White Pawn*/
+    /*White Pawn*/
     /*Capturing*/
     if(index_y != new_y)
     {
@@ -48,7 +48,7 @@ int CheckMove_wpawn(char board[8][8], int index_x, int index_y, int new_x, int n
 int CheckMove_bpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
 {
     /* 1 for legal move, 0 for illegal move*/
-	/* Black Pawn */
+    /* Black Pawn */
     /*Capturing*/
     if(index_y != new_y)
     {
@@ -87,7 +87,7 @@ int CheckMove_bpawn(char board[8][8], int index_x, int index_y, int new_x, int n
 int CheckMove_wking(char board[8][8], int index_x, int index_y, int new_x, int new_y, int ksw, int qsw)
 {
     /* 1 for legal move, 0 for illegal move*/
-	/*White King*/
+    /*White King*/
     if(abs(new_y - index_y) <= 1)
     {
         if(board[new_x][new_y] == ' ' || board[new_x][new_y] == 'p' || board[new_x][new_y] == 'r' || board[new_x][new_y] == 'n' || board[new_x][new_y] == 'b' || board[new_x][new_y] == 'q')
@@ -138,7 +138,7 @@ int CheckMove_wking(char board[8][8], int index_x, int index_y, int new_x, int n
 int CheckMove_bking(char board[8][8], int index_x, int index_y, int new_x, int new_y, int ksb, int qsb)
 {
     /* 1 for legal move, 0 for illegal move*/
-	/*Black King*/
+    /*Black King*/
     if(abs(new_y - index_y) <= 1)
     {
         if(board[new_x][new_y] == ' ' || board[new_x][new_y] == 'P' || board[new_x][new_y] == 'R' || board[new_x][new_y] == 'N' || board[new_x][new_y] == 'B' || board[new_x][new_y] == 'Q')
@@ -189,7 +189,7 @@ int CheckMove_bking(char board[8][8], int index_x, int index_y, int new_x, int n
 int CheckCapture_wpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
 {
     /* 1 for legal move, 0 for illegal move*/
-	/*White Pawn*/
+    /*White Pawn*/
     if(index_y != new_y)
     {
         if(board[new_x][new_y] != ' ')
@@ -216,8 +216,8 @@ int CheckCapture_wpawn(char board[8][8], int index_x, int index_y, int new_x, in
     {
         return 1;
     }                                                        
-	
-	return 0;
+
+    return 0;
 }
 
 //captures and promotions for black pawn
@@ -252,6 +252,6 @@ int CheckCapture_bpawn(char board[8][8], int index_x, int index_y, int new_x, in
     {
         return 1;
     } 
-					
-	return 0;
+                    
+    return 0;
 }
