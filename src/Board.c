@@ -18,36 +18,36 @@
 
 void displayboard(char board[8][8])
 {
-	int j = 8; /*row numbers*/
-	printf("\n    a   b   c   d   e   f   g   h\n");
-	/*nested loops to print the board*/
-	for(int i = 0; i < 8; i++){
-		printf("  +---+---+---+---+---+---+---+---+\n");
-		printf(" %d", j);
-		for(int k = 0; k < 8; k++){
-			if(k == 7){
-				printf("| %c |", board[i][k]);
-			}
-			else{
-				printf("| %c ", board[i][k]);
-			}
-		}
-		printf("%d", j);
-		printf("\n");
-		j--;
-	}
-	printf("  +---+---+---+---+---+---+---+---+\n");
-	printf("    a   b   c   d   e   f   g   h\n\n");
+    int j = 8; /*row numbers*/
+    printf("\n    a   b   c   d   e   f   g   h\n");
+    /*nested loops to print the board*/
+    for(int i = 0; i < 8; i++){
+        printf("  +---+---+---+---+---+---+---+---+\n");
+        printf(" %d", j);
+        for(int k = 0; k < 8; k++){
+            if(k == 7){
+                printf("| %c |", board[i][k]);
+            }
+            else{
+                printf("| %c ", board[i][k]);
+            }
+        }
+        printf("%d", j);
+        printf("\n");
+        j--;
+    }
+    printf("  +---+---+---+---+---+---+---+---+\n");
+    printf("    a   b   c   d   e   f   g   h\n\n");
 }
 
 static inline void updateboard(char current_position[3], char new_position[3], char board[8][8])
 {
     /*finding the location of the current position*/
-	int current_x = position_to_x(current_position);
-	int current_y = position_to_y(current_position);
-	/*make the new position equal to the current position, then make current position blank*/
-	board[position_to_x(new_position)][position_to_y(new_position)] = board[current_x][current_y]; /*new is now the current*/
-	board[current_x][current_y] = ' ';
+    int current_x = position_to_x(current_position);
+    int current_y = position_to_y(current_position);
+    /*make the new position equal to the current position, then make current position blank*/
+    board[position_to_x(new_position)][position_to_y(new_position)] = board[current_x][current_y]; /*new is now the current*/
+    board[current_x][current_y] = ' ';
 	
 }
 
@@ -117,7 +117,7 @@ int make_move(char cur_p[3], char new_p[3], char board[8][8])
     char ep = position_to_piece(board, new_p);
 
     updateboard(cur_p, new_p, board);
-    
+
     // CPU Pawn Promotion
     if(piece == 'P' || piece == 'p') 
     {
@@ -150,7 +150,7 @@ int make_move(char cur_p[3], char new_p[3], char board[8][8])
             return 2;
         }
     }
-    
+
     return 0;
 }
 
@@ -160,7 +160,7 @@ int make_move(char cur_p[3], char new_p[3], char board[8][8])
 int makeMove(char cur_p[3], char new_p[3], char promotion, char piece, char ep, char board[8][8])
 {
     updateboard(cur_p, new_p, board);
-    
+
     if(piece == 'P' || piece == 'p') 
     {
         switch(new_p[1])
@@ -240,7 +240,7 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, char piece, char ep, 
             updateboard("a8", "d8", board);
         }
     }
-    
+
     return 0;
 }
 
@@ -249,17 +249,17 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, char piece, char ep, 
 void resetboard(char board[8][8])
 {
     char board_reset[8][8] = {
-						
-							{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-							{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},			
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-							{'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
+                        
+                            {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
+                            {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+                            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},			
+                            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                            {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+                            {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
 
-						};
-    
+                        };
+
     memcpy(board, board_reset, sizeof(board_reset));
 }
