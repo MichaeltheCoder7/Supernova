@@ -44,12 +44,12 @@ int outofbook;
 void * engine(void * param)
 {
 	char opponentCP[3] = "", opponentNP[3] = "";
-	
+
 	if(strncmp("", opponent_move, 5))
 	{
 		sscanf(opponent_move, "%2s%2s", opponentCP, opponentNP);
 	}
-	
+
 	//displayboard(board);
 
 	search(board, engine_color, opponentCP, opponentNP, kswflag, qswflag, ksbflag, qsbflag, halfmove_counter);
@@ -61,13 +61,13 @@ void * engine(void * param)
 void handle_uci()
 {
 	printf("id name Supernova 1.0\n");
-    printf("id author Minkai Yang\n");
-    printf("uciok\n");
+	printf("id author Minkai Yang\n");
+	printf("uciok\n");
 }
 
 void handle_newgame()
 {
-    //start the game
+	//start the game
 	strncpy(opponent_move, "", 5);
 	engine_color = 0;
 	init_zobrist();
@@ -83,30 +83,30 @@ void handle_newgame()
 
 void handle_position(char *input)
 {
-    char move[5];
+	char move[5];
 	char cp[3];
 	char np[3];
 	char own_piece = ' ';
 	char op_piece;
 	int move_color = 0;
 	char promotion_piece = ' ';
-    //parse the positon input
-    char *position;
-    const char s[2] = " ";
+	//parse the positon input
+	char *position;
+	const char s[2] = " ";
 	memset(history_log, -1, sizeof(history_log)); //clear history table
-    position = strtok(input, s);
-    
+	position = strtok(input, s);
+
 	halfmove_counter = 0;
 	resetboard(board); //reset the board
 	history_log[0] = getHash(board, -1, "", "", 1, 1, 1, 1);
 	history_index = 1;
 
-    while(position != NULL) 
-    {
-        position = strtok(NULL, s);
-        if(position != NULL)
-        {
-            strncpy(move, position, 4); //get opponent's move
+	while(position != NULL) 
+	{
+		position = strtok(NULL, s);
+		if(position != NULL)
+		{
+			strncpy(move, position, 4); //get opponent's move
 			move[4] = '\0';
 			promotion_piece = position[4];
 			if(strncmp("star", move, 4) != 0 && strncmp("move", move, 4) != 0) //set the board at the start of the game
@@ -165,10 +165,10 @@ void handle_position(char *input)
 				history_log[history_index] = getHash(board, move_color, cp, np, kswflag, qswflag, ksbflag, qsbflag);
 				history_index++;
 			}
-        }
-    }
+		}
+	}
 
-    //check what color does the gui wants the engine to be
+	//check what color does the gui wants the engine to be
 	if(!strncmp("star", move, 4) || islower(own_piece))
 	{
 		engine_color = -1; //white
@@ -178,11 +178,11 @@ void handle_position(char *input)
 		engine_color = 1; //black
 	}
 
-    if(strncmp("star", move, 4) != 0)
-    {
-        strncpy(opponent_move, move, 4);
+	if(strncmp("star", move, 4) != 0)
+	{
+		strncpy(opponent_move, move, 4);
 		opponent_move[4] = '\0';
-    }
+	}
 }   
 
 void handle_go(char *input)
@@ -238,14 +238,14 @@ void handle_go(char *input)
 		ponder = false;
 		analyze = false;
 	}
-	
+
 	stop = false; //set stop to false
 	ponderhit = false;
-    //start engine thread
+	//start engine thread
 	pthread_attr_t tattr;
 	pthread_t thread;
 	int error;
-	
+
 	pthread_attr_init(&tattr);
 	pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
 	error = pthread_create(&thread, &tattr, engine, NULL);
@@ -261,10 +261,10 @@ void uci_loop()
 {
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
-    char string[3000];
-    //infinite loop for uci gui
-    while(true)
-    {
+	char string[3000];
+	//infinite loop for uci gui
+	while(true)
+	{
 		memset(&string[0], 0, sizeof(string)); //flush the string
 		fflush(stdout); //flush the stdout
 		if(!fgets(string, 3000, stdin))
@@ -277,41 +277,41 @@ void uci_loop()
 			continue;
 		}
 
-    	if(!strncmp("isready", string, 7))
-        {
-            printf("readyok\n");
-        }
-        else if(!strncmp("ucinewgame", string, 10))
-        {
-            handle_newgame();
-        }
-        else if(!strncmp("position", string, 8))
-        {
-            handle_position(string);
-        }
-        else if(!strncmp("go", string, 2))
-        {
-            handle_go(string);
-        }
+		if(!strncmp("isready", string, 7))
+		{
+			printf("readyok\n");
+		}
+		else if(!strncmp("ucinewgame", string, 10))
+		{
+			handle_newgame();
+		}
+		else if(!strncmp("position", string, 8))
+		{
+			handle_position(string);
+		}
+		else if(!strncmp("go", string, 2))
+		{
+			handle_go(string);
+		}
 		else if(!strncmp("uci", string, 3))
-        {
-            handle_uci();
-        }
+		{
+			handle_uci();
+		}
 		else if(!strncmp("stop", string, 4))
-        {
+		{
 			stop = true;
-        }
+		}
 		else if(!strncmp("ponderhit", string, 9))
-        {
+		{
 			ponderhit = true;
-        }
-        else if(!strncmp("quit", string, 4))
-        {
+		}
+		else if(!strncmp("quit", string, 4))
+		{
 			stop = true;
 			Sleep(300); //wait till all threads are done
-            break;
-        }
-    }
+			break;
+		}
+	}
 }
 
 //uci gui
