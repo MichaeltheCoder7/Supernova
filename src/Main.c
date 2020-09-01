@@ -60,7 +60,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.0\n");
+	printf("id name Supernova 1.0.1\n");
 	printf("id author Minkai Yang\n");
 	printf("uciok\n");
 }
