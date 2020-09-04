@@ -28,7 +28,7 @@ move ordering
 quiescence search  
 
 Evaluation:  
-piece square table  
+piece square tables  
 mobility  
 king safety  
 king tropism  
