@@ -15,7 +15,7 @@
 #define ROOKOPENFILE    10
 #define ROOKHALFFILE    5
 #define BISHOPPAIR      30
-#define BADBISHOP       7
+#define BADBISHOP       6
 #define OUTPOST         10
 #define KNIGHTPAIR      8
 #define ROOKPAIR        16
