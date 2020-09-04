@@ -541,7 +541,9 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
     }
 
     //get static eval
-    int eval = evaluate(board, color);
+    int eval = 0;
+    if(!is_PV && !isCheck)
+        eval = evaluate(board, color);
 
     //razoring
     if(!is_PV && !isCheck && depth == 1 && eval <= alpha - 300)
