@@ -34,6 +34,6 @@ king safety
 king tropism  
 piece-specific evaluations  
 
-To download Supernova, you can download the executables in bin directory or Supernova.zip directly from 1.1.0 release, or alternatively, you can download all source files and Makefile and then run make on windows. To use the engine with a GUI, you need to add it to the GUI first. For example, if you are using Arena as GUI, add the engine via Engines -> Install New Engine and select the executable. The link to download Arena is given below.
+To download Supernova, you can download the Windows and Linux executables in bin directory or directly from 1.1.0 release, alternatively, you can download all source files and Makefile and then run make if you are using Windows. To use the engine with a GUI, you need to add it to the GUI first. For example, if you are using Arena as GUI, add the engine via Engines -> Install New Engine and select the executable. The link to download Arena is given below.
 
 http://www.playwitharena.de/
