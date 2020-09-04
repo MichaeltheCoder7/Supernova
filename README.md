@@ -1,6 +1,6 @@
 # Supernova
 
-Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface(Arena, Winboard, Shredder...) to function properly. The strengh of Supernova is estimated to be around 2100 to 2300 elo.
+Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface(Arena, Winboard, Shredder...) to function properly. The strengh of Supernova is estimated to be around 2100 to 2300 Elo.
 
 UCI Features:  
 pondering  
