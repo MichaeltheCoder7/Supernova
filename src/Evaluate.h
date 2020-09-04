@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#define EVALSIZE 1600421 //25MB
+unsigned long int EVALHASHSIZE;
 
 struct Eval 
 {
@@ -12,9 +12,11 @@ struct Eval
    bool valid;
 };
 
-struct Eval Evaltt[EVALSIZE]; 
+struct Eval* Evaltt;
 
-void clearEvalTT(bool print_usage);
+void clearEvalTT();
+
+void EvalTT_usage();
 
 int evaluate(char board[8][8], int color);
 

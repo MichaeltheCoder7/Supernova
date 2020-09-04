@@ -15,7 +15,7 @@
 #define ROOKOPENFILE    10
 #define ROOKHALFFILE    5
 #define BISHOPPAIR      30
-#define BADBISHOP       6
+#define BADBISHOP       7
 #define OUTPOST         10
 #define KNIGHTPAIR      8
 #define ROOKPAIR        16
@@ -25,7 +25,7 @@
 
 int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 }; 
 int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 }; 
-int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 12 };
+int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
 int rook_val[9] = { 15,  12,   9,  6,  3,  0, -3, -6, -9 };
 
 enum positions {
@@ -1831,7 +1831,7 @@ static inline unsigned long long int getEvalHash(char board[8][8], int color)
 static inline struct Eval *probeEvalTT(unsigned long long int key)
 {
     //get the hash 
-    int hashIndex = key % EVALSIZE;
+    int hashIndex = key % EVALHASHSIZE;
     if(Evaltt[hashIndex].valid == true && Evaltt[hashIndex].key == key)
     {    
         return &Evaltt[hashIndex];
@@ -1846,27 +1846,33 @@ static inline struct Eval *probeEvalTT(unsigned long long int key)
 static inline void storeEvalTT(unsigned long long int key, int evaluation)
 {
     //get the hash 
-    int hashIndex = key % EVALSIZE;
+    int hashIndex = key % EVALHASHSIZE;
 
     Evaltt[hashIndex].key = key;
     Evaltt[hashIndex].evaluation = evaluation;
     Evaltt[hashIndex].valid = true;
 }
 
-void clearEvalTT(bool print_usage)
+void clearEvalTT()
 {
-    float count = 0;
-    for(int x = 0; x < EVALSIZE; x++)
+    for(int x = 0; x < EVALHASHSIZE; x++)
     {
-        if(Evaltt[x].valid == true)
-            count++;
         Evaltt[x].key = 0;
         Evaltt[x].evaluation = 0;
         Evaltt[x].valid = false;
     }
+}
 
-    if(print_usage)
-        printf("Table Usage: %.2f%%\n", count * 100 / EVALSIZE);
+void EvalTT_usage()
+{
+    float count = 0;
+    for(int x = 0; x < EVALHASHSIZE; x++)
+    {
+        if(Evaltt[x].valid == true)
+            count++;
+    }
+
+    printf("Eval Table Usage: %.2f%%\n", count * 100 / EVALHASHSIZE);
 }
 
 //1: black
@@ -2373,62 +2379,8 @@ int evaluate(char board[8][8], int color)
         }
     }
 
-    //material draw
-    if(!P_count && !p_count)
-    {
-        if(!R_count && !r_count && !Q_count && !q_count)
-        {
-            if(!B_count && !b_count)
-            {
-                if(N_count < 3 && n_count < 3)
-                {
-                    return 0;
-                }
-            }
-            else if(!N_count && !n_count)
-            {
-                if(abs(B_count - b_count) < 2)
-                {
-                    return 0;
-                }
-            }
-            else if((N_count < 3 && !B_count) || (B_count == 1 && !N_count))
-            {
-                if((n_count < 3 && !b_count) || (b_count == 1 && !n_count))
-                {
-                    return 0;
-                }
-            }
-        }
-        else if(!Q_count && !q_count)
-        {
-            if(R_count == 1 && r_count == 1)
-            {
-                if((N_count + B_count) < 2 && (n_count + b_count) < 2)
-                {
-                    return 0;
-                }
-            }
-            else if(R_count == 1 && !r_count)
-            {
-                if((N_count + B_count == 0) && (((n_count + b_count) == 1) || ((n_count + b_count) == 2))) 
-                { 
-                    return 0; 
-                }
-            }
-            else if(r_count == 1 && !R_count)
-            {
-                if((n_count + b_count == 0) && (((N_count + B_count) == 1) || ((N_count + B_count) == 2))) 
-                { 
-                    return 0; 
-                    
-                }
-            }
-        }
-    }
-
     //for kings' position bonus midgame
-    if((R_count * 5 + N_count * 3 + B_count * 3 + Q_count * 9 > 14 || r_count * 5 + n_count * 3 + b_count * 3 + q_count * 9 > 14) && (P_count + p_count + N_count + n_count + B_count + b_count + R_count + r_count + Q_count + q_count) > 12)
+    if((R_count * 5 + N_count * 3 + B_count * 3 + Q_count * 9 > 13 || r_count * 5 + n_count * 3 + b_count * 3 + q_count * 9 > 13) && (P_count + p_count + N_count + n_count + B_count + b_count + R_count + r_count + Q_count + q_count) > 12)
     {
         position_bonus_white += white_king_midgame[white_king_x][white_king_y];
         position_bonus_black += black_king_midgame[black_king_x][black_king_y];
@@ -2823,6 +2775,71 @@ int evaluate(char board[8][8], int color)
     
     points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900  + position_bonus_black + ((b_count == 2)? 1 : 0) * BISHOPPAIR + ((n_count == 2)? 1 : 0) * KNIGHTPAIR + ((r_count == 2)? 1 : 0) * ROOKPAIR + other_bonus_black - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900 - position_bonus_white - ((B_count == 2)? 1 : 0) * BISHOPPAIR - ((N_count == 2)? 1 : 0) * KNIGHTPAIR - ((R_count == 2)? 1 : 0) * ROOKPAIR - other_bonus_white + tempo; 
     
+    //material draw
+    if(!P_count && !p_count)
+    {
+        if(!R_count && !r_count && !Q_count && !q_count)
+        {
+            if(!B_count && !b_count)
+            {
+                if(N_count < 3 && n_count < 3)
+                {
+                    //tt store
+                    storeEvalTT(key, 0);
+                    return 0;
+                }
+            }
+            else if(!N_count && !n_count)
+            {
+                if(abs(B_count - b_count) < 2)
+                {
+                    //tt store
+                    storeEvalTT(key, 0);
+                    return 0;
+                }
+            }
+            else if((N_count < 3 && !B_count) || (B_count == 1 && !N_count))
+            {
+                if((n_count < 3 && !b_count) || (b_count == 1 && !n_count))
+                {
+                    //tt store
+                    storeEvalTT(key, 0);
+                    return 0;
+                }
+            }
+        }
+        else if(!Q_count && !q_count)
+        {
+            if(R_count == 1 && r_count == 1)
+            {
+                if(((N_count + B_count) < 2 && (n_count + b_count) == 0) || ((N_count + B_count) == 0 && (n_count + b_count) < 2))
+                {
+                    //tt store
+                    storeEvalTT(key, color * points / 2);
+                    return color * points / 2;
+                }
+            }
+            else if(R_count == 1 && !r_count)
+            {
+                if((N_count + B_count == 0) && (((n_count + b_count) == 1) || ((n_count + b_count) == 2))) 
+                { 
+                    //tt store
+                    storeEvalTT(key, color * points / 2);
+                    return color * points / 2; 
+                }
+            }
+            else if(r_count == 1 && !R_count)
+            {
+                if((n_count + b_count == 0) && (((N_count + B_count) == 1) || ((N_count + B_count) == 2))) 
+                { 
+                    //tt store
+                    storeEvalTT(key, color * points / 2);
+                    return color * points / 2; 
+                }
+            }
+        }
+    }
+
     //tt store
     storeEvalTT(key, color * points);
     return color * points;
