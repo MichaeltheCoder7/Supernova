@@ -31,6 +31,8 @@ int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
 int king_moves_x[10] = { -1, -1, -1,  0,  0,  0,  0,  1,  1,  1 };
 int king_moves_y[10] = { -1,  0,  1, -2, -1,  1,  2, -1,  0,  1 };
 
+int king_cap_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
+int king_cap_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 //save one side's all positions in an array of string
 //need caller to declare: char opponent[16][3] array first and pass it in
@@ -923,7 +925,6 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                                 strncat(string, positions[index_x + 1][y], 3);
                                 strncpy(all_moves[index], string, 6);
                                 index++;
-
                             }
                         }
                         break;
@@ -950,11 +951,11 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                     }
                     case 'k':
                     {
-                        for(int j = 0; j < 10; j++)
+                        for(int j = 0; j < 8; j++)
                         {
-                            x = index_x + king_moves_x[j];
-                            y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8 || abs(king_moves_y[j]) == 2) //skip when out of board or castling
+                            x = index_x + king_cap_moves_x[j];
+                            y = index_y + king_cap_moves_y[j];
+                            if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;
                             }
@@ -1307,11 +1308,11 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                     }
                     case 'K':
                     {
-                        for(int j = 0; j < 10; j++)
+                        for(int j = 0; j < 8; j++)
                         {
-                            x = index_x + king_moves_x[j];
-                            y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8 || abs(king_moves_y[j]) == 2) //skip when out of board or castling
+                            x = index_x + king_cap_moves_x[j];
+                            y = index_y + king_cap_moves_y[j];
+                            if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;
                             }
@@ -1873,7 +1874,7 @@ static inline bool good_capture(char board[8][8], char own_piece, char cap_piece
     }
 
     //check if lower takes higher or equal
-    if(piece_value(cap_piece) >= piece_value(own_piece) - 50)
+    if(piece_value(cap_piece) >= piece_value(own_piece))
     {
         return true;
     }
@@ -2038,6 +2039,7 @@ void cap_ordering(char board[8][8], char moves[100][6], int length, int color)
 }
 
 //static exchange evaluation for quiescence search
+//need to figure out when a side can choose to stop exchange
 int SEE(char board[8][8], char location[3], int color)
 {
     char board_copy[8][8];
@@ -2046,21 +2048,29 @@ int SEE(char board[8][8], char location[3], int color)
     int y;
     int attacker_index = get_smallest_attacker(board, location, color);
     char piece;
+    int turn = 1;
+    bool king_attack = false;
+    memcpy(board_copy, board, sizeof(board_copy));
 
-    if(attacker_index != -1)
+    while(attacker_index != -1)
     {
-        piece = position_to_piece(board, location);
-        //stop when king is captured
-        if(piece == 'K' || piece == 'k')
-        {
-            return -20000;
-        }
-        
+        piece = position_to_piece(board_copy, location);
         x = attacker_index / 8;
         y = attacker_index % 8;
-        memcpy(board_copy, board, sizeof(board_copy));
+        
+        if(board_copy[x][y] == 'K' || board_copy[x][y] == 'k')
+            king_attack = true;            
+       
         make_move(positions[x][y], location, board_copy);
-        value = -piece_value(piece) - SEE(board_copy, location, -color);
+        color = -color;
+        attacker_index = get_smallest_attacker(board_copy, location, color);
+        
+        //stop when king is captured
+        if(king_attack && attacker_index != -1)
+            break;
+        
+        value -= turn * piece_value(piece);
+        turn = -turn;
     }
     return value;
 }

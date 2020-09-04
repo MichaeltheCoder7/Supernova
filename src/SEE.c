@@ -7,14 +7,14 @@
 
 char board[8][8] = {
 						
-                    {' ', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-                    {' ', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                     {' ', 'r', ' ', ' ', ' ', ' ', ' ', ' '},			
-                    {'p', ' ', 'K', ' ', ' ', ' ', ' ', ' '},
+                    {'p', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                     {' ', 'P', ' ', 'Q', ' ', ' ', ' ', ' '},
                     {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                    {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-                    {'R', 'N', ' ', 'Q', 'K', 'B', 'N', 'R'},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
                     };
 
@@ -31,44 +31,27 @@ char positions[8][8][3] = {
 
                             };
 
-
 //get the x index from a position on the board
 int position_to_x(char position[3])
 {
     switch(position[1])
     {
         case '8':
-        {
             return 0;
-        }
         case '7':
-        {
             return 1;
-        }
         case '6':
-        {
             return 2;
-        }
         case '5':
-        {
             return 3;
-        }
         case '4':
-        {
             return 4;
-        }
         case '3':
-        {
             return 5;
-        }
         case '2':
-        {
             return 6;
-        }
         case '1':
-        {
             return 7;
-        }
     }
     return -1; //when nothing is matched
 }
@@ -79,82 +62,53 @@ int position_to_y(char position[3])
     switch(position[0])
     {
         case 'a':
-        {
             return 0;
-        }
         case 'b':
-        {
             return 1;
-        }
         case 'c':
-        {
             return 2;
-        }
         case 'd':
-        {
             return 3;
-        }
         case 'e':
-        {
             return 4;
-        }
         case 'f':
-        {
             return 5;
-        }
         case 'g':
-        {
             return 6;
-        }
         case 'h':
-        {
             return 7;
-        }
     }
 
     return -1; //when nothing is matched
 }
 
-//get a position string and translate it to a piece character on the board
-char position_to_piece(char board[8][8], char current_position[3])
+static inline void updateboard(char current_position[3], char new_position[3], char board[8][8])
 {
-    int index_x, index_y;
-	char piece;
-
-    index_x = position_to_x(current_position);
-    index_y = position_to_y(current_position);
-
-    piece = board[index_x][index_y];
-    return piece;
-}
-
-/*displays the board as the players make moves*/
-void updateboard(char current_position[3], char new_position[3], char board[8][8])
-{
-	int current_x = 0;
-	int current_y = 0;
-	int new_x = 0;
-	int new_y = 0;
-	/*finding the location of the current position*/
-	current_x = position_to_x(current_position);
-	current_y = position_to_y(current_position);
-	new_x = position_to_x(new_position);
-	new_y = position_to_y(new_position);
-	/*make the new position equal to the current position, then make current position blank*/
-	board[new_x][new_y] = board[current_x][current_y]; /*new is now the current*/
-	board[current_x][current_y] = ' ';
+    /*finding the location of the current position*/
+    int current_x = position_to_x(current_position);
+    int current_y = position_to_y(current_position);
+    /*make the new position equal to the current position, then make current position blank*/
+    board[position_to_x(new_position)][position_to_y(new_position)] = board[current_x][current_y]; /*new is now the current*/
+    board[current_x][current_y] = ' ';
 	
 }
 
-//return 1 if promotion or enpassant
-int updateboard2(char cur_p[3], char new_p[3], char board[8][8])
+//get a position string and translate it to a piece character on the board
+char position_to_piece(char board[8][8], char current_position[3])
 {
+    return board[position_to_x(current_position)][position_to_y(current_position)];
+}
+
+//return 1 if promotion
+//return 2 for enpassant
+//for quiescence search and static exchange evaluation
+int make_move(char cur_p[3], char new_p[3], char board[8][8])
+{
+    char piece = position_to_piece(board, cur_p);
     char ep = position_to_piece(board, new_p);
 
     updateboard(cur_p, new_p, board);
 
-    char piece = position_to_piece(board, new_p);
-    
     // CPU Pawn Promotion
     if(piece == 'P' || piece == 'p') 
     {
@@ -163,18 +117,14 @@ int updateboard2(char cur_p[3], char new_p[3], char board[8][8])
             // White Pawn Promotion 
             case '8':
             {
-                int y = position_to_y(new_p);
-                board[0][y] = ' ';
-                board[0][y] = 'Q';
+                board[0][position_to_y(new_p)] = 'Q';
                 return 1;
                 break;
             }
             case '1':
             {
                 //Black Pawn Promotion 
-                int y = position_to_y(new_p);
-                board[7][y] = ' ';
-                board[7][y] = 'q';
+                board[7][position_to_y(new_p)] = 'q';
                 return 1;
                 break;
             }
@@ -184,78 +134,44 @@ int updateboard2(char cur_p[3], char new_p[3], char board[8][8])
             }
         }
 
-        //CPU en passant
+        //en passant
         if(abs(new_p[0] - cur_p[0]) == 1 && ep == ' ')
         {
             board[position_to_x(cur_p)][position_to_y(new_p)] = ' ';
             return 2;
         }
     }
-    //For castling:
-    else if(piece == 'K' || piece == 'k') 
-    {
-        if(strncmp(cur_p, "e1", 2) == 0 && strncmp(new_p, "g1", 2) == 0)
-        {
-            updateboard("h1", "f1", board);
-        }
-        else if(strncmp(cur_p, "e8", 2) == 0 && strncmp(new_p, "g8", 2) == 0)
-        {
-            updateboard("h8", "f8", board);
-        }
-        else if(strncmp(cur_p, "e1", 2) == 0 && strncmp(new_p, "c1", 2) == 0)
-        {
-            updateboard("a1", "d1", board);
-        }
-        else if(strncmp(cur_p, "e8", 2) == 0 && strncmp(new_p, "c8", 2) == 0)
-        {
-            updateboard("a8", "d8", board);
-        }
-    }
-    
+
     return 0;
 }
 
-int cap_piece_value(char board[8][8], char np[3])
+static inline int cap_piece_value(char board[8][8], char np[3])
 {
-    int piece_value;
     switch(position_to_piece(board, np))
     {
         case 'P':
-            piece_value = 100;
-            break;
+            return 100;
         case 'p':
-            piece_value = 100;
-            break;
+            return 100;
         case 'N':
-            piece_value = 320;
-            break;
+            return 320;
         case 'n':
-            piece_value = 320;
-            break;
+            return 320;
         case 'B':
-            piece_value = 330;
-            break;
+            return 330;
         case 'b':
-            piece_value = 330;
-            break;
+            return 330;
         case 'R':
-            piece_value = 500;
-            break;
+            return 500;
         case 'r':
-            piece_value = 500;
-            break;
+            return 500;
         case 'Q':
-            piece_value = 900;
-            break;
+            return 900;
         case 'q':
-            piece_value = 900;
-            break;
+            return 900;
         default:
-            piece_value = 100;
-            break;
+            return 100;
     }
-
-    return piece_value;
 }
 
 int get_smallest_attacker(char board[8][8], char location[3], int color)
@@ -758,49 +674,36 @@ int get_smallest_attacker(char board[8][8], char location[3], int color)
     return -1;
 }
 
-int piece_value(char piece)
+static inline int piece_value(char piece)
 {
-    int piece_value;
     switch(piece)
     {
         case 'P':
-            piece_value = 100;
-            break;
+            return 100;
         case 'p':
-            piece_value = 100;
-            break;
+            return 100;
         case 'N':
-            piece_value = 320;
-            break;
+            return 320;
         case 'n':
-            piece_value = 320;
-            break;
+            return 320;
         case 'B':
-            piece_value = 330;
-            break;
+            return 330;
         case 'b':
-            piece_value = 330;
-            break;
+            return 330;
         case 'R':
-            piece_value = 500;
-            break;
+            return 500;
         case 'r':
-            piece_value = 500;
-            break;
+            return 500;
         case 'Q':
-            piece_value = 900;
-            break;
+            return 900;
         case 'q':
-            piece_value = 900;
-            break;
+            return 900;
         default:
-            piece_value = 100;
-            break;
+            return 100;
     }
-
-    return piece_value;
 }
 
+//static exchange evaluation for quiescence search
 int SEE(char board[8][8], char location[3], int color)
 {
     char board_copy[8][8];
@@ -808,10 +711,12 @@ int SEE(char board[8][8], char location[3], int color)
     int x;
     int y;
     int attacker_index = get_smallest_attacker(board, location, color);
-    char piece = position_to_piece(board, location);
+    char piece;
 
     if(attacker_index != -1)
     {
+        piece = position_to_piece(board, location);
+        //stop when king is captured
         if(piece == 'K' || piece == 'k')
         {
             return -20000;
@@ -820,9 +725,44 @@ int SEE(char board[8][8], char location[3], int color)
         x = attacker_index / 8;
         y = attacker_index % 8;
         memcpy(board_copy, board, sizeof(board_copy));
-        updateboard2(positions[x][y], location, board_copy);
+        make_move(positions[x][y], location, board_copy);
         value = -piece_value(piece) - SEE(board_copy, location, -color);
-        //value = (value >= 0)?value:0;
+    }
+    return value;
+}
+
+//static exchange evaluation for quiescence search
+int SEE2(char board[8][8], char location[3], int color)
+{
+    char board_copy[8][8];
+    int value = 0;
+    int x;
+    int y;
+    int attacker_index = get_smallest_attacker(board, location, color);
+    char piece;
+    int turn = 1;
+    bool king_attack = false;
+    memcpy(board_copy, board, sizeof(board_copy));
+
+    while(attacker_index != -1)
+    {
+        piece = position_to_piece(board_copy, location);
+        x = attacker_index / 8;
+        y = attacker_index % 8;
+        
+        if(board_copy[x][y] == 'K' || board_copy[x][y] == 'k')
+            king_attack = true;            
+       
+        make_move(positions[x][y], location, board_copy);
+        color = -color;
+        attacker_index = get_smallest_attacker(board_copy, location, color);
+        
+        //stop when king is captured
+        if(king_attack && attacker_index != -1)
+            break;
+        
+        value -= turn * piece_value(piece);
+        turn = -turn;
     }
     return value;
 }
@@ -830,7 +770,7 @@ int SEE(char board[8][8], char location[3], int color)
 int main()
 {
     char location[3] = "b4";
-    int value = see(board, location, -1);
+    int value = SEE2(board, location, -1);
     printf("value is %d\n", value);
 
     return 0;
