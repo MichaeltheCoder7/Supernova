@@ -226,7 +226,7 @@ unsigned long long int getHash(char board[8][8], int color, char op_cp[3], char 
 static inline struct DataItem *probeTT(unsigned long long int key)
 {
     //get the hash 
-    int hashIndex = key % (SIZE - 1);
+    int hashIndex = key % (HASHSIZE - 1);
     if(tt[hashIndex].flag != EMPTY && tt[hashIndex].key == key)
     {    
         tt[hashIndex].age = false;
@@ -250,7 +250,7 @@ static inline void storeTT(unsigned long long int key, int evaluation, int depth
         return;
 
     //get the hash 
-    int hashIndex = key % (SIZE - 1);
+    int hashIndex = key % (HASHSIZE - 1);
 
     if(tt[hashIndex].flag == EMPTY || (tt[hashIndex].key == key && tt[hashIndex].depth <= depth) || tt[hashIndex].age == true)
     {
@@ -273,23 +273,25 @@ static inline void storeTT(unsigned long long int key, int evaluation, int depth
 }
 
 //set age in tt
-static inline void setAge()
-{
-    for(int x = 0; x < SIZE; x++)
-    {
-        tt[x].age = true;
-    }
-}
-
-//clear the hash table
-void clearTT(bool print_usage)
+static inline void setAge(bool print_usage)
 {
     float count = 0;
-    for(int x = 0; x < SIZE; x++)
+    for(int x = 0; x < HASHSIZE; x++)
     {
         if(tt[x].flag != EMPTY)
             count++;
-        
+
+        tt[x].age = true;
+    }
+    if(print_usage)
+        printf("Table Usage: %.2f%%\n", count * 100 / HASHSIZE);
+}
+
+//clear the hash table
+void clearTT()
+{
+    for(int x = 0; x < HASHSIZE; x++)
+    {
         tt[x].key = 0;
         tt[x].depth = 0;
         tt[x].flag = EMPTY;
@@ -297,9 +299,6 @@ void clearTT(bool print_usage)
         tt[x].age = false;
         strncpy(tt[x].bestmove, "", 6);
     }
-
-    if(print_usage)
-        printf("Table Usage: %.2f%%\n", count * 100 / SIZE);
 }
 
 static inline int cap_piece_value(char board[8][8], char np[3])
@@ -420,12 +419,6 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
             if(piece_count(board_copy) > 14)
                 continue;
         }
-        
-        //SEE prunning
-        if((SEE(board_copy, np, color) + captured_piece) < 0 && isprom != 1)
-        {
-            continue;
-        }
 
         value = -quiescence(board_copy, -color, -beta, -alpha, cp, np);
 
@@ -485,7 +478,7 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
     //check extension
     if(isCheck)
     {
-        ++depth;
+        depth++;
     }
 
     key = getHash(board, color, op_cp, op_np, ksw, qsw, ksb, qsb);
@@ -547,10 +540,18 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
             strncpy(pv_move, entry->bestmove, 6);
     }
 
+    //get static eval
+    int eval = evaluate(board, color);
+
+    //razoring
+    if(!is_PV && !isCheck && depth == 1 && eval <= alpha - 300)
+    {
+        return quiescence(board, color, alpha, beta, op_cp, op_np);
+    }
+    
     //static null move prunning
     if(depth < 3 && !is_PV && !isCheck && abs(beta) < 19000)
     {
-        int eval = evaluate(board, color);
         int margin = 120 * depth;
         if(eval - margin >= beta)
         {
@@ -560,9 +561,9 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
 
     //null move prunning
     //only at non-PV nodes
-    if(DoNull && !isCheck && depth >= 3 && !is_PV)
+    if(DoNull && !isCheck && depth >= 3 && !is_PV && eval >= beta)
     {
-        if(piece_count(board) > 14 && evaluate(board, color) >= beta)
+        if(piece_count(board) > 14)
         {
             int R = 2;
             if(depth > 6)
@@ -582,12 +583,9 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
     //futility prunning
     int futilityMargin[4] = {0, 200, 300, 500};
 
-    if(depth <= 3 && !is_PV && !isCheck && abs(alpha) < 19000)
+    if(depth <= 3 && !is_PV && !isCheck && abs(alpha) < 19000 && (eval + futilityMargin[depth]) <= alpha)
     {
-        if((evaluate(board, color) + futilityMargin[depth]) <= alpha)
-        {
-            futility = true;
-        }
+        futility = true;
     }
 
     //get children of node
@@ -800,7 +798,7 @@ static int pvs_root(char board[8][8], int depth, int color, int alpha, int beta,
     //check extension
     if(isCheck)
     {
-        ++depth;
+        depth++;
     }
     
     //transposition table look up
@@ -1096,15 +1094,20 @@ void search(char board[8][8], int piece_color, char op_cp[3], char op_np[3], int
 
     //search
     iterative_deepening(board, MAXDEPTH, op_cp, op_np, ksw, qsw, ksb, qsb, move_counter, piece_color);
-    
-    setAge(); //age tt
+
     //clear tables in analyze mode
     if(analyze)
     {
-        clearTT(false);  //clear hash table
-        clearEvalTT(false);  //clear evaluation hash table
+        clearTT();  //clear hash table
+        clearEvalTT();  //clear evaluation hash table
         memset(history, 0, sizeof(history)); //clear history heuristic table
-    }    
+    }
+    else
+    {
+        setAge(false); //age tt
+        //EvalTT_usage();
+    }
+        
 }
 
 

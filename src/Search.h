@@ -3,10 +3,7 @@
 
 #include <stdbool.h>
 
-/*Hash Table Size*/
-#define SIZE 4513112	//105MB
-
-#define MAXDEPTH 20
+#define MAXDEPTH 25
 
 unsigned long long int table[8][8][12];
 unsigned long long int turn;
@@ -26,6 +23,7 @@ bool ponderhit;
 double ponder_time;
 bool ponder;
 bool analyze;
+unsigned long int HASHSIZE;
 
 struct DataItem 
 {
@@ -37,7 +35,7 @@ struct DataItem
    bool age;
 };
 
-struct DataItem tt[SIZE]; 
+struct DataItem* tt;  
 
 void search(char board[8][8], int piece_color, char op_cp[3], char op_np[3], int ksw, int qsw, int ksb, int qsb, int move_counter);
 
@@ -45,7 +43,7 @@ void init_zobrist();
 
 unsigned long long int getHash(char board[8][8], int color, char op_cp[3], char op_np[3], int ksw, int qsw, int ksb, int qsb);
 
-void clearTT(bool print_usage);
+void clearTT();
 
 
 #endif
