@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <windows.h>
+#include <assert.h>
 #include "Board.h"
 #include "Search.h"
 #include "Evaluate.h"
@@ -60,14 +61,58 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.0.1\n");
+	printf("id name Supernova 1.1.0\n");
 	printf("id author Minkai Yang\n");
+	//option
+	printf("option name Hash type spin default 32 min 1 max 2048\n");
 	printf("uciok\n");
+}
+
+//configure hash table size
+void handle_option(char *input)
+{
+	char hash_value[10] = "";
+	int hash_size;
+	
+	if(tt != NULL) //free previously allocated tt if any
+	{
+		free(tt);
+		tt = NULL;
+	}
+	if(Evaltt != NULL) //free previously allocated tt if any
+	{
+		free(Evaltt);
+		Evaltt = NULL;
+	}
+	sscanf(input, "setoption name Hash value %s\n", hash_value); //get the hash size
+	hash_size = atoi(hash_value);
+	if(hash_size < 1)
+		hash_size = 1;
+	else if(hash_size > 2048)
+		hash_size = 2048;
+	HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
+	tt = malloc(HASHSIZE * sizeof(struct DataItem));
+	//printf("hash table size: %ld\n", HASHSIZE);
+	EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
+	Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
+	//printf("eval hash table size: %ld\n", EVALHASHSIZE);
+	clearTT();
+	clearEvalTT();
 }
 
 void handle_newgame()
 {
 	//start the game
+	if(tt == NULL) //default tt if not set
+	{
+		HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
+		tt = malloc(HASHSIZE * sizeof(struct DataItem));
+	}
+	if(Evaltt == NULL) //default tt if not set
+	{
+		EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
+		Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
+	}
 	strncpy(opponent_move, "", 5);
 	engine_color = 0;
 	init_zobrist();
@@ -76,9 +121,9 @@ void handle_newgame()
 	qswflag = 1;
 	ksbflag = 1;
 	qsbflag = 1; //reset the castling flags
-	clearTT(false);
-	clearEvalTT(false);
 	outofbook = 0;
+	clearTT();
+	clearEvalTT();
 }
 
 void handle_position(char *input)
@@ -305,10 +350,24 @@ void uci_loop()
 		{
 			ponderhit = true;
 		}
+		else if(!strncmp("setoption name Hash", string, 19))
+		{
+			handle_option(string);
+		}
 		else if(!strncmp("quit", string, 4))
 		{
 			stop = true;
 			Sleep(300); //wait till all threads are done
+			if(tt != NULL)
+			{
+				free(tt);
+				tt = NULL;
+			}
+			if(Evaltt != NULL)
+			{
+				free(Evaltt);
+				Evaltt = NULL;
+			}
 			break;
 		}
 	}
@@ -317,6 +376,8 @@ void uci_loop()
 //uci gui
 int main(void)
 {
+	tt = NULL; //set hash table pointer to null
+	Evaltt = NULL;
 	uci_loop();
 	return 0;
 }
