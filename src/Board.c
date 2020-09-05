@@ -111,11 +111,8 @@ char position_to_piece(char board[8][8], char current_position[3])
 //return 1 if promotion
 //return 2 for enpassant
 //for quiescence search and static exchange evaluation
-int make_move(char cur_p[3], char new_p[3], char board[8][8])
+int make_move(char cur_p[3], char new_p[3], char piece, char ep, char board[8][8])
 {
-    char piece = position_to_piece(board, cur_p);
-    char ep = position_to_piece(board, new_p);
-
     updateboard(cur_p, new_p, board);
 
     // CPU Pawn Promotion

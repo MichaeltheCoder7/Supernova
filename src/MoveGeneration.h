@@ -9,6 +9,8 @@ void move_ordering(char board[8][8], char moves[256][6], int length, char pv_mov
 
 void cap_ordering(char board[8][8], char moves[100][6], int length, int color);
 
+int piece_value(char piece);
+
 int SEE(char board[8][8], char location[3], int color);
 
 #endif

@@ -1887,7 +1887,7 @@ void move_ordering(char board[8][8], char moves[256][6], int length, char pv_mov
     quickSort(sort, 0, length - 1, moves);
 }
 
-static inline int piece_value(char piece)
+int piece_value(char piece)
 {
     switch(piece)
     {
@@ -2090,7 +2090,6 @@ void cap_ordering(char board[8][8], char moves[100][6], int length, int color)
 }
 
 //static exchange evaluation for quiescence search
-//need to figure out when a side can choose to stop exchange
 int SEE(char board[8][8], char location[3], int color)
 {
     char board_copy[8][8];
@@ -2105,14 +2104,14 @@ int SEE(char board[8][8], char location[3], int color)
 
     while(attacker_index != -1)
     {
-        piece = position_to_piece(board_copy, location);
         x = attacker_index / 8;
         y = attacker_index % 8;
         
         if(board_copy[x][y] == 'K' || board_copy[x][y] == 'k')
             king_attack = true;            
-       
-        make_move(positions[x][y], location, board_copy);
+
+        piece = position_to_piece(board_copy, location);
+        make_move(positions[x][y], location, position_to_piece(board, positions[x][y]), piece, board_copy);
         color = -color;
         attacker_index = get_smallest_attacker(board_copy, location, color);
         

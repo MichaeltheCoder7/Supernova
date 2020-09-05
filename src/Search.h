@@ -39,6 +39,8 @@ struct DataItem* tt;
 
 void search(char board[8][8], int piece_color, char op_cp[3], char op_np[3], int ksw, int qsw, int ksb, int qsb, int move_counter);
 
+int index(char piece);
+ 
 void init_zobrist();
 
 unsigned long long int getHash(char board[8][8], int color, char op_cp[3], char op_np[3], int ksw, int qsw, int ksb, int qsb);

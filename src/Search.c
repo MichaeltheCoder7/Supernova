@@ -72,7 +72,7 @@ static inline bool timeUp()
     return false;
 }
 
-static inline int index(char piece) 
+int index(char piece) 
 { 
     switch(piece)
     {
@@ -301,35 +301,6 @@ void clearTT()
     }
 }
 
-static inline int cap_piece_value(char board[8][8], char np[3])
-{
-    switch(position_to_piece(board, np))
-    {
-        case 'P':
-            return 100;
-        case 'p':
-            return 100;
-        case 'N':
-            return 320;
-        case 'n':
-            return 320;
-        case 'B':
-            return 330;
-        case 'b':
-            return 330;
-        case 'R':
-            return 500;
-        case 'r':
-            return 500;
-        case 'Q':
-            return 900;
-        case 'q':
-            return 900;
-        default:
-            return 100;
-    }
-}
-
 static inline bool check_repetition(unsigned long long int key, int ply, int counter)
 {
     //store the current position key into the history table
@@ -370,7 +341,8 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
     char cp[3];
     char np[3];
     int isprom;
-    int captured_piece;
+    char moved_piece, piece;
+    int cap_piece_value;
 
     //check if time is up
     if(timeUp())
@@ -385,6 +357,12 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
     if(standing_pat >= beta) 
     {
 		return beta;
+	}
+
+    //futility pruning at parent nodes
+    if(standing_pat < alpha - 900) 
+    {
+		return alpha;
 	}
 
 	if(standing_pat > alpha) 
@@ -403,7 +381,10 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
         sscanf(moves[x], "%2s%2s", cp, np);
         //make a copy of the board
         memcpy(board_copy, board, sizeof(board_copy));
-        isprom = make_move(cp, np, board_copy);
+        
+        moved_piece = position_to_piece(board, cp);
+        piece = position_to_piece(board, np);
+        isprom = make_move(cp, np, moved_piece, piece, board_copy);
             
         //check if check is ignored
         if(ifCheck(board_copy, color))
@@ -411,13 +392,23 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
             continue;
         }
 
-        captured_piece = cap_piece_value(board, np);
+        cap_piece_value = piece_value(piece);
 
         //delta prunning
-        if((standing_pat + captured_piece + 200) < alpha && isprom != 1)
+        if((standing_pat + cap_piece_value + 200) < alpha && isprom != 1)
         {
             if(piece_count(board_copy) > 14)
                 continue;
+        }
+
+        //SEE prunning
+        //do not check when captures by pawn or higher takes lower or equal
+        if(moved_piece != 'P' && moved_piece != 'p' && cap_piece_value < (piece_value(moved_piece) - 50))
+        {
+            if((SEE(board_copy, np, color) + cap_piece_value) < 0)
+            {
+                continue;
+            }
         }
 
         value = -quiescence(board_copy, -color, -beta, -alpha, cp, np);
