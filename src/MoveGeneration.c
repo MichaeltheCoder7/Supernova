@@ -28,11 +28,8 @@ char positions[8][8][3] = {
 int knight_moves_x[8] = { -2, -2, -1, -1,  1,  1,  2,  2 };
 int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
 
-int king_moves_x[10] = { -1, -1, -1,  0,  0,  0,  0,  1,  1,  1 };
-int king_moves_y[10] = { -1,  0,  1, -2, -1,  1,  2, -1,  0,  1 };
-
-int king_cap_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
-int king_cap_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
+int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
+int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 //save one side's all positions in an array of string
 //need caller to declare: char opponent[16][3] array first and pass it in
@@ -115,7 +112,7 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                             {
                                 continue;
                             }
-                            if(CheckMove_bpawn(board, index_x, index_y, index_x + 1, y, op_cp, op_np))  
+                            if(CheckMove_bpawn(board, index_y, index_x + 1, y, op_cp, op_np))  
                             { 
                                 //promotions
                                 if((index_x + 1) == 7)
@@ -183,7 +180,25 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                     }
                     case 'k':
                     {
-                        for(int j = 0; j < 10; j++)
+                        //castling
+                        if(index_x == 0 && index_y == 4)
+                        {
+                            if(CheckMove_bkingside(board, ksb))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[0][6], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                            if(CheckMove_bqueenside(board, qsb))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[0][2], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                        }
+                        for(int j = 0; j < 8; j++)
                         {
                             x = index_x + king_moves_x[j];
                             y = index_y + king_moves_y[j];
@@ -191,13 +206,14 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                             {
                                 continue;
                             }
-                            if(CheckMove_bking(board, index_x, index_y, x, y, ksb, qsb))  
+                            if(board[x][y] == ' ' || board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
                             {  
                                 strncpy(string, piece_positions[i], 3);
                                 strncat(string, positions[x][y], 3);
                                 strncpy(all_moves[index], string, 6);
                                 index++;
                             }
+                            
                         }
                         break;
                     }
@@ -518,7 +534,7 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                             {
                                 continue;
                             }
-                            if(CheckMove_wpawn(board, index_x, index_y, index_x - 1, y, op_cp, op_np)) 
+                            if(CheckMove_wpawn(board, index_y, index_x - 1, y, op_cp, op_np)) 
                             { 
                                 //promotions
                                 if((index_x - 1) == 0)
@@ -575,7 +591,25 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                     }
                     case 'K':
                     {
-                        for(int j = 0; j < 10; j++)
+                        //castling
+                        if(index_x == 7 && index_y == 4)
+                        {
+                            if(CheckMove_wkingside(board, ksw))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[7][6], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                            if(CheckMove_wqueenside(board, qsw))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[7][2], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                        }
+                        for(int j = 0; j < 8; j++)
                         {
                             x = index_x + king_moves_x[j];
                             y = index_y + king_moves_y[j];
@@ -583,7 +617,7 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                             {
                                 continue;
                             }
-                            if(CheckMove_wking(board, index_x, index_y, x, y, ksw, qsw))  
+                            if(board[x][y] == ' ' || board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')   
                             {  
                                 strncpy(string, piece_positions[i], 3);
                                 strncat(string, positions[x][y], 3);
@@ -913,20 +947,29 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                 {
                     case 'p':
                     {
-                        for(y = index_y - 1; y < index_y + 2; y++)
-                        {
-                            if(y & 8) //skip when out of board
-                            {
-                                continue;
-                            }
-                            if(CheckCapture_bpawn(board, index_x, index_y, index_x + 1, y, op_cp, op_np)) 
-                            { 
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + 1][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
+                        if((index_y - 1) >= 0 && CheckCapture_bpawn(board, index_x + 1, index_y - 1, op_cp, op_np)) 
+                        { 
+                            strncpy(string, piece_positions[i], 3);
+                            strncat(string, positions[index_x + 1][index_y - 1], 3);
+                            strncpy(all_moves[index], string, 6);
+                            index++;
                         }
+                        //promotion
+                        if(index_x == 6 && board[7][index_y] == ' ')
+                        {
+                            strncpy(string, piece_positions[i], 3);
+                            strncat(string, positions[7][index_y], 3);
+                            strncpy(all_moves[index], string, 6);
+                            index++;
+                        } 
+                        if((index_y + 1) <= 7 && CheckCapture_bpawn(board, index_x + 1, index_y + 1, op_cp, op_np)) 
+                        { 
+                            strncpy(string, piece_positions[i], 3);
+                            strncat(string, positions[index_x + 1][index_y + 1], 3);
+                            strncpy(all_moves[index], string, 6);
+                            index++;
+                        }
+
                         break;
                     }
                     case 'n':
@@ -953,8 +996,8 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                     {
                         for(int j = 0; j < 8; j++)
                         {
-                            x = index_x + king_cap_moves_x[j];
-                            y = index_y + king_cap_moves_y[j];
+                            x = index_x + king_moves_x[j];
+                            y = index_y + king_moves_y[j];
                             if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;
@@ -1270,19 +1313,27 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                 {
                     case 'P':
                     {
-                        for(y = index_y - 1; y < index_y + 2; y++)
+                        if((index_y - 1) >= 0 && CheckCapture_wpawn(board, index_x - 1, index_y - 1, op_cp, op_np)) 
+                        { 
+                            strncpy(string, piece_positions[i], 3);
+                            strncat(string, positions[index_x - 1][index_y - 1], 3);
+                            strncpy(all_moves[index], string, 6);
+                            index++;
+                        }
+                        //promotion
+                        if(index_x == 1 && board[0][index_y] == ' ')
                         {
-                            if(y & 8) //skip when out of board
-                            {
-                                continue;
-                            }
-                            if(CheckCapture_wpawn(board, index_x, index_y, index_x - 1, y, op_cp, op_np)) 
-                            { 
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - 1][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
+                            strncpy(string, piece_positions[i], 3);
+                            strncat(string, positions[0][index_y], 3);
+                            strncpy(all_moves[index], string, 6);
+                            index++;
+                        } 
+                        if((index_y + 1) <= 7 && CheckCapture_wpawn(board, index_x - 1, index_y + 1, op_cp, op_np)) 
+                        { 
+                            strncpy(string, piece_positions[i], 3);
+                            strncat(string, positions[index_x - 1][index_y + 1], 3);
+                            strncpy(all_moves[index], string, 6);
+                            index++;
                         }
                         break;
                     }
@@ -1310,8 +1361,8 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
                     {
                         for(int j = 0; j < 8; j++)
                         {
-                            x = index_x + king_cap_moves_x[j];
-                            y = index_y + king_cap_moves_y[j];
+                            x = index_x + king_moves_x[j];
+                            y = index_y + king_moves_y[j];
                             if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;

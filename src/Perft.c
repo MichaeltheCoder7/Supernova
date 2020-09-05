@@ -9,7 +9,7 @@
 //position 1
 //depth 5: 4865609 nodes
 //depth 6: 119060324 nodes
-char board[8][8] = {
+char board1[8][8] = {
 						
                     {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
                     {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -56,8 +56,8 @@ char positions[8][8][3] = {
 int knight_moves_x[8] = {-2, -2, -1, -1,  1,  1,  2,  2};
 int knight_moves_y[8] = {-1,  1, -2,  2, -2,  2, -1,  1};
 
-int king_moves_x[10] = {-1, -1, -1,  0,  0,  0,  0,  1,  1,  1};
-int king_moves_y[10] = {-1,  0,  1, -2, -1,  1,  2, -1,  0,  1};
+int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
+int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 void displayboard(char board[8][8])
 {
@@ -89,37 +89,21 @@ int position_to_x(char position[3])
     switch(position[1])
     {
         case '8':
-        {
             return 0;
-        }
         case '7':
-        {
             return 1;
-        }
         case '6':
-        {
             return 2;
-        }
         case '5':
-        {
             return 3;
-        }
         case '4':
-        {
             return 4;
-        }
         case '3':
-        {
             return 5;
-        }
         case '2':
-        {
             return 6;
-        }
         case '1':
-        {
             return 7;
-        }
     }
     return -1; //when nothing is matched
 }
@@ -130,37 +114,21 @@ int position_to_y(char position[3])
     switch(position[0])
     {
         case 'a':
-        {
             return 0;
-        }
         case 'b':
-        {
             return 1;
-        }
         case 'c':
-        {
             return 2;
-        }
         case 'd':
-        {
             return 3;
-        }
         case 'e':
-        {
             return 4;
-        }
         case 'f':
-        {
             return 5;
-        }
         case 'g':
-        {
             return 6;
-        }
         case 'h':
-        {
             return 7;
-        }
     }
 
     return -1; //when nothing is matched
@@ -1184,10 +1152,10 @@ int isThreatened(char board[8][8], char location[3], int color)
 
 
 //checking moves for white pawn
-int CheckMove_wpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
+int CheckMove_wpawn(char board[8][8], int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
 {
     /* 1 for legal move, 0 for illegal move*/
-	/*White Pawn*/
+    /*White Pawn*/
     /*Capturing*/
     if(index_y != new_y)
     {
@@ -1203,7 +1171,7 @@ int CheckMove_wpawn(char board[8][8], int index_x, int index_y, int new_x, int n
             //en passant
             if(op_cp[1] == '7' && op_np[1] == '5' && position_to_piece(board, op_np) == 'p')
             {
-                if(position_to_y(op_np) == new_y && index_x == 3 && new_x == 2)
+                if(position_to_y(op_np) == new_y && new_x == 2)
                 {
                     return 1;
                 }                                           
@@ -1222,183 +1190,7 @@ int CheckMove_wpawn(char board[8][8], int index_x, int index_y, int new_x, int n
 }                                                     
 
 //checking moves for black pawn
-int CheckMove_bpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
-{
-    /* 1 for legal move, 0 for illegal move*/
-	/* Black Pawn */
-    /*Capturing*/
-    if(index_y != new_y)
-    {
-        if(board[new_x][new_y] != ' ')
-        {
-            if(board[new_x][new_y] == 'P' || board[new_x][new_y] == 'R' || board[new_x][new_y] == 'N' || board[new_x][new_y] == 'B' || board[new_x][new_y] == 'Q')
-            {
-                return 1;
-            }
-        }
-        else
-        {
-            //en passant
-            if(op_cp[1] == '2' && op_np[1] == '4' && position_to_piece(board, op_np) == 'P')
-            {
-                if(position_to_y(op_np) == new_y && index_x == 4 && new_x == 5)
-                {
-                    return 1;
-                }                                           
-            }
-                                
-        }	
-    }
-    /*one step forward*/
-    else
-    {
-        if(board[new_x][new_y] == ' ')
-        {
-            return 1;
-        }
-    }  
-    return 0; 
-} 
-
-//checking moves for white king
-int CheckMove_wking(char board[8][8], int index_x, int index_y, int new_x, int new_y, int ksw, int qsw)
-{
-    /* 1 for legal move, 0 for illegal move*/
-	/*White King*/
-    if(abs(new_y - index_y) <= 1)
-    {
-        if(board[new_x][new_y] == ' ' || board[new_x][new_y] == 'p' || board[new_x][new_y] == 'r' || board[new_x][new_y] == 'n' || board[new_x][new_y] == 'b' || board[new_x][new_y] == 'q')
-        {
-            return 1;
-        }
-    }
-    //castling
-    //king side
-    else if(index_y == 4 && index_x == 7 && new_y == 6 && new_x == 7)
-    {
-        //check if king and rook have been moved
-        if(ksw)
-        {
-            //check if positions between king and rook are empty
-            if(board[7][5] == ' ' && board[7][6] == ' ')
-            {
-                //check if king is in check and the two other spots are threatened
-                if((ifCheck(board, -1)) == 0 && (isThreatened(board, "f1", -1)) == 0 && (isThreatened(board, "g1", -1)) == 0)
-                {
-                    return 1;
-                }
-            }   
-        }   
-    }
-    //queen side
-    else if(index_y == 4 && index_x == 7 && new_y == 2 && new_x == 7)
-    {
-        //check if king and rook have been moved
-        if(qsw)
-        {
-            //check if positions between king and rook are empty
-            if(board[7][1] == ' ' && board[7][2] == ' ' && board[7][3] == ' ')
-            {
-                //check if king is in check and the two other spots are threatened
-                if((ifCheck(board, -1)) == 0 && (isThreatened(board, "c1", -1)) == 0 && (isThreatened(board, "d1", -1)) == 0)
-                {
-                    return 1;      
-                }
-            } 
-        }
-    }
-    //end of castling  
-    return 0; 
-}
-
-//checking moves for black king
-int CheckMove_bking(char board[8][8], int index_x, int index_y, int new_x, int new_y, int ksb, int qsb)
-{
-    /* 1 for legal move, 0 for illegal move*/
-	/*Black King*/
-    if(abs(new_y - index_y) <= 1)
-    {
-        if(board[new_x][new_y] == ' ' || board[new_x][new_y] == 'P' || board[new_x][new_y] == 'R' || board[new_x][new_y] == 'N' || board[new_x][new_y] == 'B' || board[new_x][new_y] == 'Q')
-        {
-            return 1;
-        }
-    }
-    //castling
-    //king side
-    else if(index_y == 4 && index_x == 0 && new_y == 6 && new_x == 0)
-    {
-        //check if king and rook have been moved
-        if(ksb)
-        {
-            //check if positions between king and rook are empty
-            if(board[0][5] == ' ' && board[0][6] == ' ')
-            {
-                //check if king is in check and the two other spots are threatened
-                if((ifCheck(board, 1)) == 0 && (isThreatened(board, "f8", 1)) == 0 && (isThreatened(board, "g8", 1)) == 0)
-                {
-                    return 1;
-                }
-            }          
-        }
-    }
-    //queen side
-    else if(index_y == 4 && index_x == 0 && new_y == 2 && new_x == 0)
-    {
-        //check if king and rook have been moved
-        if(qsb)
-        {
-            //check if positions between king and rook are empty
-            if(board[0][1] == ' ' && board[0][2] == ' ' && board[0][3] == ' ')
-            {
-                //check if king is in check and the two other spots are threatened
-                if((ifCheck(board, 1)) == 0 && (isThreatened(board, "c8", 1)) == 0 && (isThreatened(board, "d8", 1)) == 0)
-                {
-                    return 1;
-                }
-            } 
-        }
-    }
-    //end of castling  
-    return 0; 
-}
-
-//captures and promotions for white pawn
-int CheckCapture_wpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
-{
-    /* 1 for legal move, 0 for illegal move*/
-	/*White Pawn*/
-    if(index_y != new_y)
-    {
-        if(board[new_x][new_y] != ' ')
-        {
-            if(board[new_x][new_y] == 'p' || board[new_x][new_y] == 'r' || board[new_x][new_y] == 'n' || board[new_x][new_y] == 'b' || board[new_x][new_y] == 'q')
-            {
-                return 1;
-            }
-        }
-        else
-        {
-            //en passant
-            if(op_cp[1] == '7' && op_np[1] == '5' && position_to_piece(board, op_np) == 'p')
-            {
-                if(position_to_y(op_np) == new_y && index_x == 3 && new_x == 2)
-                {
-                    return 1;
-                }                                           
-            }
-        }
-    }
-    //promotion
-    else if(index_x == 1 && new_x == 0 && board[new_x][new_y] == ' ')
-    {
-        return 1;
-    }                                                        
-	
-	return 0;
-}
-
-//captures and promotions for black pawn
-int CheckCapture_bpawn(char board[8][8], int index_x, int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
+int CheckMove_bpawn(char board[8][8], int index_y, int new_x, int new_y, char op_cp[3], char op_np[3])
 {
     /* 1 for legal move, 0 for illegal move*/
     /* Black Pawn */
@@ -1417,20 +1209,117 @@ int CheckCapture_bpawn(char board[8][8], int index_x, int index_y, int new_x, in
             //en passant
             if(op_cp[1] == '2' && op_np[1] == '4' && position_to_piece(board, op_np) == 'P')
             {
-                if(position_to_y(op_np) == new_y && index_x == 4 && new_x == 5)
+                if(position_to_y(op_np) == new_y && new_x == 5)
                 {
                     return 1;
                 }                                           
             }
+                                
         }	
     }
-    //promotion
-    else if(index_x == 6 && new_x == 7 && board[new_x][new_y] == ' ')
+    /*one step forward*/
+    else
     {
-        return 1;
-    } 
-					
-	return 0;
+        if(board[new_x][new_y] == ' ')
+        {
+            return 1;
+        }
+    }  
+    return 0; 
+} 
+
+//castling for white king
+int CheckMove_wkingside(char board[8][8], int ksw)
+{
+    /* 1 for legal move, 0 for illegal move*/
+    /*White King*/
+    //castling
+    //king side
+    //check if king and rook have been moved
+    if(ksw)
+    {
+        //check if positions between king and rook are empty
+        if(board[7][5] == ' ' && board[7][6] == ' ')
+        {
+            //check if king is in check and the two other spots are threatened
+            if((ifCheck(board, -1)) == 0 && (isThreatened(board, "f1", -1)) == 0 && (isThreatened(board, "g1", -1)) == 0)
+            {
+                return 1;
+            }
+        }   
+    }   
+    return 0; 
+}
+
+int CheckMove_wqueenside(char board[8][8], int qsw)
+{
+    /* 1 for legal move, 0 for illegal move*/
+    /*White King*/
+    //castling
+    //queen side
+    //check if king and rook have been moved
+    if(qsw)
+    {
+        //check if positions between king and rook are empty
+        if(board[7][1] == ' ' && board[7][2] == ' ' && board[7][3] == ' ')
+        {
+            //check if king is in check and the two other spots are threatened
+            if((ifCheck(board, -1)) == 0 && (isThreatened(board, "c1", -1)) == 0 && (isThreatened(board, "d1", -1)) == 0)
+            {
+                return 1;      
+            }
+        } 
+    }
+    //end of castling  
+    return 0; 
+}
+
+//castling for black king
+int CheckMove_bkingside(char board[8][8], int ksb)
+{
+    /* 1 for legal move, 0 for illegal move*/
+    /*Black King*/
+    //castling
+    //king side
+    //check if king and rook have been moved
+    if(ksb)
+    {
+        //check if positions between king and rook are empty
+        if(board[0][5] == ' ' && board[0][6] == ' ')
+        {
+            //check if king is in check and the two other spots are threatened
+            if((ifCheck(board, 1)) == 0 && (isThreatened(board, "f8", 1)) == 0 && (isThreatened(board, "g8", 1)) == 0)
+            {
+                return 1;
+            }
+        }          
+    }
+
+    return 0; 
+}
+
+//castling for black king
+int CheckMove_bqueenside(char board[8][8], int qsb)
+{
+    /* 1 for legal move, 0 for illegal move*/
+    /*Black King*/
+    //castling
+    //queen side
+    //check if king and rook have been moved
+    if(qsb)
+    {
+        //check if positions between king and rook are empty
+        if(board[0][1] == ' ' && board[0][2] == ' ' && board[0][3] == ' ')
+        {
+            //check if king is in check and the two other spots are threatened
+            if((ifCheck(board, 1)) == 0 && (isThreatened(board, "c8", 1)) == 0 && (isThreatened(board, "d8", 1)) == 0)
+            {
+                return 1;
+            }
+        } 
+    }
+
+    return 0; 
 }
 
 //generate all pseudo-legal moves
@@ -1461,11 +1350,11 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                     {
                         for(y = index_y - 1; y < index_y + 2; y++)
                         {
-                            if(y & 8) //stop when out of board
+                            if(y & 8) //skip when out of board
                             {
                                 continue;
                             }
-                            if(CheckMove_bpawn(board, index_x, index_y, index_x + 1, y, op_cp, op_np))  
+                            if(CheckMove_bpawn(board, index_y, index_x + 1, y, op_cp, op_np))  
                             { 
                                 //promotions
                                 if((index_x + 1) == 7)
@@ -1517,7 +1406,7 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                         {
                             x = index_x + knight_moves_x[j];
                             y = index_y + knight_moves_y[j];
-                            if(x & 8 || y & 8) //stop when out of board
+                            if(x & 8 || y & 8) //skips when out of board
                             {
                                 continue;
                             }
@@ -1533,21 +1422,40 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                     }
                     case 'k':
                     {
-                        for(int j = 0; j < 10; j++)
+                        //castling
+                        if(index_x == 0 && index_y == 4)
+                        {
+                            if(CheckMove_bkingside(board, ksb))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[0][6], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                            if(CheckMove_bqueenside(board, qsb))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[0][2], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                        }
+                        for(int j = 0; j < 8; j++)
                         {
                             x = index_x + king_moves_x[j];
                             y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8) //stop when out of board
+                            if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;
                             }
-                            if(CheckMove_bking(board, index_x, index_y, x, y, ksb, qsb))  
+                            if(board[x][y] == ' ' || board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
                             {  
                                 strncpy(string, piece_positions[i], 3);
                                 strncat(string, positions[x][y], 3);
                                 strncpy(all_moves[index], string, 6);
                                 index++;
                             }
+                            
                         }
                         break;
                     }
@@ -1864,11 +1772,11 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                         }
                         for(y = index_y - 1; y < index_y + 2; y++)
                         {
-                            if(y & 8) //stop when out of board
+                            if(y & 8) //skip when out of board
                             {
                                 continue;
                             }
-                            if(CheckMove_wpawn(board, index_x, index_y, index_x - 1, y, op_cp, op_np)) 
+                            if(CheckMove_wpawn(board, index_y, index_x - 1, y, op_cp, op_np)) 
                             { 
                                 //promotions
                                 if((index_x - 1) == 0)
@@ -1909,7 +1817,7 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                         {
                             x = index_x + knight_moves_x[j];
                             y = index_y + knight_moves_y[j];
-                            if(x & 8 || y & 8) //stop when out of board
+                            if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;
                             }
@@ -1925,15 +1833,33 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
                     }
                     case 'K':
                     {
-                        for(int j = 0; j < 10; j++)
+                        //castling
+                        if(index_x == 7 && index_y == 4)
+                        {
+                            if(CheckMove_wkingside(board, ksw))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[7][6], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                            if(CheckMove_wqueenside(board, qsw))  
+                            {  
+                                strncpy(string, piece_positions[i], 3);
+                                strncat(string, positions[7][2], 3);
+                                strncpy(all_moves[index], string, 6);
+                                index++;
+                            }
+                        }
+                        for(int j = 0; j < 8; j++)
                         {
                             x = index_x + king_moves_x[j];
                             y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8) //stop when out of board
+                            if(x & 8 || y & 8) //skip when out of board
                             {
                                 continue;
                             }
-                            if(CheckMove_wking(board, index_x, index_y, x, y, ksw, qsw))  
+                            if(board[x][y] == ' ' || board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')   
                             {  
                                 strncpy(string, piece_positions[i], 3);
                                 strncat(string, positions[x][y], 3);
