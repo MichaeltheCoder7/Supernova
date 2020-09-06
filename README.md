@@ -41,6 +41,7 @@ Details
 * static exchange evaluation
 
 **Evaluation** 
+* evaluation hash table
 * piece square tables  
 * mobility  
 * king safety  
