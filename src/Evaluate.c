@@ -2343,9 +2343,9 @@ int evaluate(char board[8][8], int color)
             }
         }
     }
-
+    
     //for kings' position bonus midgame
-    if((R_count * 5 + N_count * 3 + B_count * 3 + Q_count * 9 > 13 || r_count * 5 + n_count * 3 + b_count * 3 + q_count * 9 > 13) && (P_count + p_count + N_count + n_count + B_count + b_count + R_count + r_count + Q_count + q_count) > 12)
+    if((R_count * 5 + N_count * 3 + B_count * 3 + Q_count * 9 > 14 || r_count * 5 + n_count * 3 + b_count * 3 + q_count * 9 > 14) && (P_count + p_count + N_count + n_count + B_count + b_count + R_count + r_count + Q_count + q_count) > 12)
     {
         position_bonus_white += white_king_midgame[white_king_x][white_king_y];
         position_bonus_black += black_king_midgame[black_king_x][black_king_y];

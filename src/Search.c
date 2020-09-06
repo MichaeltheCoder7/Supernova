@@ -704,7 +704,7 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
             reduction_depth = 0;
             goto search_again;
         }
- 
+
         if(value > alpha)
         {
             strncpy(bm, moves[x], 6);
@@ -879,6 +879,12 @@ static int pvs_root(char board[8][8], int depth, int color, int alpha, int beta,
             }
         }
         
+        //check if time is up
+        if(timeUp())
+        {
+            break;
+        }
+        
         if(value > alpha)
         {
             strncpy(bm, moves[x], 6);
@@ -1005,6 +1011,7 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
     struct timeval ending_time;
     double secs;
     bool more_time = true;
+    bool valid_partial_search = false;
 
     for(current_depth = 1; current_depth <= depth; current_depth++)
     {   
@@ -1016,7 +1023,15 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
         secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
         if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
         {
-            break;
+            //allow partial search results if at least one move searched and it's within the bounds
+            if(strncmp(searched_move, "", 5) && val > alpha && val < beta)
+            {
+                valid_partial_search = true;
+            }
+            else
+            {
+                break;
+            }
         }
 
         //aspiration window
@@ -1070,6 +1085,11 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
             printf("%s ", pv_table[i]);
         }
         printf("\n");
+
+        if(valid_partial_search)
+        {
+            break;
+        }
     }
   
     //send move to gui
@@ -1100,7 +1120,6 @@ void search(char board[8][8], int piece_color, char op_cp[3], char op_np[3], int
         setAge(false); //age tt
         //EvalTT_usage();
     }
-        
 }
 
 
