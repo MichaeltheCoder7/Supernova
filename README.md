@@ -54,4 +54,4 @@ Author
 
 License
 -------
-Supernova is covered by the MIT license. See the LICENSE file for more details.
+Supernova is covered by the MIT license. See https://github.com/MichaeltheCoder7/Supernova/blob/master/LICENSE for more details.
