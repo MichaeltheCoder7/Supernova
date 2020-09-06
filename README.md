@@ -6,6 +6,9 @@ Installation
 --------
 To download Supernova, you can download the Windows and Linux executables in bin directory or directly from the latest release, alternatively, if you are using Windows, you can download all source files and Makefile and then run make outside the bin directory, then the executable should appear in the bin directory. To use the engine with a GUI, you need to add it to the GUI first. For example, if you are using Arena as GUI, add the engine via Engines -> Install New Engine and select the executable. Supernova does not have its own opening book so it's recommended to use the book provided by the GUI. The link to download Arena is given below.
 
+**Releases**
+https://github.com/MichaeltheCoder7/Supernova/releases  
+**Arena**
 http://www.playwitharena.de/
 
 Details
