@@ -26,6 +26,7 @@ late move reduction
 check extension  
 move ordering  
 quiescence search  
+static exchange evaluation
 
 Evaluation:  
 piece square tables  
