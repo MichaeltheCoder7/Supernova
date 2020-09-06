@@ -8,6 +8,10 @@ To download Supernova, you can download the Windows and Linux executables in bin
 
 http://www.playwitharena.de/
 
+License
+-------
+Supernova is covered by the MIT license. See the LICENSE file for more details.
+
 Details
 -------
 **UCI Features**
