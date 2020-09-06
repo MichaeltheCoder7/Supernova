@@ -23,7 +23,7 @@ Details
 **Board Representation**
 * 8x8 board  
 
-Move Generation:  
+**Move Generation**  
 * all legal moves of chess including castling, en passant, queen promotion and under promotions  
 
 **Search** 
