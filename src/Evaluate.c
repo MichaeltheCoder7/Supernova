@@ -2738,7 +2738,7 @@ int evaluate(char board[8][8], int color)
         }
     }
     
-    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900  + position_bonus_black + ((b_count == 2)? 1 : 0) * BISHOPPAIR + ((n_count == 2)? 1 : 0) * KNIGHTPAIR + ((r_count == 2)? 1 : 0) * ROOKPAIR + other_bonus_black - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900 - position_bonus_white - ((B_count == 2)? 1 : 0) * BISHOPPAIR - ((N_count == 2)? 1 : 0) * KNIGHTPAIR - ((R_count == 2)? 1 : 0) * ROOKPAIR - other_bonus_white + tempo; 
+    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900  + position_bonus_black + ((b_count >= 2)? 1 : 0) * BISHOPPAIR + ((n_count >= 2)? 1 : 0) * KNIGHTPAIR + ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900 - position_bonus_white - ((B_count >= 2)? 1 : 0) * BISHOPPAIR - ((N_count >= 2)? 1 : 0) * KNIGHTPAIR - ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white + tempo; 
     
     //material draw
     if(!P_count && !p_count)
