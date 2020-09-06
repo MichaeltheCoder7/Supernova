@@ -8,10 +8,6 @@ To download Supernova, you can download the Windows and Linux executables in bin
 
 http://www.playwitharena.de/
 
-License
--------
-Supernova is covered by the MIT license. See the LICENSE file for more details.
-
 Details
 -------
 **UCI Features**
@@ -47,3 +43,12 @@ Details
 * king safety  
 * king tropism  
 * piece-specific evaluations  
+
+Author
+------
+**Minkai Yang**
+* Email: mikeyang7@yahoo.com
+
+License
+-------
+Supernova is covered by the MIT license. See the LICENSE file for more details.
