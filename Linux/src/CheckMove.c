@@ -3,7 +3,7 @@
 #include <string.h>
 #include "CheckMove.h"
 #include "Board.h"
-#include "Checkmate.h"
+#include "Attack.h"
 
 
 //checking moves for white pawn
