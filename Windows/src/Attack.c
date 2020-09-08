@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "Checkmate.h"
+#include "Attack.h"
 #include "Board.h"
 
 

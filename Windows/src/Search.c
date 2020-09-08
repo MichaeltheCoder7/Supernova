@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "Checkmate.h"
+#include "Attack.h"
 #include "Search.h"
 #include "Board.h"
 #include "MoveGeneration.h"

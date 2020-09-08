@@ -1,5 +1,5 @@
-#ifndef CHECKMATE_H
-#define CHECKMATE_H
+#ifndef Attack_H
+#define Attack_H
 
 int ifCheck(char board[8][8], int color);
 

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "MoveGeneration.h"
-#include "Checkmate.h"
+#include "Attack.h"
 #include "CheckMove.h"
 #include "Board.h"
 #include "Search.h"
