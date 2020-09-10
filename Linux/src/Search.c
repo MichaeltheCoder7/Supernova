@@ -159,7 +159,6 @@ unsigned long long int getHash(char board[8][8], int color, char op_cp[3], char 
         }
     }
     //encode turn
-    
     if(color == 1)
     {
         h ^= turn;
@@ -358,13 +357,7 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
     {
 		return beta;
 	}
-
-    //futility pruning at parent nodes
-    if(standing_pat < alpha - 900) 
-    {
-		return alpha;
-	}
-
+    
 	if(standing_pat > alpha) 
     {
 		alpha = standing_pat;
@@ -1012,6 +1005,7 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
     double secs;
     bool more_time = true;
     bool valid_partial_search = false;
+    bool failed_low = false;
 
     for(current_depth = 1; current_depth <= depth; current_depth++)
     {   
@@ -1023,8 +1017,8 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
         secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
         if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
         {
-            //allow partial search results if at least one move searched and it's within the bounds
-            if(strncmp(searched_move, "", 5) && val > alpha && val < beta)
+            //allow partial search results if at least one move searched and it's within the bounds/not failed low
+            if(strncmp(searched_move, "", 5) && !failed_low && val > alpha && val < beta)
             {
                 valid_partial_search = true;
             }
@@ -1041,13 +1035,14 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
             beta = INFINITE;
             current_depth -= 1;
             //search longer if failed low
-            if(current_depth > 2 && more_time)
+            if(current_depth > 4 && more_time)
             {
-                search_time *= 1.5;
+                search_time *= 1.8;
                 if(ponder)
-                    ponder_time *= 1.5;
+                    ponder_time *= 1.8;
                 more_time = false;
             }
+            failed_low = true;
             continue;
         }
         else if(val >= beta)
@@ -1055,8 +1050,11 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
             alpha = -INFINITE;
             beta = INFINITE;
             current_depth -= 1;
+            failed_low = false;
             continue;
         }
+
+        failed_low = false;
 
         alpha = val - ASWINDOW;
         beta = val + ASWINDOW;

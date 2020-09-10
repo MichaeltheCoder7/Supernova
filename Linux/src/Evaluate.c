@@ -9,11 +9,12 @@
 
 
 #define CONNECTEDPAWN   10
-#define DOUBLEDPAWN     10
-#define ISOLATEDPAWN    5
+#define DOUBLEDPAWN     20
+#define ISOLATEDPAWN    20
 #define BACKWARDPAWN    8
 #define ROOKOPENFILE    10
 #define ROOKHALFFILE    5
+#define ROOKQUEENFILE   7
 #define BISHOPPAIR      30
 #define BADBISHOP       5
 #define OUTPOST         10
@@ -26,7 +27,7 @@
 int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 }; 
 int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 }; 
 int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
-int rook_val[9] = { 15,  12,   9,  6,  3,  0, -3, -6, -9 };
+int rook_val[9] = { 15, 12,  9,  6,  3,  0, -3, -6, -9 };
 
 enum positions {
     a8, b8, c8, d8, e8, f8, g8, h8,
@@ -234,99 +235,46 @@ static inline bool passed_white(char board[8][8], int x, int y)
         case 0:
             for(int rank = 1; rank < x; rank++)
             {
-                for(int file = 0; file < 2; file++)
+                if(tolower(board[rank][0]) == 'p')
                 {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-            }
-            break;
-        case 1:
-            for(int rank = 1; rank < x; rank++)
-            {
-                for(int file = 0; file < 3; file++)
+                if(board[rank][1] == 'p')
                 {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 2:
-            for(int rank = 1; rank < x; rank++)
-            {
-                for(int file = 1; file < 4; file++)
-                {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 3:
-            for(int rank = 1; rank < x; rank++)
-            {
-                for(int file = 2; file < 5; file++)
-                {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 4:
-            for(int rank = 1; rank < x; rank++)
-            {
-                for(int file = 3; file < 6; file++)
-                {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 5:
-            for(int rank = 1; rank < x; rank++)
-            {
-                for(int file = 4; file < 7; file++)
-                {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 6:
-            for(int rank = 1; rank < x; rank++)
-            {
-                for(int file = 5; file < 8; file++)
-                {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             break;
         case 7:
             for(int rank = 1; rank < x; rank++)
             {
-                for(int file = 6; file < 8; file++)
+                if(tolower(board[rank][7]) == 'p')
                 {
-                    if(board[rank][file] == 'p')
-                    {
-                        return false;
-                    }
+                    return false;
+                }
+                if(board[rank][6] == 'p')
+                {
+                    return false;
                 }
             }
-            break;     
+            break;  
+        default:
+            for(int rank = 1; rank < x; rank++)
+            {
+                if(tolower(board[rank][y]) == 'p')
+                {
+                    return false;
+                }
+                if(board[rank][y-1] == 'p')
+                {
+                    return false;
+                }
+                if(board[rank][y+1] == 'p')
+                {
+                    return false;
+                }
+            } 
+            break;
     }
     return true;    
 }
@@ -338,99 +286,46 @@ static inline bool passed_black(char board[8][8], int x, int y)
         case 0:
             for(int rank = 6; rank > x; rank--)
             {
-                for(int file = 0; file < 2; file++)
+                if(toupper(board[rank][0]) == 'P')
                 {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-            }
-            break;
-        case 1:
-            for(int rank = 6; rank > x; rank--)
-            {
-                for(int file = 0; file < 3; file++)
+                if(board[rank][1] == 'P')
                 {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-            }
-            break;
-        case 2:
-            for(int rank = 6; rank > x; rank--)
-            {
-                for(int file = 1; file < 4; file++)
-                {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 3:
-            for(int rank = 6; rank > x; rank--)
-            {
-                for(int file = 2; file < 5; file++)
-                {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 4:
-            for(int rank = 6; rank > x; rank--)
-            {
-                for(int file = 3; file < 6; file++)
-                {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 5:
-            for(int rank = 6; rank > x; rank--)
-            {
-                for(int file = 4; file < 7; file++)
-                {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
-                }
-            }
-            break;
-        case 6:
-            for(int rank = 6; rank > x; rank--)
-            {
-                for(int file = 5; file < 8; file++)
-                {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
-                }
-            }
+        }
             break;
         case 7:
             for(int rank = 6; rank > x; rank--)
             {
-                for(int file = 6; file < 8; file++)
+                if(toupper(board[rank][7]) == 'P')
                 {
-                    if(board[rank][file] == 'P')
-                    {
-                        return false;
-                    }
+                    return false;
+                }
+                if(board[rank][6] == 'P')
+                {
+                    return false;
                 }
             }
-            break;     
+            break;   
+        default:
+            for(int rank = 6; rank > x; rank--)
+            {
+                if(toupper(board[rank][y]) == 'P')
+                {
+                    return false;
+                }
+                if(board[rank][y-1] == 'P')
+                {
+                    return false;
+                }
+                if(board[rank][y+1] == 'P')
+                {
+                    return false;
+                }
+            }
+            break;
     }
     return true;    
 }
@@ -556,84 +451,6 @@ static inline bool isolated_white(char board[8][8], int y)
                 }
             }
             break;
-        case 1:
-            for(int rank = 6; rank > 0; rank--)
-            {
-                if(board[rank][0] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][2] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 2:
-            for(int rank = 6; rank > 0; rank--)
-            {
-                if(board[rank][1] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][3] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 3:
-            for(int rank = 6; rank > 0; rank--)
-            {
-                if(board[rank][2] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][4] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 4:
-            for(int rank = 6; rank > 0; rank--)
-            {
-                if(board[rank][3] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][5] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 5:
-            for(int rank = 6; rank > 0; rank--)
-            {
-                if(board[rank][4] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][6] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 6:
-            for(int rank = 6; rank > 0; rank--)
-            {
-                if(board[rank][5] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][7] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
         case 7:
             for(int rank = 6; rank > 0; rank--)
             {
@@ -642,7 +459,20 @@ static inline bool isolated_white(char board[8][8], int y)
                     return false;
                 }
             }
-            break;     
+            break; 
+        default:
+            for(int rank = 6; rank > 0; rank--)
+            {
+                if(board[rank][y-1] == 'P')
+                {
+                    return false;
+                }
+                if(board[rank][y+1] == 'P')
+                {
+                    return false;
+                }
+            }
+            break;
     }
     return true;    
 }
@@ -660,84 +490,6 @@ static inline bool isolated_black(char board[8][8], int y)
                 }
             }
             break;
-        case 1:
-            for(int rank = 1; rank < 7; rank++)
-            {
-                if(board[rank][0] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][2] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 2:
-            for(int rank = 1; rank < 7; rank++)
-            {
-                if(board[rank][1] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][3] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 3:
-            for(int rank = 1; rank < 7; rank++)
-            {
-                if(board[rank][2] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][4] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 4:
-            for(int rank = 1; rank < 7; rank++)
-            {
-                if(board[rank][3] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][5] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 5:
-            for(int rank = 1; rank < 7; rank++)
-            {
-                if(board[rank][4] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][6] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 6:
-            for(int rank = 1; rank < 7; rank++)
-            {
-                if(board[rank][5] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][7] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
         case 7:
             for(int rank = 1; rank < 7; rank++)
             {
@@ -746,7 +498,20 @@ static inline bool isolated_black(char board[8][8], int y)
                     return false;
                 }
             }
-            break;     
+            break;   
+        default:
+            for(int rank = 1; rank < 7; rank++)
+            {
+                if(board[rank][y-1] == 'p')
+                {
+                    return false;
+                }
+                if(board[rank][y+1] == 'p')
+                {
+                    return false;
+                }
+            }
+            break;  
     }
     return true;    
 }
@@ -764,84 +529,6 @@ static inline bool backward_white(char board[8][8], int x, int y)
                 }
             }
             break;
-        case 1:
-            for(int rank = 6; rank >= x; rank--)
-            {
-                if(board[rank][0] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][2] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 2:
-            for(int rank = 6; rank >= x; rank--)
-            {
-                if(board[rank][1] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][3] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 3:
-            for(int rank = 6; rank >= x; rank--)
-            {
-                if(board[rank][2] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][4] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 4:
-            for(int rank = 6; rank >= x; rank--)
-            {
-                if(board[rank][3] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][5] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 5:
-            for(int rank = 6; rank >= x; rank--)
-            {
-                if(board[rank][4] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][6] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 6:
-            for(int rank = 6; rank >= x; rank--)
-            {
-                if(board[rank][5] == 'P')
-                {
-                    return false;
-                }
-                if(board[rank][7] == 'P')
-                {
-                    return false;
-                }
-            }
-            break;
         case 7:
             for(int rank = 6; rank >= x; rank--)
             {
@@ -850,7 +537,20 @@ static inline bool backward_white(char board[8][8], int x, int y)
                     return false;
                 }
             }
-            break;     
+            break;    
+        default:
+            for(int rank = 6; rank >= x; rank--)
+            {
+                if(board[rank][y-1] == 'P')
+                {
+                    return false;
+                }
+                if(board[rank][y+1] == 'P')
+                {
+                    return false;
+                }
+            }
+            break; 
     }
     return true;    
 }
@@ -868,84 +568,6 @@ static inline bool backward_black(char board[8][8], int x, int y)
                 }
             }
             break;
-        case 1:
-            for(int rank = 1; rank <= x; rank++)
-            {
-                if(board[rank][0] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][2] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 2:
-            for(int rank = 1; rank <= x; rank++)
-            {
-                if(board[rank][1] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][3] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 3:
-            for(int rank = 1; rank <= x; rank++)
-            {
-                if(board[rank][2] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][4] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 4:
-            for(int rank = 1; rank <= x; rank++)
-            {
-                if(board[rank][3] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][5] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 5:
-            for(int rank = 1; rank <= x; rank++)
-            {
-                if(board[rank][4] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][6] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
-        case 6:
-            for(int rank = 1; rank <= x; rank++)
-            {
-                if(board[rank][5] == 'p')
-                {
-                    return false;
-                }
-                if(board[rank][7] == 'p')
-                {
-                    return false;
-                }
-            }
-            break;
         case 7:
             for(int rank = 1; rank <= x; rank++)
             {
@@ -954,7 +576,20 @@ static inline bool backward_black(char board[8][8], int x, int y)
                     return false;
                 }
             }
-            break;     
+            break;   
+        default:
+            for(int rank = 1; rank <= x; rank++)
+            {
+                if(board[rank][y-1] == 'p')
+                {
+                    return false;
+                }
+                if(board[rank][y+1] == 'p')
+                {
+                    return false;
+                }
+            }
+            break;  
     }
     return true;    
 }
@@ -963,16 +598,24 @@ static inline bool openFile(char board[8][8], int y)
 {
     for(int x = 1; x < 7; x++)
     {
-        if(board[x][y] == 'p')
-        {
-            return false;
-        }
-        if(board[7-x][y] == 'P')
+        if(tolower(board[x][y]) == 'p')
         {
             return false;
         }
     }
     return true;
+}
+
+static inline bool queenFile(char board[8][8], int y)
+{
+    for(int x = 0; x < 8; x++)
+    {
+        if(tolower(board[x][y]) == 'q')
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 static inline bool semiOpenFile_white(char board[8][8], int y)
@@ -1929,6 +1572,8 @@ int evaluate(char board[8][8], int color)
     int tempo = 0;   
     int midgame_white = 0, midgame_black = 0;
     int endgame_white = 0, endgame_black = 0;
+    int wqueen_mob = 0, bqueen_mob = 0, wrook_mob = 0, brook_mob = 0;
+    bool passed;
 
     for(int x = 0; x < 8; x++)
  	{
@@ -1939,40 +1584,46 @@ int evaluate(char board[8][8], int color)
                 case 'P':
                 {
                     P_count++;
+                    passed = false;
                     if(board[x-1][y] == 'P')
                     {
-                        midgame_white -= DOUBLEDPAWN;     //doubled pawn penalty
-                        endgame_white -= 45;     
+                        other_bonus_white -= DOUBLEDPAWN;     //doubled pawn penalty    
                         position_bonus_white += white_pawn[x][y];
                     }
                     else if(passed_white(board, x, y))
                     {
-                        position_bonus_white += PawnPassed_white[x];
+                        passed = true;
+                        //blockage penalty
+                        if(islower(board[x-1][y]))
+                            position_bonus_white += PawnPassed_white[x+1];
+                        else
+                            position_bonus_white += PawnPassed_white[x];
+                        if(phalanx_white(board, x, y))
+                        {
+                            other_bonus_white += 20;
+                        }
                     }
                     else
                     {
                         position_bonus_white += white_pawn[x][y];
                     }
-                    
+
                     if(connected_white(board, x, y))
                     {
-                        other_bonus_white += CONNECTEDPAWN;    //connected pawn bonus
-                    }
-                    else if(phalanx_white(board, x, y))
-                    {
-                        other_bonus_white += (7-x) * 2;
+                        if(passed)
+                            other_bonus_white += CONNECTEDPAWN*2;
+                        else
+                            other_bonus_white += CONNECTEDPAWN;    //connected pawn bonus
                     }
                     else if(isolated_white(board, y))
                     {
-                        midgame_white -= ISOLATEDPAWN;
-                        endgame_white -= 15;
+                        other_bonus_white -= ISOLATEDPAWN;
                     }
                     
                     if(backward_white(board, x, y))
                     {
-                        midgame_white -= BACKWARDPAWN;   
-                        endgame_white -= 20;                     
-                    }
+                        other_bonus_white -= BACKWARDPAWN;                        
+                    }      
                     break;
                 }
                 case 'R':
@@ -1992,14 +1643,21 @@ int evaluate(char board[8][8], int color)
                     }
                     if(openFile(board, y))
                     {
-                        midgame_white += ROOKOPENFILE*2;
-                        endgame_white += ROOKOPENFILE;
+                        other_bonus_white += ROOKOPENFILE;
                     }
                     else if(semiOpenFile_white(board, y))
                     {
-                        midgame_white += ROOKHALFFILE*2;
-                        endgame_white += ROOKHALFFILE;
+                        other_bonus_white += ROOKHALFFILE;
                     }
+
+                    if(queenFile(board, y))
+                    {
+                        other_bonus_white += ROOKQUEENFILE;
+                    }
+                    //mobility
+                    wrook_mob = wrook_mobility(board, x, y);
+                    midgame_white += wrook_mob;
+                    endgame_white += wrook_mob*2;
                     break;
                 }
                 case 'N':
@@ -2154,21 +1812,25 @@ int evaluate(char board[8][8], int color)
                     {
                         if(board[7][1] == 'N')
                         {
-                            other_bonus_white -= 5;
+                            other_bonus_white -= 4;
                         }
                         if(board[7][2] == 'B')
                         {
-                            other_bonus_white -= 5;
+                            other_bonus_white -= 4;
                         }
                         if(board[7][5] == 'B')
                         {
-                            other_bonus_white -= 5;
+                            other_bonus_white -= 4;
                         }
                         if(board[7][6] == 'N')
                         {
-                            other_bonus_white -= 5;
+                            other_bonus_white -= 4;
                         }
                     }
+                    //mobility
+                    wqueen_mob = wqueen_mobility(board, x, y);
+                    midgame_white += wqueen_mob; 
+                    endgame_white += wqueen_mob*2;
                     break;
                 }
                 case 'K':
@@ -2180,15 +1842,24 @@ int evaluate(char board[8][8], int color)
                 case 'p':
                 {
                     p_count++;
+                    passed = false;
                     if(board[x+1][y] == 'p')
                     {
-                        midgame_black -= DOUBLEDPAWN;     //doubled pawn penalty
-                        endgame_black -= 45;
+                        other_bonus_black -= DOUBLEDPAWN;     //doubled pawn penalty
                         position_bonus_black += black_pawn[x][y];
                     }
                     else if(passed_black(board, x, y))
                     {
-                        position_bonus_black += PawnPassed_black[x];
+                        passed = true;
+                        //blockage penalty
+                        if(isupper(board[x+1][y]))
+                            position_bonus_black += PawnPassed_black[x-1];
+                        else
+                            position_bonus_black += PawnPassed_black[x];
+                        if(phalanx_black(board, x, y))
+                        {
+                            other_bonus_black += 20;    //connected pawn bonus
+                        }
                     }
                     else
                     {
@@ -2197,22 +1868,19 @@ int evaluate(char board[8][8], int color)
                     
                     if(connected_black(board, x, y))
                     {
-                        other_bonus_black += CONNECTEDPAWN;    //connected pawn bonus
-                    }
-                    else if(phalanx_black(board, x, y))
-                    {
-                        other_bonus_black += x * 2;
+                        if(passed)
+                            other_bonus_black += CONNECTEDPAWN*2;    //connected pawn bonus
+                        else
+                            other_bonus_black += CONNECTEDPAWN; 
                     }
                     else if(isolated_black(board, y))
                     {
-                        midgame_black -= ISOLATEDPAWN;
-                        endgame_black -= 15;
+                        other_bonus_black -= ISOLATEDPAWN;
                     }
 
                     if(backward_black(board, x, y))
                     {
-                        midgame_black -= BACKWARDPAWN;       
-                        endgame_black -= 20;                   
+                        other_bonus_black -= BACKWARDPAWN;                        
                     }
                     break;
                 }
@@ -2233,14 +1901,21 @@ int evaluate(char board[8][8], int color)
                     }
                     if(openFile(board, y))
                     {
-                        midgame_black += ROOKOPENFILE*2;
-                        endgame_black += ROOKOPENFILE;
+                        other_bonus_black += ROOKOPENFILE;
                     }
                     else if(semiOpenFile_black(board, y))
                     {
-                        midgame_black += ROOKHALFFILE*2;
-                        endgame_black += ROOKHALFFILE;
+                        other_bonus_black += ROOKHALFFILE;
                     }
+
+                    if(queenFile(board, y))
+                    {
+                        other_bonus_black += ROOKQUEENFILE;
+                    }
+                    //mobility
+                    brook_mob = brook_mobility(board, x, y);
+                    midgame_black += brook_mob;
+                    endgame_black += brook_mob*2; 
                     break;
                 }
                 case 'n':
@@ -2395,21 +2070,25 @@ int evaluate(char board[8][8], int color)
                     {
                         if(board[0][1] == 'n')
                         {
-                            other_bonus_black -= 5;
+                            other_bonus_black -= 4;
                         }
                         if(board[0][2] == 'b')
                         {
-                            other_bonus_black -= 5;
+                            other_bonus_black -= 4;
                         }
                         if(board[0][5] == 'b')
                         {
-                            other_bonus_black -= 5;
+                            other_bonus_black -= 4;
                         }
                         if(board[0][6] == 'n')
                         {
-                            other_bonus_black -= 5;
+                            other_bonus_black -= 4;
                         }
                     }
+                    //mobility
+                    bqueen_mob = bqueen_mobility(board, x, y);
+                    midgame_black += bqueen_mob;
+                    endgame_black += bqueen_mob*2;
                     break;
                 } 
                 case 'k':
@@ -2434,7 +2113,7 @@ int evaluate(char board[8][8], int color)
     //game phase based on non-pawn materials
     int phase = N_count + n_count + B_count + b_count + R_count * 2 + r_count * 2 + Q_count * 4 + q_count * 4;
 
-    if(phase > 4)
+    if(phase > 0)
     {
         //for kings' position bonus midgame
         midgame_white += white_king_midgame[white_king_x][white_king_y];
@@ -2611,7 +2290,6 @@ int evaluate(char board[8][8], int color)
     endgame_white += white_king_endgame[white_king_x][white_king_y];
     endgame_black += black_king_endgame[black_king_x][black_king_y];
 
-    int wqueen_mob = 0, bqueen_mob = 0, wrook_mob = 0, brook_mob = 0;
     int wqueen_tropism = 0, bqueen_tropism = 0, wrook_tropism = 0, brook_tropism = 0, wknight_tropism = 0, bknight_tropism = 0, wbishop_tropism = 0, bbishop_tropism = 0;
 
     //king tropism
@@ -2623,19 +2301,11 @@ int evaluate(char board[8][8], int color)
             wqueen_tropism = abs(wqueen[0] - black_king_x) + abs(wqueen[1] - black_king_y) - 7;
             midgame_black += wqueen_tropism*2; 
             endgame_black += wqueen_tropism*4; 
-            //mobility
-            wqueen_mob = wqueen_mobility(board, wqueen[0], wqueen[1]);
-            midgame_white += wqueen_mob; 
-            endgame_white += wqueen_mob*2;
             break;
         default:
             wqueen_tropism = abs(wqueen[0] - black_king_x) + abs(wqueen[1] - black_king_y) + abs(wqueen[2] - black_king_x) + abs(wqueen[3] - black_king_y) - 14;
             midgame_black += wqueen_tropism*2; 
             endgame_black += wqueen_tropism*4; 
-            //mobility
-            wqueen_mob = wqueen_mobility(board, wqueen[0], wqueen[1]) + wqueen_mobility(board, wqueen[2], wqueen[3]);
-            midgame_white += wqueen_mob;
-            endgame_white += wqueen_mob*2; 
             break;                 
     }
     switch(q_count)
@@ -2646,19 +2316,11 @@ int evaluate(char board[8][8], int color)
             bqueen_tropism = abs(bqueen[0] - white_king_x) + abs(bqueen[1] - white_king_y) - 7;
             midgame_white += bqueen_tropism*2; 
             endgame_white += bqueen_tropism*4; 
-            //mobility
-            bqueen_mob = bqueen_mobility(board, bqueen[0], bqueen[1]);
-            midgame_black += bqueen_mob;
-            endgame_black += bqueen_mob*2;
             break;
         default:
             bqueen_tropism = abs(bqueen[0] - white_king_x) + abs(bqueen[1] - white_king_y) + abs(bqueen[2] - white_king_x) + abs(bqueen[3] - white_king_y)- 14;
             midgame_white += bqueen_tropism*2; 
             endgame_white += bqueen_tropism*4; 
-            //mobility
-            bqueen_mob = bqueen_mobility(board, bqueen[0], bqueen[1]) + bqueen_mobility(board, bqueen[2], bqueen[3]);
-            midgame_black += bqueen_mob;
-            endgame_black += bqueen_mob*2;
             break;                       
     }
     switch(N_count)
@@ -2699,19 +2361,11 @@ int evaluate(char board[8][8], int color)
             wrook_tropism = abs(wrook[0] - black_king_x) + abs(wrook[1] - black_king_y) - 7;
             midgame_black += wrook_tropism*2; 
             endgame_black += wrook_tropism*1; 
-            //mobility
-            wrook_mob = wrook_mobility(board, wrook[0], wrook[1]);
-            midgame_white += wrook_mob;
-            endgame_white += wrook_mob*2;
             break;
         default:
             wrook_tropism = abs(wrook[0] - black_king_x) + abs(wrook[1] - black_king_y) + abs(wrook[2] - black_king_x) + abs(wrook[3] - black_king_y) - 14;
             midgame_black += wrook_tropism*2; 
             endgame_black += wrook_tropism*1; 
-            //mobility
-            wrook_mob = wrook_mobility(board, wrook[0], wrook[1]) + wrook_mobility(board, wrook[2], wrook[3]);
-            midgame_white += wrook_mob;
-            endgame_white += wrook_mob*2;
             break;                       
     }
     switch(r_count)
@@ -2722,19 +2376,11 @@ int evaluate(char board[8][8], int color)
             brook_tropism = abs(brook[0] - white_king_x) + abs(brook[1] - white_king_y) - 7;
             midgame_white += brook_tropism*2; 
             endgame_white += brook_tropism*1;
-            //mobility
-            brook_mob = brook_mobility(board, brook[0], brook[1]);
-            midgame_black += brook_mob;
-            endgame_black += brook_mob*2; 
             break;
         default:
             brook_tropism = abs(brook[0] - white_king_x) + abs(brook[1] - white_king_y) + abs(brook[2] - white_king_x) + abs(brook[3] - white_king_y) - 14;
             midgame_white += brook_tropism*2; 
             endgame_white += brook_tropism*1; 
-            //mobility
-            brook_mob = brook_mobility(board, brook[0], brook[1]) + brook_mobility(board, brook[2], brook[3]);
-            midgame_black += brook_mob;
-            endgame_black += brook_mob*2;
             break;                       
     }
     switch(B_count)
@@ -2771,10 +2417,8 @@ int evaluate(char board[8][8], int color)
     points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900  + position_bonus_black + ((b_count >= 2)? 1 : 0) * BISHOPPAIR + ((n_count >= 2)? 1 : 0) * KNIGHTPAIR + ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900 - position_bonus_white - ((B_count >= 2)? 1 : 0) * BISHOPPAIR - ((N_count >= 2)? 1 : 0) * KNIGHTPAIR - ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white + tempo;
     
     //adjust phase score based on materials
-    if(phase > 20)
+    if(phase > 24)
         phase = 24;
-    else if(phase <= 4)
-        phase = 0;
     int mg_weight = phase;
     int eg_weight = 24 - mg_weight;
     points += (((midgame_black - midgame_white) * mg_weight + (endgame_black - endgame_white) * eg_weight) / 24);
