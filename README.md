@@ -47,6 +47,7 @@ Details
   * Analyze/Infinite
 * Pondering  
 * Configurable Hash Tables from 1MB to 2048MB  
+* Clear Hash Tables
 * Search Information and Principal Variation
 
 **Board Representation**
