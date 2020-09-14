@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#define MAXDEPTH 25
+#define MAXDEPTH 30
 
 unsigned long long int table[8][8][12];
 unsigned long long int turn;
@@ -21,9 +21,10 @@ double search_time;
 int history[2][64][64];
 bool ponderhit;
 double ponder_time;
-bool ponder;
+bool extra_time;
 bool analyze;
 unsigned long int HASHSIZE;
+int search_depth;
 
 struct DataItem 
 {

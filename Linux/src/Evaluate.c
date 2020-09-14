@@ -704,7 +704,7 @@ static inline bool outpost_black(char board[8][8], int x, int y)
 
 static inline bool badBishop_white(char board[8][8], int x, int y)
 {
-    if(x != 0)
+    if(x > 1)
     {
         switch(y)
         {
@@ -734,7 +734,7 @@ static inline bool badBishop_white(char board[8][8], int x, int y)
 
 static inline bool badBishop_black(char board[8][8], int x, int y)
 {
-    if(x != 7)
+    if(x < 6)
     {
         switch(y)
         {
@@ -764,7 +764,7 @@ static inline bool badBishop_black(char board[8][8], int x, int y)
 
 static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 {
-    if(x != 7)
+    if(x < 6)
     {
         switch(y)
         {
@@ -794,7 +794,7 @@ static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 
 static inline bool defended_by_bpawn(char board[8][8], int x, int y)
 {
-    if(x != 0)
+    if(x > 1)
     {
         switch(y)
         {

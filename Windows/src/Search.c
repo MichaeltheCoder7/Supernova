@@ -1035,11 +1035,10 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
             beta = INFINITE;
             current_depth -= 1;
             //search longer if failed low
-            if(current_depth > 4 && more_time)
+            if(current_depth > 4 && more_time && extra_time)
             {
                 search_time *= 1.8;
-                if(ponder)
-                    ponder_time *= 1.8;
+                ponder_time *= 1.8;
                 more_time = false;
             }
             failed_low = true;
@@ -1104,7 +1103,7 @@ void search(char board[8][8], int piece_color, char op_cp[3], char op_np[3], int
     nodes = 0;
 
     //search
-    iterative_deepening(board, MAXDEPTH, op_cp, op_np, ksw, qsw, ksb, qsb, move_counter, piece_color);
+    iterative_deepening(board, (search_depth == -1)?MAXDEPTH:search_depth, op_cp, op_np, ksw, qsw, ksb, qsb, move_counter, piece_color);
 
     //clear tables in analyze mode
     if(analyze)

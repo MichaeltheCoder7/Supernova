@@ -61,15 +61,17 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.3.2\n");
+	printf("id name Supernova 1.3.3\n");
 	printf("id author Minkai Yang\n");
-	//option
+	//options
 	printf("option name Hash type spin default 32 min 1 max 2048\n");
+	printf("option name Ponder type check default true\n");
+	printf("option name Clear Hash type button\n");
 	printf("uciok\n");
 }
 
 //configure hash table size
-void handle_option(char *input)
+void configure_hash(char *input)
 {
 	char hash_value[10] = "";
 	int hash_size;
@@ -92,10 +94,8 @@ void handle_option(char *input)
 		hash_size = 2048;
 	HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
 	tt = malloc(HASHSIZE * sizeof(struct DataItem));
-	//printf("hash table size: %ld\n", HASHSIZE);
 	EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
 	Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
-	//printf("eval hash table size: %ld\n", EVALHASHSIZE);
 	clearTT();
 	clearEvalTT();
 }
@@ -233,56 +233,106 @@ void handle_position(char *input)
 void handle_go(char *input)
 {
 	char option[10] = "";
+	char buffer[40] = "";
 	char white_time[20] = "";
 	char black_time[20] = "";
+	char white_inc[20] = "";
+	char black_inc[20] = "";
+	char movestogo[20] = "";
 	double wt;
 	double bt;
-	sscanf(input, "go %s %s btime %s winc 0 binc 0\n", option, white_time, black_time); //get remaining time on the clock
-	if(!strncmp("infinite", option, 8))
-	{
-		search_time = __DBL_MAX__;
-		ponder = false;
-		analyze = true;
-	}
-	else if(!strncmp("ponder", option, 6))
-	{
-		search_time = __DBL_MAX__;
-		sscanf(input, "go ponder wtime %s btime %s winc 0 binc 0\n", white_time, black_time); //get remaining time on the clock
-		wt = (double)atoi(white_time) / 1000;	//convert to sec
-		bt = (double)atoi(black_time) / 1000;
-		//sudden death time control
-		if(engine_color == -1)
-		{
-			ponder_time = wt / 30;	//assume 30 moves are left
-		}
-		else if(engine_color == 1)
-		{
-			ponder_time = bt / 30;
-		}
-		ponder = true;
-		analyze = false;
-	}
-	else
+	double winc = 0, binc = 0;
+	int moves_left = 30;
+	search_depth = -1;
+	ponder_time = 0;
+	extra_time = true;
+	analyze = false;
+	sscanf(input, "go %s %s", option, buffer); //get the go command
+	if(!strncmp("wtime", option, 5))
 	{	
+		//get remaining time on the clock
+		sscanf(input, "go wtime %s btime %s winc %s binc %s movestogo %s", white_time, black_time, white_inc, black_inc, movestogo);
 		wt = (double)atoi(white_time) / 1000;	//convert to sec
 		bt = (double)atoi(black_time) / 1000;
+		if(strncmp("", white_inc, 19))
+		{
+			winc = (double)atoi(white_inc) / 1000;
+		}
+		if(strncmp("", black_inc, 19))
+		{
+			binc = (double)atoi(black_inc) / 1000;
+		}
+		if(strncmp("", movestogo, 19))
+		{
+			//assume more moves to prevent running out of time
+			moves_left = atoi(movestogo) + 2; 
+		}
 		//sudden death time control
+		//time = time left / moves to go + 0.9 * increment
+		//if moves to go not given, assume 30 moves
 		if(engine_color == -1)
 		{
-			search_time = wt / 30;	//assume 30 moves are left
+			search_time = wt / moves_left + 0.9 * winc;
 		}
 		else if(engine_color == 1)
 		{
-			search_time = bt / 30;
+			search_time = bt / moves_left + 0.9 * binc;
 		}
 		if(outofbook < 5) //think longer when out of book
 		{
 			search_time *= 1.2;
 			outofbook++;
 		}
-		ponder = false;
-		analyze = false;
 	}
+	else if(!strncmp("ponder", option, 6))
+	{
+		search_time = __DBL_MAX__;
+		sscanf(input, "go ponder wtime %s btime %s winc %s binc %s movestogo %s", white_time, black_time, white_inc, black_inc, movestogo);
+		wt = (double)atoi(white_time) / 1000;
+		bt = (double)atoi(black_time) / 1000;
+		if(strncmp("", white_inc, 19))
+		{
+			winc = (double)atoi(white_inc) / 1000;
+		}
+		if(strncmp("", black_inc, 19))
+		{
+			binc = (double)atoi(black_inc) / 1000;
+		}
+		if(strncmp("", movestogo, 19))
+		{
+			moves_left = atoi(movestogo) + 2;
+		}
+		if(engine_color == -1)
+		{
+			ponder_time = wt / moves_left + 0.9 * winc;
+		}
+		else if(engine_color == 1)
+		{
+			ponder_time = bt / moves_left + 0.9 * binc;
+		}
+	}
+	else if(!strncmp("movetime", option, 8))
+	{
+		search_time = (double)atoi(buffer) / 1000;
+		extra_time = false;
+	}
+	else if(!strncmp("depth", option, 5))
+	{
+		search_time = __DBL_MAX__;
+		search_depth = atoi(buffer);
+	}
+	else if(!strncmp("infinite", option, 8))
+	{
+		search_time = __DBL_MAX__;
+		analyze = true;
+	}
+	else
+	{
+		printf("info string Error! Unknown command!\n");
+		search_time = 0;
+		search_depth = 0;
+	}
+	
 
 	stop = false; //set stop to false
 	ponderhit = false;
@@ -352,7 +402,14 @@ void uci_loop()
 		}
 		else if(!strncmp("setoption name Hash", string, 19))
 		{
-			handle_option(string);
+			configure_hash(string);
+		}
+		else if(!strncmp("setoption name Clear Hash", string, 25))
+		{
+			//clear hash tables 
+			clearTT();
+			clearEvalTT();
+			memset(history, 0, sizeof(history)); //clear history heuristic table
 		}
 		else if(!strncmp("quit", string, 4))
 		{
