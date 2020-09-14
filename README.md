@@ -38,11 +38,16 @@ http://www.playwitharena.de/
 
 Details
 -------
-**UCI Features**
+**UCI Features** 
+* search Mode
+  * blitz
+  * tournament
+  * fixed search depth
+  * time per move
+  * analyze/infinite
 * pondering  
-* analyze mode  
 * configurable hash tables from 1MB to 2048MB  
-* search information and principal variation  
+* search information and principal variation
 
 **Board Representation**
 * 8x8 board  
@@ -75,7 +80,7 @@ Details
 Author
 ------
 **Minkai Yang**
-* Email: mikeyang7@yahoo.com
+* email: mikeyang7@yahoo.com
 
 License
 -------
