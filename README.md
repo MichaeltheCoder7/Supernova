@@ -39,48 +39,48 @@ http://www.playwitharena.de/
 Details
 -------
 **UCI Features** 
-* search mode
-  * blitz
-  * tournament
-  * fixed search depth
-  * time per move
-  * analyze/infinite
-* pondering  
-* configurable hash tables from 1MB to 2048MB  
-* search information and principal variation
+* Search Mode
+  * Blitz
+  * Tournament
+  * Fixed Search Depth
+  * Time per Move
+  * Analyze/Infinite
+* Pondering  
+* Configurable Hash Tables from 1MB to 2048MB  
+* Search Information and Principal Variation
 
 **Board Representation**
-* 8x8 board  
+* 8x8 Board  
 
 **Move Generation**  
-* all legal moves of chess including castling, en passant, queen promotion and under promotions  
+* All Legal Moves of Chess (including castling, en passant, queen promotion and under promotions) 
 
 **Search** 
-* transposition table  
-* iterative deepening with aspiration window  
-* principal variation search  
-* razoring  
-* static null move pruning  
-* null move prunning  
-* futility prunning  
-* late move reduction  
-* check extension  
-* move ordering  
-* quiescence search  
-* static exchange evaluation
+* Transposition Table  
+* Iterative Deepening with Aspiration Window  
+* Principal Variation Search  
+* Razoring  
+* Static Null Move Pruning  
+* Null Move Prunning  
+* Futility Prunning  
+* Late Move Reduction  
+* Check Extension  
+* Move Ordering  
+* Quiescence Search  
+* Static Exchange Evaluation
 
 **Evaluation** 
-* evaluation hash table
-* piece square tables  
-* mobility  
-* king safety  
-* king tropism  
-* piece-specific evaluations  
+* Evaluation Hash Table
+* Piece Square Tables  
+* Mobility  
+* King Safety  
+* King Tropism  
+* Piece-specific Evaluations  
 
 Author
 ------
 **Minkai Yang**
-* email: mikeyang7@yahoo.com
+* Email: mikeyang7@yahoo.com
 
 License
 -------
