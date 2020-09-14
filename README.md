@@ -39,7 +39,7 @@ http://www.playwitharena.de/
 Details
 -------
 **UCI Features** 
-* search Mode
+* search mode
   * blitz
   * tournament
   * fixed search depth
