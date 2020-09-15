@@ -61,7 +61,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.3.3\n");
+	printf("id name Supernova 1.3.4\n");
 	printf("id author Minkai Yang\n");
 	//options
 	printf("option name Hash type spin default 32 min 1 max 2048\n");
@@ -257,15 +257,19 @@ void handle_go(char *input)
 		if(strncmp("", white_inc, 19))
 		{
 			winc = (double)atoi(white_inc) / 1000;
+			if(wt <= 2 * winc) //prevent losing on time
+				extra_time = false;
 		}
 		if(strncmp("", black_inc, 19))
 		{
 			binc = (double)atoi(black_inc) / 1000;
+			if(bt <= 2 * binc)
+				extra_time = false;
 		}
 		if(strncmp("", movestogo, 19))
 		{
-			//assume more moves to prevent running out of time
-			moves_left = atoi(movestogo) + 2; 
+			//assume one more move to prevent running out of time
+			moves_left = atoi(movestogo) + 1; 
 		}
 		//sudden death time control
 		//time = time left / moves to go + 0.9 * increment
@@ -293,14 +297,18 @@ void handle_go(char *input)
 		if(strncmp("", white_inc, 19))
 		{
 			winc = (double)atoi(white_inc) / 1000;
+			if(wt <= 2 * winc)
+				extra_time = false;
 		}
 		if(strncmp("", black_inc, 19))
 		{
 			binc = (double)atoi(black_inc) / 1000;
+			if(bt <= 2 * binc)
+				extra_time = false;
 		}
 		if(strncmp("", movestogo, 19))
 		{
-			moves_left = atoi(movestogo) + 2;
+			moves_left = atoi(movestogo) + 1;
 		}
 		if(engine_color == -1)
 		{
@@ -333,7 +341,6 @@ void handle_go(char *input)
 		search_depth = 0;
 	}
 	
-
 	stop = false; //set stop to false
 	ponderhit = false;
 	//start engine thread
