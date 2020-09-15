@@ -355,13 +355,13 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
 
     if(standing_pat >= beta) 
     {
-		return beta;
-	}
+        return beta;
+    }
     
-	if(standing_pat > alpha) 
+    if(standing_pat > alpha) 
     {
-		alpha = standing_pat;
-	}
+        alpha = standing_pat;
+    }
     
     value = -INFINITE;
     //get children of node
