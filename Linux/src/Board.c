@@ -50,7 +50,6 @@ static inline void updateboard(char current_position[3], char new_position[3], c
     /*make the new position equal to the current position, then make current position blank*/
     board[position_to_x(new_position)][position_to_y(new_position)] = board[current_x][current_y]; /*new is now the current*/
     board[current_x][current_y] = ' ';
-	
 }
 
 //get the x index from a position on the board
@@ -75,6 +74,7 @@ int position_to_x(char position[3])
         case '1':
             return 7;
     }
+
     return -1; //when nothing is matched
 }
 
