@@ -910,7 +910,6 @@ int get_smallest_attacker(char board[8][8], char location[3], int color)
                 }
                 if(board[x + i][y - i] != ' ')
                 {
-
                     if(board[x + i][y - i] == 'B')
                     {
                         return 8*(x+i) + (y-i);
