@@ -2111,7 +2111,7 @@ int SEE(char board[8][8], char location[3], int color)
             king_attack = true;            
 
         piece = position_to_piece(board_copy, location);
-        make_move(positions[x][y], location, position_to_piece(board, positions[x][y]), piece, board_copy);
+        make_move(positions[x][y], location, position_to_piece(board_copy, positions[x][y]), piece, board_copy);
         color = -color;
         attacker_index = get_smallest_attacker(board_copy, location, color);
         
