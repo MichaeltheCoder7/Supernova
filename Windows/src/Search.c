@@ -24,6 +24,7 @@ int nodes;
 struct timeval starting_time;
 char BestMove[6];
 char searched_move[6];
+bool stop_search;
 
 //count number of pieces on the board
 static inline int piece_count(char board[8][8])
@@ -57,19 +58,38 @@ static inline void ageHistory()
     }
 }
 
-//check for time up or stop command from GUI
-static inline bool timeUp()
+//prevent history heuristics array to overflow 
+static inline void preventOverflow()
 {
-    struct timeval ending_time;
-    
-    gettimeofday(&ending_time, NULL);
-    double secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
-    if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
+    for(int d = 0; d < 2; d++)
     {
-        return true;
+        for(int e = 0; e < 64; e++)
+        {
+            for(int f = 0; f < 64; f++)
+            {
+                history[d][e][f] = history[d][e][f] / 2;
+            }
+        }
     }
+}
 
-    return false;
+//check for time up or stop command from GUI every 512 nodes
+static inline void timeUp()
+{
+    if(!stop_search && !(nodes & 511))
+    {
+        struct timeval ending_time;
+        gettimeofday(&ending_time, NULL);
+        double secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
+        if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
+        {
+            stop_search = true;
+        }
+        if(node_mode && nodes >= search_nodes)
+        {
+            stop_search = true;
+        }
+    }
 }
 
 int index(char piece) 
@@ -245,7 +265,7 @@ static inline struct DataItem *probeTT(unsigned long long int key)
 
 static inline void storeTT(unsigned long long int key, int evaluation, int depth, char bestmove[5], int flag)
 {
-    if(timeUp()) //don't save when time up
+    if(stop_search) //don't save when time up
         return;
 
     //get the hash 
@@ -303,9 +323,9 @@ void clearTT()
 static inline bool check_repetition(unsigned long long int key, int ply, int counter)
 {
     //store the current position key into the history table
-    history_log[history_index+ply-1] = key;
+    history_log[history_index+ply] = key;
     //check positions till an capture or a pawn move
-    for(int x = history_index+ply-3; x >= history_index+ply-1-counter; x-=2)
+    for(int x = history_index+ply-2; x >= history_index+ply-counter; x-=2)
     {
         if(key == history_log[x])
         {
@@ -344,10 +364,9 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
     int cap_piece_value;
 
     //check if time is up
-    if(timeUp())
-    {
+    timeUp();
+    if(stop_search)
         return 0;
-    }
 
     nodes++;
 
@@ -406,6 +425,9 @@ static int quiescence(char board[8][8], int color, int alpha, int beta, char op_
 
         value = -quiescence(board_copy, -color, -beta, -alpha, cp, np);
 
+        if(stop_search)
+            return 0;
+
         if(value > alpha)
         {
             if(value >= beta)
@@ -445,10 +467,9 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
     int isprom_ep;
 
     //check if time is up
-    if(timeUp())
-    {
+    timeUp();
+    if(stop_search)
         return 0;
-    }
 
     //mate distance prunning
     if(alpha < -mate_value) 
@@ -559,6 +580,9 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
 
             value = -pvs(board, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, "", "", ksw, qsw, ksb, qsb, move_counter, false, false);
             
+            if(stop_search)
+                return 0;
+
             if(value >= beta)
             {
                 return beta;
@@ -698,6 +722,9 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
             goto search_again;
         }
 
+        if(stop_search)
+            return 0;
+
         if(value > alpha)
         {
             strncpy(bm, moves[x], 6);
@@ -715,16 +742,7 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
                     //prevent overflow 
                     if(history[a][b][c] > 800000)
                     {
-                        for(int d = 0; d < 2; d++)
-                        {
-                            for(int e = 0; e < 64; e++)
-                            {
-                                for(int f = 0; f < 64; f++)
-                                {
-                                    history[d][e][f] = history[d][e][f] / 2;
-                                }
-                            }
-                        }
+                        preventOverflow();
                     }
                 }
                 alpha = beta;
@@ -873,10 +891,8 @@ static int pvs_root(char board[8][8], int depth, int color, int alpha, int beta,
         }
         
         //check if time is up
-        if(timeUp())
-        {
+        if(stop_search)
             break;
-        }
         
         if(value > alpha)
         {
@@ -895,16 +911,7 @@ static int pvs_root(char board[8][8], int depth, int color, int alpha, int beta,
                     //prevent overflow 
                     if(history[a][b][c] > 800000)
                     {
-                        for(int d = 0; d < 2; d++)
-                        {
-                            for(int e = 0; e < 64; e++)
-                            {
-                                for(int f = 0; f < 64; f++)
-                                {
-                                    history[d][e][f] = history[d][e][f] / 2;
-                                }
-                            }
-                        }
+                        preventOverflow();
                     }
                 }
                 alpha = beta;
@@ -1015,7 +1022,7 @@ static void iterative_deepening(char board[8][8], int depth, char op_cp[3], char
         
         gettimeofday(&ending_time, NULL);
         secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
-        if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
+        if(stop_search)
         {
             //allow partial search results if at least one move searched and it's within the bounds/not failed low
             if(strncmp(searched_move, "", 5) && !failed_low && val > alpha && val < beta)
@@ -1101,6 +1108,7 @@ void search(char board[8][8], int piece_color, char op_cp[3], char op_np[3], int
     memset(killers, 0, sizeof(killers)); //clear killer move table
     memset(BestMove, 0, sizeof(BestMove));
     nodes = 0;
+    stop_search = false;
 
     //search
     iterative_deepening(board, (search_depth == -1)?MAXDEPTH:search_depth, op_cp, op_np, ksw, qsw, ksb, qsb, move_counter, piece_color);

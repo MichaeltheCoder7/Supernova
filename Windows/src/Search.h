@@ -25,6 +25,8 @@ bool extra_time;
 bool analyze;
 unsigned long int HASHSIZE;
 int search_depth;
+bool node_mode;
+int search_nodes;
 
 struct DataItem 
 {

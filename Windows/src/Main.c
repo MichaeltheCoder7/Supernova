@@ -61,7 +61,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.3.4\n");
+	printf("id name Supernova 1.3.5\n");
 	printf("id author Minkai Yang\n");
 	//options
 	printf("option name Hash type spin default 32 min 1 max 2048\n");
@@ -144,7 +144,7 @@ void handle_position(char *input)
 	halfmove_counter = 0;
 	resetboard(board); //reset the board
 	history_log[0] = getHash(board, -1, "", "", 1, 1, 1, 1);
-	history_index = 1;
+	history_index = 0;
 
 	while(position != NULL) 
 	{
@@ -207,8 +207,8 @@ void handle_position(char *input)
 				}
 				
 				//store board into move history
-				history_log[history_index] = getHash(board, move_color, cp, np, kswflag, qswflag, ksbflag, qsbflag);
 				history_index++;
+				history_log[history_index] = getHash(board, move_color, cp, np, kswflag, qswflag, ksbflag, qsbflag);
 			}
 		}
 	}
@@ -247,6 +247,7 @@ void handle_go(char *input)
 	ponder_time = 0;
 	extra_time = true;
 	analyze = false;
+	node_mode = false;
 	sscanf(input, "go %s %s", option, buffer); //get the go command
 	if(!strncmp("wtime", option, 5))
 	{	
@@ -328,6 +329,12 @@ void handle_go(char *input)
 	{
 		search_time = __DBL_MAX__;
 		search_depth = atoi(buffer);
+	}
+	else if(!strncmp("nodes", option, 5))
+	{
+		search_time = __DBL_MAX__;
+		search_nodes = atoi(buffer);
+		node_mode = true;
 	}
 	else if(!strncmp("infinite", option, 8))
 	{

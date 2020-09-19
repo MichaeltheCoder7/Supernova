@@ -3,7 +3,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
-
 #include "Attack.h"
 #include "Board.h"
 
