@@ -44,6 +44,7 @@ Details
   * Tournament
   * Fixed Search Depth
   * Time per Move
+  * Nodes
   * Analyze/Infinite
 * Pondering  
 * Configurable Hash Tables from 1MB to 2048MB  
