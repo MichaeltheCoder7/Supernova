@@ -74,7 +74,7 @@ int position_to_x(char position[3])
         case '1':
             return 7;
     }
-
+    
     return -1; //when nothing is matched
 }
 

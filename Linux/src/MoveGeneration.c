@@ -31,475 +31,403 @@ int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
 int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
 int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
-//save one side's all positions in an array of string
-//need caller to declare: char opponent[16][3] array first and pass it in
-//the array has a fixed size
-//color = -1: white pieces
-//color = 1: black pieces
-static int all_positions(char board[8][8], char opponent[16][3], int color)
-{
-    int temp = 0;
-    //get all white pieces locations
-    switch(color)
-    {
-        case -1:
-        {
-            for(int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    if(isupper(board[x][y]))
-                    {
-                        strncpy(opponent[temp], positions[x][y], 3);
-                        temp++;
-                        
-                    }
-                }
-            }
-            break;
-        }
-        //get all black pieces locations
-        case 1:
-        {
-            for(int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    if(islower(board[x][y]))
-                    {
-                        strncpy(opponent[temp], positions[x][y], 3);
-                        temp++;
-                        
-                    }
-
-                }
-            }
-            break;
-        }
-    }
-    return temp;
-}
 
 //generate all pseudo-legal moves
 int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[3], int ksw, int qsw, int ksb, int qsb, int color)
 {
-    char piece_positions[16][3];
     int index = 0; 
-    int length;
     char piece;
     int index_x;
     int index_y;
-    char string[3];
     int x, y;
 
     switch(color)
     {
         case 1:
         {
-            length = all_positions(board, piece_positions, 1);
-            for(int i = 0; i < length; i++)
+            for(index_x = 0; index_x < 8; index_x++)
             {
-                index_x = position_to_x(piece_positions[i]);
-                index_y = position_to_y(piece_positions[i]);
-                piece = board[index_x][index_y];
-                switch(piece)
+                for(index_y = 0; index_y < 8; index_y++)
                 {
-                    case 'p':
+                    piece = board[index_x][index_y];
+                    switch(piece)
                     {
-                        for(y = index_y - 1; y < index_y + 2; y++)
+                        case 'p':
                         {
-                            if(y & 8) //skip when out of board
+                            for(y = index_y - 1; y < index_y + 2; y++)
                             {
-                                continue;
-                            }
-                            if(CheckMove_bpawn(board, index_y, index_x + 1, y, op_cp, op_np))  
-                            { 
-                                //promotions
-                                if((index_x + 1) == 7)
+                                if(y & 8) //skip when out of board
                                 {
-                                    strncpy(string, piece_positions[i], 3);
-                                    strncat(string, positions[index_x + 1][y], 3);
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'q';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'r';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'b';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'n';
-                                    all_moves[index][5] = '\0';
+                                    continue;
+                                }
+                                if(CheckMove_bpawn(board, index_y, index_x + 1, y, op_cp, op_np))  
+                                { 
+                                    //promotions
+                                    if((index_x + 1) == 7)
+                                    {
+                                        strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                        strncat(all_moves[index], positions[index_x + 1][y], 3);
+                                        all_moves[index][4] = 'q';
+                                        all_moves[index][5] = '\0';
+                                        index++;
+                                        strncpy(all_moves[index], all_moves[index-1], 6);
+                                        all_moves[index][4] = 'r';
+                                        index++;
+                                        strncpy(all_moves[index], all_moves[index-1], 6);
+                                        all_moves[index][4] = 'b';
+                                        index++;
+                                        strncpy(all_moves[index], all_moves[index-1], 6);
+                                        all_moves[index][4] = 'n';
+                                        index++;
+                                    }
+                                    else
+                                    {
+                                        strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                        strncat(all_moves[index], positions[index_x + 1][y], 3);
+                                        index++;
+                                    }
+                                }
+                            }
+                            //2 steps at starting position
+                            if(index_x == 1)
+                            {
+                                if(board[2][index_y] == ' ' && board[3][index_y] == ' ')  
+                                { 
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[3][index_y], 3);
                                     index++;
                                 }
-                                else
+                            }
+                            break;
+                        }
+                        case 'n':
+                        {
+                            for(int j = 0; j < 8; j++)
+                            {
+                                x = index_x + knight_moves_x[j];
+                                y = index_y + knight_moves_y[j];
+                                if(x & 8 || y & 8) //skips when out of board
                                 {
-                                    strncpy(string, piece_positions[i], 3);
-                                    strncat(string, positions[index_x + 1][y], 3);
-                                    strncpy(all_moves[index], string, 6);
+                                    continue;
+                                }
+                                if(board[x][y] == ' ' || board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
                                     index++;
                                 }
                             }
+                            break;
                         }
-                        //2 steps at starting position
-                        if(index_x == 1)
+                        case 'k':
                         {
-                            if(board[2][index_y] == ' ' && board[3][index_y] == ' ')  
-                            { 
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[3][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                            //castling
+                            if(index_x == 0 && index_y == 4)
+                            {
+                                if(CheckMove_bkingside(board, ksb))  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[0][6], 3);
+                                    index++;
+                                }
+                                if(CheckMove_bqueenside(board, qsb))  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[0][2], 3);
+                                    index++;
+                                }
                             }
+                            for(int j = 0; j < 8; j++)
+                            {
+                                x = index_x + king_moves_x[j];
+                                y = index_y + king_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == ' ' || board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
+                                
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'n':
-                    {
-                        for(int j = 0; j < 8; j++)
+                        case 'r':
                         {
-                            x = index_x + knight_moves_x[j];
-                            y = index_y + knight_moves_y[j];
-                            if(x & 8 || y & 8) //skips when out of board
-                            {
-                                continue;
-                            }
-                            if(board[x][y] == ' ' || board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
                             {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'k':
-                    {
-                        //castling
-                        if(index_x == 0 && index_y == 4)
+                        case 'b':
                         {
-                            if(CheckMove_bkingside(board, ksb))  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[0][6], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                            //up left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
-                            if(CheckMove_bqueenside(board, qsb))  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[0][2], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')    
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        for(int j = 0; j < 8; j++)
+                        case 'q':
                         {
-                            x = index_x + king_moves_x[j];
-                            y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                continue;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
-                            if(board[x][y] == ' ' || board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            
-                        }
-                        break;
-                    }
-                    case 'r':
-                    {
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
-                        {  
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
                             {
-                                break;
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
+                        default:
                         {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
+                            continue;
+                            break;
                         }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
-                        {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
-                        {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'b':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')    
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'q':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
-                        {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
-                        {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
-                        {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
-                        {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
                     }
                 }
             }
@@ -507,415 +435,393 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
         }
         case -1:
         {
-            length = all_positions(board, piece_positions, -1);
-            for(int i = 0; i < length; i++)
+            for(index_x = 0; index_x < 8; index_x++)
             {
-                index_x = position_to_x(piece_positions[i]);
-                index_y = position_to_y(piece_positions[i]);
-                piece = board[index_x][index_y];
-                switch(piece)
+                for(index_y = 0; index_y < 8; index_y++)
                 {
-                    case 'P':
+                    piece = board[index_x][index_y];
+                    switch(piece)
                     {
-                        //2 steps at starting position
-                        if(index_x == 6)
+                        case 'P':
                         {
-                            if(board[5][index_y] == ' ' && board[4][index_y] == ' ')  
-                            { 
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[4][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                        }
-                        for(y = index_y - 1; y < index_y + 2; y++)
-                        {
-                            if(y & 8) //skip when out of board
+                            //2 steps at starting position
+                            if(index_x == 6)
                             {
-                                continue;
-                            }
-                            if(CheckMove_wpawn(board, index_y, index_x - 1, y, op_cp, op_np)) 
-                            { 
-                                //promotions
-                                if((index_x - 1) == 0)
-                                {
-                                    strncpy(string, piece_positions[i], 3);
-                                    strncat(string, positions[index_x - 1][y], 3);
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'q';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'r';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'b';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                    strncpy(all_moves[index], string, 6);
-                                    all_moves[index][4] = 'n';
-                                    all_moves[index][5] = '\0';
-                                    index++;
-                                }
-                                else
-                                {
-                                    strncpy(string, piece_positions[i], 3);
-                                    strncat(string, positions[index_x - 1][y], 3);
-                                    strncpy(all_moves[index], string, 6);
+                                if(board[5][index_y] == ' ' && board[4][index_y] == ' ')  
+                                { 
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[4][index_y], 3);
                                     index++;
                                 }
                             }
+                            for(y = index_y - 1; y < index_y + 2; y++)
+                            {
+                                if(y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(CheckMove_wpawn(board, index_y, index_x - 1, y, op_cp, op_np)) 
+                                { 
+                                    //promotions
+                                    if((index_x - 1) == 0)
+                                    {
+                                        strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                        strncat(all_moves[index], positions[index_x - 1][y], 3);
+                                        all_moves[index][4] = 'q';
+                                        all_moves[index][5] = '\0';
+                                        index++;
+                                        strncpy(all_moves[index], all_moves[index-1], 6);
+                                        all_moves[index][4] = 'r';
+                                        index++;
+                                        strncpy(all_moves[index], all_moves[index-1], 6);
+                                        all_moves[index][4] = 'b';
+                                        index++;
+                                        strncpy(all_moves[index], all_moves[index-1], 6);
+                                        all_moves[index][4] = 'n';
+                                        index++;
+                                    }
+                                    else
+                                    {
+                                        strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                        strncat(all_moves[index], positions[index_x - 1][y], 3);
+                                        index++;
+                                    }
+                                }
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'N':
-                    {
-                        for(int j = 0; j < 8; j++)
+                        case 'N':
                         {
-                            x = index_x + knight_moves_x[j];
-                            y = index_y + knight_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
+                            for(int j = 0; j < 8; j++)
                             {
-                                continue;
+                                x = index_x + knight_moves_x[j];
+                                y = index_y + knight_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == ' ' || board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
                             }
-                            if(board[x][y] == ' ' || board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'K':
-                    {
-                        //castling
-                        if(index_x == 7 && index_y == 4)
+                        case 'K':
                         {
-                            if(CheckMove_wkingside(board, ksw))  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[7][6], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                            //castling
+                            if(index_x == 7 && index_y == 4)
+                            {
+                                if(CheckMove_wkingside(board, ksw))  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[7][6], 3);
+                                    index++;
+                                }
+                                if(CheckMove_wqueenside(board, qsw))  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[7][2], 3);
+                                    index++;
+                                }
                             }
-                            if(CheckMove_wqueenside(board, qsw))  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[7][2], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                            for(int j = 0; j < 8; j++)
+                            {
+                                x = index_x + king_moves_x[j];
+                                y = index_y + king_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == ' ' || board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
                             }
+                            break;
                         }
-                        for(int j = 0; j < 8; j++)
+                        case 'R':
                         {
-                            x = index_x + king_moves_x[j];
-                            y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
                             {
-                                continue;
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
                             }
-                            if(board[x][y] == ' ' || board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'R':
-                    {
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
+                        case 'B':
                         {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                break;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
+                        case 'Q':
                         {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                break;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
+                            {
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
+                        default:
                         {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
+                            continue;
+                            break;
                         }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
-                        {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'B':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'Q':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == ' ' || board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
-                        {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == ' ' || board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
-                        {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
-                        {
-                            if(board[index_x][j] == ' ' || board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == ' ' || board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
-                        {
-                            if(board[j][index_y] == ' ' || board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == ' ' || board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
                     }
                 }
             }
             break;
         }
-        
     }
     
     return index;
@@ -924,378 +830,359 @@ int moveGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[
 //generate caputures and queen promotion
 int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_np[3], int color)
 {
-    char piece_positions[16][3];
     int index = 0; 
-    int length;
     char piece;
     int index_x;
     int index_y;
-    char string[3];
     int x, y;
 
     switch(color)
     {
         case 1:
         {
-            length = all_positions(board, piece_positions, 1);
-            for(int i = 0; i < length; i++)
+            for(index_x = 0; index_x < 8; index_x++)
             {
-                index_x = position_to_x(piece_positions[i]);
-                index_y = position_to_y(piece_positions[i]);
-                piece = board[index_x][index_y];
-                switch(piece)
+                for(index_y = 0; index_y < 8; index_y++)
                 {
-                    case 'p':
+                    piece = board[index_x][index_y];
+                    switch(piece)
                     {
-                        if((index_y - 1) >= 0 && CheckCapture_bpawn(board, index_x + 1, index_y - 1, op_cp, op_np)) 
-                        { 
-                            strncpy(string, piece_positions[i], 3);
-                            strncat(string, positions[index_x + 1][index_y - 1], 3);
-                            strncpy(all_moves[index], string, 6);
-                            index++;
-                        }
-                        //promotion
-                        if(index_x == 6 && board[7][index_y] == ' ')
+                        case 'p':
                         {
-                            strncpy(string, piece_positions[i], 3);
-                            strncat(string, positions[7][index_y], 3);
-                            strncpy(all_moves[index], string, 6);
-                            index++;
-                        } 
-                        if((index_y + 1) <= 7 && CheckCapture_bpawn(board, index_x + 1, index_y + 1, op_cp, op_np)) 
-                        { 
-                            strncpy(string, piece_positions[i], 3);
-                            strncat(string, positions[index_x + 1][index_y + 1], 3);
-                            strncpy(all_moves[index], string, 6);
-                            index++;
-                        }
+                            if((index_y - 1) >= 0 && CheckCapture_bpawn(board, index_x + 1, index_y - 1, op_cp, op_np)) 
+                            { 
+                                strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                strncat(all_moves[index], positions[index_x + 1][index_y - 1], 3);
+                                index++;
+                            }
+                            //promotion
+                            if(index_x == 6 && board[7][index_y] == ' ')
+                            {
+                                strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                strncat(all_moves[index], positions[7][index_y], 3);
+                                index++;
+                            } 
+                            if((index_y + 1) <= 7 && CheckCapture_bpawn(board, index_x + 1, index_y + 1, op_cp, op_np)) 
+                            { 
+                                strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                strncat(all_moves[index], positions[index_x + 1][index_y + 1], 3);
+                                index++;
+                            }
 
-                        break;
-                    }
-                    case 'n':
-                    {
-                        for(int j = 0; j < 8; j++)
+                            break;
+                        }
+                        case 'n':
                         {
-                            x = index_x + knight_moves_x[j];
-                            y = index_y + knight_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
+                            for(int j = 0; j < 8; j++)
                             {
-                                continue;
+                                x = index_x + knight_moves_x[j];
+                                y = index_y + knight_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
                             }
-                            if(board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'k':
-                    {
-                        for(int j = 0; j < 8; j++)
+                        case 'k':
                         {
-                            x = index_x + king_moves_x[j];
-                            y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
+                            for(int j = 0; j < 8; j++)
                             {
-                                continue;
+                                x = index_x + king_moves_x[j];
+                                y = index_y + king_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
                             }
-                            if(board[x][y] == 'P' || board[x][y] == 'R' || board[x][y] == 'N' || board[x][y] == 'B' || board[x][y] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
+                            
+                            break;
                         }
-                        
-                        break;
-                    }
-                    case 'r':
-                    {
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
-                        {  
-                            if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
+                        case 'r':
                         {
-                            if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
                             {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
+                                if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
                             }
-                            if(board[index_x][j] != ' ')
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
                             {
-                                break;
+                                if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
+                        case 'b':
                         {
-                            if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                break;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')    
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
+                        case 'q':
                         {
-                            if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                break;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
+                            {
+                                if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'b':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
+                        default:
                         {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
+                            continue;
+                            break;
                         }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')    
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'q':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == 'P' || board[index_x - j][index_y - j] == 'R' || board[index_x - j][index_y - j] == 'N' || board[index_x - j][index_y - j] == 'B' || board[index_x - j][index_y - j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
-                        {
-                            if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == 'P' || board[index_x - j][index_y + j] == 'R' || board[index_x - j][index_y + j] == 'N' || board[index_x - j][index_y + j] == 'B' || board[index_x - j][index_y + j] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
-                        {
-                            if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
-                        {
-                            if(board[index_x][j] == 'P' || board[index_x][j] == 'R' || board[index_x][j] == 'N' || board[index_x][j] == 'B' || board[index_x][j] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == 'P' || board[index_x + j][index_y - j] == 'R' || board[index_x + j][index_y - j] == 'N' || board[index_x + j][index_y - j] == 'B' || board[index_x + j][index_y - j] == 'Q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
-                        {
-                            if(board[j][index_y] == 'P' || board[j][index_y] == 'R' || board[j][index_y] == 'N' || board[j][index_y] == 'B' || board[j][index_y] == 'Q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == 'P' || board[index_x + j][index_y + j] == 'R' || board[index_x + j][index_y + j] == 'N' || board[index_x + j][index_y + j] == 'B' || board[index_x + j][index_y + j] == 'Q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
                     }
                 }
             }
@@ -1303,363 +1190,347 @@ int captureGen(char board[8][8], char all_moves[256][6], char op_cp[3], char op_
         }
         case -1:
         {
-            length = all_positions(board, piece_positions, -1);
-            for(int i = 0; i < length; i++)
+            for(index_x = 0; index_x < 8; index_x++)
             {
-                index_x = position_to_x(piece_positions[i]);
-                index_y = position_to_y(piece_positions[i]);
-                piece = board[index_x][index_y];
-                switch(piece)
+                for(index_y = 0; index_y < 8; index_y++)
                 {
-                    case 'P':
+                    piece = board[index_x][index_y];
+                    switch(piece)
                     {
-                        if((index_y - 1) >= 0 && CheckCapture_wpawn(board, index_x - 1, index_y - 1, op_cp, op_np)) 
-                        { 
-                            strncpy(string, piece_positions[i], 3);
-                            strncat(string, positions[index_x - 1][index_y - 1], 3);
-                            strncpy(all_moves[index], string, 6);
-                            index++;
-                        }
-                        //promotion
-                        if(index_x == 1 && board[0][index_y] == ' ')
+                        case 'P':
                         {
-                            strncpy(string, piece_positions[i], 3);
-                            strncat(string, positions[0][index_y], 3);
-                            strncpy(all_moves[index], string, 6);
-                            index++;
-                        } 
-                        if((index_y + 1) <= 7 && CheckCapture_wpawn(board, index_x - 1, index_y + 1, op_cp, op_np)) 
-                        { 
-                            strncpy(string, piece_positions[i], 3);
-                            strncat(string, positions[index_x - 1][index_y + 1], 3);
-                            strncpy(all_moves[index], string, 6);
-                            index++;
-                        }
-                        break;
-                    }
-                    case 'N':
-                    {
-                        for(int j = 0; j < 8; j++)
-                        {
-                            x = index_x + knight_moves_x[j];
-                            y = index_y + knight_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
-                            {
-                                continue;
-                            }
-                            if(board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
+                            if((index_y - 1) >= 0 && CheckCapture_wpawn(board, index_x - 1, index_y - 1, op_cp, op_np)) 
+                            { 
+                                strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                strncat(all_moves[index], positions[index_x - 1][index_y - 1], 3);
                                 index++;
                             }
-                        }
-                        break;
-                    }
-                    case 'K':
-                    {
-                        for(int j = 0; j < 8; j++)
-                        {
-                            x = index_x + king_moves_x[j];
-                            y = index_y + king_moves_y[j];
-                            if(x & 8 || y & 8) //skip when out of board
+                            //promotion
+                            if(index_x == 1 && board[0][index_y] == ' ')
                             {
-                                continue;
-                            }
-                            if(board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[x][y], 3);
-                                strncpy(all_moves[index], string, 6);
+                                strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                strncat(all_moves[index], positions[0][index_y], 3);
+                                index++;
+                            } 
+                            if((index_y + 1) <= 7 && CheckCapture_wpawn(board, index_x - 1, index_y + 1, op_cp, op_np)) 
+                            { 
+                                strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                strncat(all_moves[index], positions[index_x - 1][index_y + 1], 3);
                                 index++;
                             }
+                            break;
                         }
-                        break;
-                    }
-                    case 'R':
-                    {
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
+                        case 'N':
                         {
-                            if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
+                            for(int j = 0; j < 8; j++)
                             {
-                                break;
+                                x = index_x + knight_moves_x[j];
+                                y = index_y + knight_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
                             }
+                            break;
                         }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
+                        case 'K':
                         {
-                            if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
+                            for(int j = 0; j < 8; j++)
                             {
-                                break;
+                                x = index_x + king_moves_x[j];
+                                y = index_y + king_moves_y[j];
+                                if(x & 8 || y & 8) //skip when out of board
+                                {
+                                    continue;
+                                }
+                                if(board[x][y] == 'p' || board[x][y] == 'r' || board[x][y] == 'n' || board[x][y] == 'b' || board[x][y] == 'q')
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[x][y], 3);
+                                    index++;
+                                }
                             }
+                            break;
                         }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
+                        case 'R':
                         {
-                            if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
                             {
-                                break;
+                                if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
+                        case 'B':
                         {
-                            if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                break;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'B':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
+                        case 'Q':
                         {
-                            if(index_x - j < 0 || index_y - j < 0)
+                            //up left
+                            for(int j = 1; j <= 7; j++)
                             {
-                                break;
+                                if(index_x - j < 0 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
                             }
-                            if(board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
+                            //up
+                            for(int j = index_x-1; j >= 0; j--)
                             {
-                                break;
+                                if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q')  
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
                             }
+                            //up right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x - j < 0 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x - j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x - j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //left
+                            for(int j = index_y-1; j >= 0; j--)
+                            {
+                                if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //right
+                            for(int j = index_y+1; j <= 7; j++)
+                            {
+                                if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x][j], 3);
+                                    index++;
+                                }
+                                if(board[index_x][j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down left
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y - j < 0)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y - j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y - j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down
+                            for(int j = index_x+1; j <= 7; j++)
+                            {
+                                if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[j][index_y], 3);
+                                    index++;
+                                }
+                                if(board[j][index_y] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            //down right
+                            for(int j = 1; j <= 7; j++)
+                            {
+                                if(index_x + j > 7 || index_y + j > 7)
+                                {
+                                    break;
+                                }
+                                if(board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
+                                {  
+                                    strncpy(all_moves[index], positions[index_x][index_y], 3);
+                                    strncat(all_moves[index], positions[index_x + j][index_y + j], 3);
+                                    index++;
+                                }
+                                if(board[index_x + j][index_y + j] != ' ')
+                                {
+                                    break;
+                                }
+                            }
+                            break;
                         }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
+                        default:
                         {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
+                            continue;
+                            break;
                         }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case 'Q':
-                    {
-                        //up left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y - j] == 'p' || board[index_x - j][index_y - j] == 'r' || board[index_x - j][index_y - j] == 'n' || board[index_x - j][index_y - j] == 'b' || board[index_x - j][index_y - j] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up
-                        for(int j = index_x-1; j >= 0; j--)
-                        {
-                            if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q')  
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //up right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x - j < 0 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x - j][index_y + j] == 'p' || board[index_x - j][index_y + j] == 'r' || board[index_x - j][index_y + j] == 'n' || board[index_x - j][index_y + j] == 'b' || board[index_x - j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x - j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x - j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //left
-                        for(int j = index_y-1; j >= 0; j--)
-                        {
-                            if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //right
-                        for(int j = index_y+1; j <= 7; j++)
-                        {
-                            if(board[index_x][j] == 'p' || board[index_x][j] == 'r' || board[index_x][j] == 'n' || board[index_x][j] == 'b' || board[index_x][j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x][j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x][j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down left
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y - j < 0)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y - j] == 'p' || board[index_x + j][index_y - j] == 'r' || board[index_x + j][index_y - j] == 'n' || board[index_x + j][index_y - j] == 'b' || board[index_x + j][index_y - j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y - j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y - j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down
-                        for(int j = index_x+1; j <= 7; j++)
-                        {
-                            if(board[j][index_y] == 'p' || board[j][index_y] == 'r' || board[j][index_y] == 'n' || board[j][index_y] == 'b' || board[j][index_y] == 'q') 
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[j][index_y], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[j][index_y] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        //down right
-                        for(int j = 1; j <= 7; j++)
-                        {
-                            if(index_x + j > 7 || index_y + j > 7)
-                            {
-                                break;
-                            }
-                            if(board[index_x + j][index_y + j] == 'p' || board[index_x + j][index_y + j] == 'r' || board[index_x + j][index_y + j] == 'n' || board[index_x + j][index_y + j] == 'b' || board[index_x + j][index_y + j] == 'q')   
-                            {  
-                                strncpy(string, piece_positions[i], 3);
-                                strncat(string, positions[index_x + j][index_y + j], 3);
-                                strncpy(all_moves[index], string, 6);
-                                index++;
-                            }
-                            if(board[index_x + j][index_y + j] != ' ')
-                            {
-                                break;
-                            }
-                        }
-                        break;
                     }
                 }
             }
@@ -2092,11 +1963,13 @@ void cap_ordering(char board[8][8], char moves[100][6], int length, int color)
 //static exchange evaluation for quiescence search
 int SEE(char board[8][8], char location[3], int color)
 {
+    int attacker_index = get_smallest_attacker(board, location, color);
+    if(attacker_index == -1) //exit if no attackers found
+        return 0;
     char board_copy[8][8];
     int value = 0;
     int x;
     int y;
-    int attacker_index = get_smallest_attacker(board, location, color);
     char piece;
     int turn = 1;
     bool king_attack = false;

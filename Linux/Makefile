@@ -6,10 +6,10 @@ FLAGS = gcc -ansi -std=c99 -Wall -lpthread -O3
 CDEPS = ./bin/Main.o ./bin/Board.o ./bin/CheckMove.o ./bin/Attack.o ./bin/Search.o ./bin/MoveGeneration.o ./bin/Evaluate.o
 
 # Default target
-all: ./bin/Supernova_1.3.4_linux
+all: ./bin/Supernova_1.3.5_linux
 
 test: 
-	./bin/Supernova_1.3.4_linux
+	./bin/Supernova_1.3.5_linux
 
 ######################### Generate object files #######################
 # Target for object files
@@ -19,10 +19,10 @@ test:
 
 ######################### Generate the executable #####################
 # Target for Supernova
-./bin/Supernova_1.3.4_linux: $(CDEPS)
+./bin/Supernova_1.3.5_linux: $(CDEPS)
 	$(FLAGS) $^ -o $@
 
 ###############################  others  ##############################
 # Target for clean
 clean:
-	rm -rf ./bin/*.o $(TXT) ./bin/Supernova_1.3.4_linux
+	rm -rf ./bin/*.o $(TXT) ./bin/Supernova_1.3.5_linux
