@@ -50,5 +50,4 @@ unsigned long long int getHash(char board[8][8], int color, char op_cp[3], char 
 
 void clearTT();
 
-
 #endif

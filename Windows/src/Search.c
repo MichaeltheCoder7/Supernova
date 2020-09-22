@@ -512,7 +512,7 @@ static int pvs(char board[8][8], int depth, int ply, int color, int alpha, int b
             //at pv nodes, only exact cutoffs are accepted
             if(is_PV)
             {
-                if(entry -> flag == EXACT && entry -> evaluation > alpha && entry -> evaluation < beta)
+                if(entry -> flag == EXACT)
                     return entry -> evaluation;
             }
             //tt cutoff at none pv nodes

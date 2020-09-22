@@ -28,7 +28,7 @@ char board[8][8] = {
 			};
 
 
-//global variables for uci engine
+//global variables
 //specify color for engine
 //1: black
 //-1: white
@@ -46,6 +46,7 @@ void * engine(void * param)
 {
 	char opponentCP[3] = "", opponentNP[3] = "";
 
+	//get oppponent's last move for enpassant squares
 	if(strncmp("", opponent_move, 5))
 	{
 		sscanf(opponent_move, "%2s%2s", opponentCP, opponentNP);
@@ -61,7 +62,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.3.5\n");
+	printf("id name Supernova 1.4.0\n");
 	printf("id author Minkai Yang\n");
 	//options
 	printf("option name Hash type spin default 32 min 1 max 2048\n");
