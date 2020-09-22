@@ -1563,10 +1563,10 @@ static inline int partition(int arr[], int low, int high, char moves[256][6])
     int pivot = arr[low];    // pivot 
     int i = low;  // Index of smaller element 
   
-    for (int j = low + 1; j <= high; j++) 
+    for(int j = low + 1; j <= high; j++) 
     { 
         // If current element is smaller than the pivot 
-        if (arr[j] > pivot) 
+        if(arr[j] > pivot) 
         { 
             i++;    // increment index of smaller element 
             swap(&arr[i], &arr[j]); 
@@ -1584,7 +1584,7 @@ static inline int partition(int arr[], int low, int high, char moves[256][6])
 //high  --> Ending index 
 static inline void quickSort(int arr[], int low, int high, char moves[256][6]) 
 { 
-    if (low < high) 
+    if(low < high) 
     { 
         // pi is partitioning index, arr[p] is now 
         // at right place 
