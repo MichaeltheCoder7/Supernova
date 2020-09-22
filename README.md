@@ -1,6 +1,6 @@
 # Supernova
 
-Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface(Arena, Shredder...) to function properly.
+Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface(Arena, Shredder...) to function properly. Elo rating of Supernova 1.4.0 is estimated to be 2100 - 2200.
 
 Installation
 ------------
