@@ -1,5 +1,3 @@
-/* Main.c */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -11,8 +9,7 @@
 #include <assert.h>
 #include "Board.h"
 #include "Search.h"
-#include "Evaluate.h"
-
+#include "Transposition.h"
 
 char board[8][8] = {
 						
@@ -27,34 +24,47 @@ char board[8][8] = {
 
 			};
 
+int pieceList[12][10] = {
+
+                    { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, //wP
+                    { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wN
+                    { c1, f1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wB
+                    { a1, h1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wR
+                    { d1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wQ
+                    { e1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wK
+                    { a7, b7, c7, d7, e7, f7, g7, h7, -1, -1 }, //bP
+                    { b8, g8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bN
+                    { c8, f8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bB
+                    { a8, h8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bR
+                    { d8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bQ
+                    { e8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bK
+
+                    };
+
+int pieceCount[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
+
+int indexBoard[64] = {
+	  0,   0,   0,   0,   0,   1,   1,   1,
+	  0,   1,   2,   3,   4,   5,   6,   7,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	  0,   1,   2,   3,   4,   5,   6,   7,
+	  0,   0,   0,   0,   0,   1,   1,   1
+};
 
 //global variables
 //specify color for engine
 //1: black
 //-1: white
-int engine_color = 0;
-char opponent_move[5] = "";
-int kswflag = 1;
-int qswflag = 1;
-int ksbflag = 1;
-int qsbflag = 1;
-int halfmove_counter = 0;
+int engine_color;
 int outofbook;
-
+BOARD pos;
 
 void * engine(void * param)
 {
-	char opponentCP[3] = "", opponentNP[3] = "";
-
-	//get oppponent's last move for enpassant squares
-	if(strncmp("", opponent_move, 5))
-	{
-		sscanf(opponent_move, "%2s%2s", opponentCP, opponentNP);
-	}
-
-	//displayboard(board);
-
-	search(board, engine_color, opponentCP, opponentNP, kswflag, qswflag, ksbflag, qsbflag, halfmove_counter);
+	search(&pos, engine_color);
 
 	pthread_exit(NULL);
 	return 0;
@@ -62,7 +72,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 1.4.0\n");
+	printf("id name Supernova 2.0\n");
 	printf("id author Minkai Yang\n");
 	//options
 	printf("option name Hash type spin default 32 min 1 max 2048\n");
@@ -114,17 +124,30 @@ void handle_newgame()
 		EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
 		Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
 	}
-	strncpy(opponent_move, "", 5);
 	engine_color = 0;
 	init_zobrist();
 	memset(history, 0, sizeof(history)); //clear history heuristic table
-	kswflag = 1;
-	qswflag = 1;
-	ksbflag = 1;
-	qsbflag = 1; //reset the castling flags
 	outofbook = 0;
 	clearTT();
 	clearEvalTT();
+}
+
+void init_board(BOARD *pos)
+{
+    memcpy(pos->board, board, sizeof(pos->board));
+	//set the castling flags
+    pos->ksb = 1;
+    pos->qsb = 1;
+    pos->ksw = 1;
+    pos->qsw = 1;
+	//set en passant files
+    pos->ep_file = 0;
+    pos->halfmove_counter = 0;
+    pos->piece_num = 32;
+    memcpy(pos->piece_list, pieceList, sizeof(pos->piece_list));
+    memcpy(pos->piece_count, pieceCount, sizeof(pos->piece_count));
+    memcpy(pos->index_board, indexBoard, sizeof(pos->index_board));
+    pos->key = getHash(pos, -1);
 }
 
 void handle_position(char *input)
@@ -133,8 +156,6 @@ void handle_position(char *input)
 	char cp[3];
 	char np[3];
 	char own_piece = ' ';
-	char op_piece;
-	int move_color = 0;
 	char promotion_piece = ' ';
 	//parse the positon input
 	char *position;
@@ -142,9 +163,10 @@ void handle_position(char *input)
 	memset(history_log, -1, sizeof(history_log)); //clear history table
 	position = strtok(input, s);
 
-	halfmove_counter = 0;
-	resetboard(board); //reset the board
-	history_log[0] = getHash(board, -1, "", "", 1, 1, 1, 1);
+	//set the board struct to initial state
+	init_board(&pos);
+
+	history_log[0] = pos.key; //get the initial hash key
 	history_index = 0;
 
 	while(position != NULL) 
@@ -155,61 +177,16 @@ void handle_position(char *input)
 			strncpy(move, position, 4); //get opponent's move
 			move[4] = '\0';
 			promotion_piece = position[4];
-			if(strncmp("star", move, 4) != 0 && strncmp("move", move, 4) != 0) //set the board at the start of the game
+			//set the board at the start of the game
+			if(strncmp("star", move, 4) != 0 && strncmp("move", move, 4) != 0)
 			{
 				sscanf(move, "%2s%2s", cp, np);
-				own_piece = position_to_piece(board, cp);
-				op_piece = position_to_piece(board, np);
-				makeMove(cp, np, promotion_piece, own_piece, op_piece, board);
-
-				//Check if kings and rooks have moved for castling
-				if(board[7][4] != 'K')
-				{
-					kswflag = qswflag = 0;
-				}
-				if(board[0][4] != 'k')
-				{
-					ksbflag = qsbflag = 0;
-				}
-				if(board[7][0] != 'R')
-				{
-					qswflag = 0;
-				}
-				if(board[7][7] != 'R')
-				{
-					kswflag = 0;
-				}
-				if(board[0][0] != 'r')
-				{
-					qsbflag = 0;
-				}
-				if(board[0][7] != 'r')
-				{
-					ksbflag = 0;
-				}
-				
-				//fifty-move rule counter
-				if(op_piece == ' ' && own_piece != 'P' && own_piece != 'p')
-				{
-					halfmove_counter++;
-				}
-				else
-				{
-					halfmove_counter = 0;
-				}
-
-				if(islower(own_piece))
-				{
-					move_color = -1; //white
-				}
-				else
-				{
-					move_color = 1; //black
-				}
+				own_piece = position_to_piece(pos.board, cp);
+				makeMove(cp, np, promotion_piece, &pos);
 				
 				//store board into move history
 				history_index++;
-				history_log[history_index] = getHash(board, move_color, cp, np, kswflag, qswflag, ksbflag, qsbflag);
+				history_log[history_index] = pos.key;
 			}
 		}
 	}
@@ -222,12 +199,6 @@ void handle_position(char *input)
 	else
 	{
 		engine_color = 1; //black
-	}
-
-	if(strncmp("star", move, 4) != 0)
-	{
-		strncpy(opponent_move, move, 4);
-		opponent_move[4] = '\0';
 	}
 }   
 
@@ -371,13 +342,13 @@ void uci_loop()
 {
 	setbuf(stdin, NULL);
 	setbuf(stdout, NULL);
-	char string[3000];
+	char string[4000];
 	//infinite loop for uci gui
 	while(true)
 	{
 		memset(&string[0], 0, sizeof(string)); //flush the string
 		fflush(stdout); //flush the stdout
-		if(!fgets(string, 3000, stdin))
+		if(!fgets(string, 4000, stdin))
 		{
 			continue;
 		}
@@ -453,4 +424,3 @@ int main(void)
 	uci_loop();
 	return 0;
 }
-

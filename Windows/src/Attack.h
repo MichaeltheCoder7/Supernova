@@ -1,7 +1,9 @@
 #ifndef ATTACK_H
 #define ATTACK_H
 
-int ifCheck(char board[8][8], int color);
+#include "Board.h"
+
+int ifCheck(BOARD *pos, int color);
 
 int isThreatened(char board[8][8], char location[3], int color);
 
