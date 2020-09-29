@@ -19,12 +19,12 @@ unsigned long EVALHASHSIZE;
 struct DataItem 
 {
    unsigned long long key;   
-   char bestmove[6];
    int evaluation;
+   short statEval;
    char depth;
+   char bestmove[6];
    char flag;
    bool age;
-   short statEval;
 };
 
 struct Eval 
