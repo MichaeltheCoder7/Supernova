@@ -95,7 +95,7 @@ static inline bool check_repetition(unsigned long long key, int counter, int ply
 //draw contempt factor of -0.25 pawn
 static inline int contempt(BOARD *pos, int ply)
 {
-    if(pos->piece_num <= 16)
+    if(pos->piece_num <= 14)
     {
         return 0;
     }
@@ -223,6 +223,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     char promotion = ' ';
     int isTactical;
     BOARD pos_copy;
+    int extension;
+    bool check_extend = false;
 
     //check if time is up
     timeUp();
@@ -242,6 +244,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     if(isCheck)
     {
         depth++;
+        check_extend = true;
     }
 
     //check draw of repetition
@@ -298,7 +301,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
         }
         //get the pv move
-        strncpy(hash_move, entry->bestmove, 6);
+        if(entry->flag != UPPERBOUND)
+            strncpy(hash_move, entry->bestmove, 6);
         //get static eval from tt
         eval = entry->statEval;
     }
@@ -366,12 +370,16 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     //get children of node
     char moves[256][6];
     int scores[256];
-    length = moveGen(pos, moves, scores, hash_move, ply, color);
+    length = moveGen(pos, moves, scores, ply, color);
+    int move_exist = orderHashMove(moves, scores, length, hash_move);
 
     for(int x = 0; x < length; x++)
     {
         //find the move with highest score
-        movesort(moves, scores, length, x);
+        if(x != 0 || !move_exist)
+            movesort(moves, scores, length, x);
+        if(x == 0)
+            strncpy(bm, moves[0], 6);
         //make a copy of the board
         pos_copy = *pos;
         sscanf(moves[x], "%2s%2s%c", cp, np, &promotion);
@@ -394,10 +402,12 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
 
         moves_made++;
-      
+
+        extension = 0;
+
         //late move reduction
         reduction_depth = 0;
-        new_depth = depth - 1;
+        new_depth = depth - 1 + extension;
        
         if(!is_PV 
             && new_depth > 3
@@ -456,7 +466,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                         strncpy(killers[ply][1], killers[ply][0], 6);
                     }
                     //save killer move
-                    strncpy(killers[ply][0], moves[x], 6); 
+                    strncpy(killers[ply][0], moves[x], 6);
                     //save data in the history table for move ordering
                     int a = (color==1)?1:0;
                     int b = 8*position_to_x(cp) + position_to_y(cp);
@@ -525,7 +535,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 
     //transposition table look up
     entry = probeTT(pos->key);
-    if(entry != NULL)
+    if(entry != NULL && entry->flag != UPPERBOUND)
     { 
         strncpy(hash_move, entry->bestmove, 6);
     }
@@ -580,7 +590,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                         strncpy(killers[0][1], killers[0][0], 6);
                     }
                     //save killer move 
-                    strncpy(killers[0][0], moves[x], 6);  
+                    strncpy(killers[0][0], moves[x], 6);
                     //save data in the history table for move ordering
                     int a = (color==1)?1:0;
                     int b = 8*position_to_x(cp) + position_to_y(cp);
@@ -608,13 +618,12 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 }
 
 //obtain the principal variation from the hash table
-static inline void getPVline(BOARD *pos, char bestmove[6], int depth, int color)
+static inline void getPVline(BOARD *pos, char bestmove[6], int depth)
 {
     struct DataItem* item;
     char cp[3];
     char np[3];
     char move[6];
-    int turn = color;
     char promotion = ' ';
     BOARD pos_copy;
     //make a copy
@@ -632,7 +641,6 @@ static inline void getPVline(BOARD *pos, char bestmove[6], int depth, int color)
         sscanf(move, "%2s%2s%c", cp, np, &promotion);
         makeMove(cp, np, promotion, &pos_copy);
 
-        turn = -turn;
         item = probeTT(pos_copy.key);
         if(item != NULL)
         {
@@ -655,8 +663,18 @@ static inline int get_nps(int nodes, double secs)
     return (int)(nodes / secs);
 }
 
+static inline bool isRecapture(char move[6], char op_move[6])
+{
+    if(move[2] == op_move[2] && move[3] == op_move[3])
+    {
+        return true;
+    }
+    
+    return false;
+}
+
 //iterative deepening
-static void iterative_deepening(BOARD *pos, int depth, int color)
+static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6])
 {
     int current_depth;
     int alpha = -INFINITE;
@@ -667,6 +685,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color)
     bool more_time = true;
     bool valid_partial_search = false;
     bool failed_low = false;
+    bool eazy_move = true;
 
     for(current_depth = 1; current_depth <= depth; current_depth++)
     {   
@@ -695,7 +714,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color)
             alpha = -INFINITE;
             beta = INFINITE;
             //search longer if failed low
-            if(current_depth >= 7 && more_time && extra_time)
+            if(current_depth >= 6 && more_time && extra_time)
             {
                 search_time *= 1.8;
                 ponder_time *= 1.8;
@@ -721,7 +740,11 @@ static void iterative_deepening(BOARD *pos, int depth, int color)
 
         //get the pv line and best move
         memset(pv_table, 0, sizeof(pv_table));
-        getPVline(pos, searched_move, current_depth, color);
+        getPVline(pos, searched_move, current_depth);
+        if(current_depth != 1 && strncmp(BestMove, searched_move, 5))
+        {
+            eazy_move = false;
+        }
         strncpy(BestMove, searched_move, 6);
 
         //send info to gui
@@ -748,13 +771,18 @@ static void iterative_deepening(BOARD *pos, int depth, int color)
         {
             break;
         }
+        //easy move if the best move is a recapture and has not changed at depth 10
+        if(eazy_move && current_depth == 10)
+        {
+            if(isRecapture(BestMove, op_move))
+                break;
+        }
     }
-  
     //send move to gui
     printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);
 }
 
-void search(BOARD *pos, int piece_color) 
+void search(BOARD *pos, int piece_color, char op_move[6]) 
 {
     //prepare to search
     gettimeofday(&starting_time, NULL);
@@ -765,8 +793,8 @@ void search(BOARD *pos, int piece_color)
     nodes = 0;
 
     //search
-    iterative_deepening(pos, (search_depth == -1)? MAXDEPTH:search_depth, piece_color);
-    
+    iterative_deepening(pos, (search_depth == -1)? MAXDEPTH:search_depth, piece_color, op_move);
+
     //clear tables in analyze mode
     if(analyze)
     {

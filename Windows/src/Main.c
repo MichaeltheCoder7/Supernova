@@ -61,10 +61,11 @@ int indexBoard[64] = {
 int engine_color;
 int outofbook;
 BOARD pos;
+char op_move[6] = "";
 
 void * engine(void * param)
 {
-	search(&pos, engine_color);
+	search(&pos, engine_color, op_move);
 
 	pthread_exit(NULL);
 	return 0;
@@ -148,14 +149,17 @@ void init_board(BOARD *pos)
     memcpy(pos->piece_count, pieceCount, sizeof(pos->piece_count));
     memcpy(pos->index_board, indexBoard, sizeof(pos->index_board));
     pos->key = getHash(pos, -1);
+	pos->wcastled = false;
+	pos->bcastled = false;
 }
 
 void handle_position(char *input)
 {
-	char move[5];
+	char move[6];
 	char cp[3];
 	char np[3];
 	char own_piece = ' ';
+	char op_piece = ' ';
 	char promotion_piece = ' ';
 	//parse the positon input
 	char *position;
@@ -174,14 +178,14 @@ void handle_position(char *input)
 		position = strtok(NULL, s);
 		if(position != NULL)
 		{
-			strncpy(move, position, 4); //get opponent's move
-			move[4] = '\0';
-			promotion_piece = position[4];
+			strncpy(move, position, 6); //get opponent's move
+			move[5] = '\0';
 			//set the board at the start of the game
-			if(strncmp("star", move, 4) != 0 && strncmp("move", move, 4) != 0)
+			if(strncmp("start", move, 5) && strncmp("moves", move, 5))
 			{
-				sscanf(move, "%2s%2s", cp, np);
+				sscanf(move, "%2s%2s%c", cp, np, &promotion_piece);
 				own_piece = position_to_piece(pos.board, cp);
+				op_piece = position_to_piece(pos.board, np);
 				makeMove(cp, np, promotion_piece, &pos);
 				
 				//store board into move history
@@ -190,9 +194,16 @@ void handle_position(char *input)
 			}
 		}
 	}
-
+	//get opponent's move
+	if(strncmp("start", move, 5))
+	{
+		memset(op_move, 0, sizeof(op_move));
+		//only when it's a capture
+		if(op_piece != ' ')
+			strncpy(op_move, move, 6);
+	}
 	//check what color does the gui wants the engine to be
-	if(!strncmp("star", move, 4) || islower(own_piece))
+	if(!strncmp("start", move, 5) || islower(own_piece))
 	{
 		engine_color = -1; //white
 	}

@@ -13,8 +13,8 @@
 #define DOUBLEDPAWN     20
 #define ISOLATEDPAWN    20
 #define BACKWARDPAWN    8
-#define ROOKOPENFILE    10
-#define ROOKHALFFILE    5
+#define ROOKOPENFILE    16
+#define ROOKHALFFILE    8
 #define ROOKQUEENFILE   7
 #define BISHOPPAIR      30
 #define BADBISHOP       6
@@ -28,6 +28,25 @@ int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 };
 int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 }; 
 int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
 int rook_val[9] = { 15, 12,  9,  6,  3,  0, -3, -6, -9 };
+int wattack_count;
+int battack_count;
+int wattack_weight;
+int battack_weight;
+
+const int SafetyTable[100] = {
+
+                    0,   0,   1,   2,   3,   4,   6,   8,  10,  12,
+                    15,  18,  21,  24,  28,  32,  36,  40,  45,  50,
+                    55,  60,  66,  72,  78,  84,  91,  98, 105, 112,
+                    120, 128, 136, 144, 153, 162, 171, 180, 190, 200,
+                    210, 220, 231, 242, 253, 264, 276, 288, 300, 312,
+                    324, 336, 348, 360, 372, 384, 395, 400, 400, 400,
+                    400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
+                    400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
+                    400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
+                    400, 400, 400, 400, 400, 400, 400, 400, 400, 400
+                    
+                    };
 
 //piece-square tables:
 //add bonus points based on position
@@ -107,7 +126,7 @@ int white_king_midgame[8][8] = {
                     { -20, -30, -30, -40, -40, -30, -30, -20 },
                     { -10, -20, -20, -20, -20, -20, -20, -10 },
                     {  20,  20,   0,   0,   0,   0,  20,  20 },
-                    {  20,  40,  40,   0,   0,  10,  40,  20 },
+                    {  30,  40,  20,   0,   0,  20,  40,  30 },
 
                     };  
 
@@ -192,7 +211,7 @@ int black_queen[8][8] = {
 
 int black_king_midgame[8][8] = {
 
-                    {  20,  40,  40,   0,   0,  10,  40,  20 },
+                    {  30,  40,  20,   0,   0,  20,  40,  30 },
                     {  20,  20,   0,   0,   0,   0,  20,  20 },
                     { -10, -20, -20, -20, -20, -20, -20, -10 },     
                     { -20, -30, -30, -40, -40, -30, -30, -20 },
@@ -215,23 +234,85 @@ int black_king_endgame[8][8] = {
                     { -72, -48, -36, -24, -24, -36, -48, -72 },
                     
                     };
-                    
-static inline bool passed_white(BOARD *pos, char board[8][8], int x, int y)
+
+static inline int wpawn_controlled(char board[8][8], int x, int y)
 {
-    int index_x, index_y;
-    for(int i = 0; i < pos->piece_count[bP]; i++)
+    int squares = 0;
+    if(x < 6)
     {
-        index_x = pos->piece_list[bP][i] / 8;
-        index_y = pos->piece_list[bP][i] % 8;
-        if(index_y >= y - 1 && index_y <= y + 1 && index_x < x)
+        switch(y)
+        {
+            case 0:
+                if(board[x+1][y+1] == 'P')
+                {
+                    squares++;
+                }
+                break;
+            case 7:
+                if(board[x+1][y-1] == 'P')
+                {
+                    squares++;
+                }
+                break;
+            default:
+                if(board[x+1][y-1] == 'P')
+                {
+                    squares++;
+                }
+                if(board[x+1][y+1] == 'P')
+                {
+                    squares++;
+                }
+                break;
+        }
+    }
+    return squares;
+}
+
+static inline int bpawn_controlled(char board[8][8], int x, int y)
+{
+    int squares = 0;
+    if(x > 1)
+    {
+        switch(y)
+        {
+            case 0:
+                if(board[x-1][y+1] == 'p')
+                {
+                    squares++;;
+                }
+                break;
+            case 7:
+                if(board[x-1][y-1] == 'p')
+                {
+                    squares++;;
+                }
+                break;
+            default:
+                if(board[x-1][y-1] == 'p')
+                {
+                    squares++;
+                }
+                if(board[x-1][y+1] == 'p')
+                {
+                    squares++;
+                }
+                break;
+        }
+    }
+    return squares;
+}
+
+static inline bool candidate_passed_white(char board[8][8], int x, int y)
+{
+    for(int rank = 1; rank < x; rank++)
+    {
+        //don't count as passed when there's a doubled pawn
+        if(toupper(board[rank][y]) == 'P')
         {
             return false;
         }
-    }
-    //don't count as passed when there's a doubled pawn
-    for(int rank = 1; rank < x; rank++)
-    {
-        if(board[rank][y] == 'P')
+        if(bpawn_controlled(board, rank, y) > wpawn_controlled(board, rank, y))
         {
             return false;
         }
@@ -239,22 +320,16 @@ static inline bool passed_white(BOARD *pos, char board[8][8], int x, int y)
     return true;    
 }
 
-static inline bool passed_black(BOARD *pos, char board[8][8], int x, int y)
+static inline bool candidate_passed_black(char board[8][8], int x, int y)
 {
-    int index_x, index_y;
-    for(int i = 0; i < pos->piece_count[wP]; i++)
+    for(int rank = 6; rank > x; rank--)
     {
-        index_x = pos->piece_list[wP][i] / 8;
-        index_y = pos->piece_list[wP][i] % 8;
-        if(index_y >= y - 1 && index_y <= y + 1 && index_x > x)
+        //don't count as passed when there's a doubled pawn
+        if(toupper(board[rank][y]) == 'P')
         {
             return false;
         }
-    }
-    //don't count as passed when there's a doubled pawn
-    for(int rank = 6; rank > x; rank--)
-    {
-        if(board[rank][y] == 'p')
+        if(wpawn_controlled(board, rank, y) > bpawn_controlled(board, rank, y))
         {
             return false;
         }
@@ -749,6 +824,92 @@ static inline bool bTarrasch_brook(BOARD *pos, int x, int y)
     return false;
 }
 
+int wking_file(char board[8][8], int y)
+{
+    int result = 0;
+    switch(y)
+    {
+        case 0:
+            if(semiOpenFile_white(board, 0))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_white(board, 1))
+            {
+                result += 15;
+            }
+            break;
+        case 7:
+            if(semiOpenFile_white(board, 6))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_white(board, 7))
+            {
+                result += 15;
+            }
+            break;
+        default:
+            if(semiOpenFile_white(board, y-1))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_white(board, y))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_white(board, y+1))
+            {
+                result += 15;
+            }
+            break;
+    }
+    return result;
+}
+
+int bking_file(char board[8][8], int y)
+{
+    int result = 0;
+    switch(y)
+    {
+        case 0:
+            if(semiOpenFile_black(board, 0))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_black(board, 1))
+            {
+                result += 15;
+            }
+            break;
+        case 7:
+            if(semiOpenFile_black(board, 6))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_black(board, 7))
+            {
+                result += 15;
+            }
+            break;
+        default:
+            if(semiOpenFile_black(board, y-1))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_black(board, y))
+            {
+                result += 15;
+            }
+            if(semiOpenFile_black(board, y+1))
+            {
+                result += 15;
+            }
+            break;
+    }
+    return result;
+}
+
 static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 {
     if(x < 6)
@@ -809,13 +970,36 @@ static inline bool defended_by_bpawn(char board[8][8], int x, int y)
     return false;
 }
 
+//get king zone
+static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
+{
+    if(y >= wkingy-1 && y <= wkingy+1 && x >= wkingx-1 && x <= wkingx+1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
+{
+    if(y >= bkingy-1 && y <= bkingy+1 && x >= bkingx-1 && x <= bkingx+1)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 //mobility
 //exclude space protected by enemy pawns
 //exclude own queen for minor pieces
 //exclude own blocked pawns and own pawns on rank 2 and 3
 //exclude own king
-static inline int wknight_mobility(char board[8][8], int index_x, int index_y)
+//also consider king attack
+static inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x, y;
     int knight_moves_x[8] = {-2, -2, -1, -1,  1,  1,  2,  2};
@@ -833,13 +1017,23 @@ static inline int wknight_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
+    }
+    if(attack)
+    {
+        wattack_count++;
+        wattack_weight += 2 * attack;
     }
     
     return 4 * (move_count - 4);
 }
 
-static inline int bknight_mobility(char board[8][8], int index_x, int index_y)
+static inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x, y;
     int knight_moves_x[8] = {-2, -2, -1, -1,  1,  1,  2,  2};
@@ -857,12 +1051,23 @@ static inline int bknight_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
     }
+    if(attack)
+    {
+        battack_count++;
+        battack_weight += 2 * attack;
+    }
+
     return 4 * (move_count - 4);
 }
 
-static inline int wbishop_mobility(char board[8][8], int index_x, int index_y)
+static inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x;
     int y;
@@ -880,6 +1085,10 @@ static inline int wbishop_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -900,6 +1109,10 @@ static inline int wbishop_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -918,6 +1131,10 @@ static inline int wbishop_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -938,16 +1155,27 @@ static inline int wbishop_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
         }
     }
+    if(attack)
+    {
+        wattack_count++;
+        wattack_weight += 2 * attack;
+    }
+
     return 3 * (move_count - 7);
 }
 
-static inline int bbishop_mobility(char board[8][8], int index_x, int index_y)
+static inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x;
     int y;
@@ -964,6 +1192,10 @@ static inline int bbishop_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
+        }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -984,6 +1216,10 @@ static inline int bbishop_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1002,6 +1238,10 @@ static inline int bbishop_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
+        }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1022,16 +1262,27 @@ static inline int bbishop_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
         }
     }
+    if(attack)
+    {
+        battack_count++;
+        battack_weight += 2 * attack;
+    }
+
     return 3 * (move_count - 7);
 }
 
-static inline int wrook_mobility(char board[8][8], int index_x, int index_y)
+static inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x;
     int y;
@@ -1044,6 +1295,10 @@ static inline int wrook_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1060,6 +1315,10 @@ static inline int wrook_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1074,6 +1333,10 @@ static inline int wrook_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1090,16 +1353,27 @@ static inline int wrook_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
         }
     }
+    if(attack)
+    {
+        wattack_count++;
+        wattack_weight += 3 * attack;
+    }
+
     return 2 * (move_count - 7);
 }
 
-static inline int brook_mobility(char board[8][8], int index_x, int index_y)
+static inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x;
     int y;
@@ -1113,6 +1387,10 @@ static inline int brook_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1127,6 +1405,10 @@ static inline int brook_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
+        }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1143,6 +1425,10 @@ static inline int brook_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1158,16 +1444,27 @@ static inline int brook_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
         }
     }
+    if(attack)
+    {
+        battack_count++;
+        battack_weight += 3 * attack;
+    }
+
     return 2 * (move_count - 7);
 }
 
-static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
+static inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x;
     int y;
@@ -1185,6 +1482,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1199,6 +1500,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1219,6 +1524,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1233,6 +1542,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1249,6 +1562,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1268,6 +1585,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1282,6 +1603,10 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
+        }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1302,16 +1627,27 @@ static inline int wqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_bpawn(board, x, y))
                 move_count++;
         }
+        if(bking_zone(bkingx, bkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
         }
     }
+    if(attack)
+    {
+        wattack_count++;
+        wattack_weight += 4 * attack;
+    }
+
     return 1 * (move_count - 14);
 }
 
-static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
+static inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
+    int attack = 0;
     int move_count = 0;
     int x;
     int y;
@@ -1329,6 +1665,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1343,6 +1683,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
+        }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1363,6 +1707,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1378,6 +1726,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1392,6 +1744,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
+        }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1412,6 +1768,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
@@ -1426,6 +1786,10 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
         {  
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
+        }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
         }
         if(board[x][y] != ' ')
         {
@@ -1446,11 +1810,21 @@ static inline int bqueen_mobility(char board[8][8], int index_x, int index_y)
             if(!defended_by_wpawn(board, x, y))
                 move_count++;
         }
+        if(wking_zone(wkingx, wkingy, x, y))
+        {
+            attack++;
+        }
         if(board[x][y] != ' ')
         {
             break;
         }
     }
+    if(attack)
+    {
+        battack_count++;
+        battack_weight += 4 * attack;
+    }
+
     return 1 * (move_count - 14);
 }
 
@@ -1462,7 +1836,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     struct Eval* entry = probeEvalTT(pos->key);
     if(entry != NULL)
     { 
-        return entry -> evaluation;
+        return entry->evaluation;
     }
 
     int P_count = pos->piece_count[wP], R_count = pos->piece_count[wR], N_count = pos->piece_count[wN]; 
@@ -1487,6 +1861,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     int wknight_tropism, bknight_tropism, wbishop_tropism, bbishop_tropism;
     int pawn_white = 0, pawn_black = 0;
     int x, y;
+    wattack_count = battack_count = wattack_weight = battack_weight = 0;
     
     //white pawn
     for(int i = 0; i < P_count; i++)
@@ -1500,7 +1875,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             pawn_white -= DOUBLEDPAWN;     //doubled pawn penalty    
             pawn_white += white_pawn[x][y];
         }
-        else if(passed_white(pos, board, x, y))
+        else if(candidate_passed_white(board, x, y))
         {
             passed = true;
             //blockage penalty
@@ -1559,7 +1934,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             pawn_black -= DOUBLEDPAWN;     //doubled pawn penalty
             pawn_black += black_pawn[x][y];
         }
-        else if(passed_black(pos, board, x, y))
+        else if(candidate_passed_black(board, x, y))
         {
             passed = true;
             //blockage penalty
@@ -1627,7 +2002,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             other_bonus_white += ROOKQUEENFILE;
         }
         //mobility
-        wrook_mob = wrook_mobility(board, x, y);
+        wrook_mob = wrook_mobility(board, x, y, black_king_x, black_king_y);
         midgame_white += wrook_mob;
         endgame_white += wrook_mob*2;
         //king tropism
@@ -1647,7 +2022,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             other_bonus_white += OUTPOST; //outpost bonus
         }
         //mobility
-        other_bonus_white += wknight_mobility(board, x, y);
+        other_bonus_white += wknight_mobility(board, x, y, black_king_x, black_king_y);
         //king tropism
         wknight_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wknight_tropism*3; 
@@ -1703,7 +2078,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             other_bonus_white += OUTPOST; //outpost bonus
         }
         //mobility
-        other_bonus_white += wbishop_mobility(board, x, y);
+        other_bonus_white += wbishop_mobility(board, x, y, black_king_x, black_king_y);
         //king tropism
         wbishop_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wbishop_tropism*2; 
@@ -1785,7 +2160,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             }
         }
         //mobility
-        wqueen_mob = wqueen_mobility(board, x, y);
+        wqueen_mob = wqueen_mobility(board, x, y, black_king_x, black_king_y);
         midgame_white += wqueen_mob; 
         endgame_white += wqueen_mob*2;
         //king tropism
@@ -1814,7 +2189,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             other_bonus_black += ROOKQUEENFILE;
         }
         //mobility
-        brook_mob = brook_mobility(board, x, y);
+        brook_mob = brook_mobility(board, x, y, white_king_x, white_king_y);
         midgame_black += brook_mob;
         endgame_black += brook_mob*2; 
         //king tropism
@@ -1834,7 +2209,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             other_bonus_black += OUTPOST; //outpost bonus
         }
         //mobility
-        other_bonus_black += bknight_mobility(board, x, y);
+        other_bonus_black += bknight_mobility(board, x, y, white_king_x, white_king_y);
         //king tropism
         bknight_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bknight_tropism*3; 
@@ -1890,7 +2265,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             other_bonus_black += OUTPOST; //outpost bonus
         }
         //mobility
-        other_bonus_black += bbishop_mobility(board, x, y);
+        other_bonus_black += bbishop_mobility(board, x, y, white_king_x, white_king_y);
         //king tropism
         bbishop_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bbishop_tropism*2; 
@@ -1972,7 +2347,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             }
         }
         //mobility
-        bqueen_mob = bqueen_mobility(board, x, y);
+        bqueen_mob = bqueen_mobility(board, x, y, white_king_x, white_king_y);
         midgame_black += bqueen_mob;
         endgame_black += bqueen_mob*2;
         //king tropism
@@ -1981,12 +2356,12 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         endgame_white += bqueen_tropism*4; 
     } 
 
-    //tempo
-    if(pos->piece_num > 14)
-        tempo = color * TEMPO;
-
     //game phase based on non-pawn materials
     int phase = N_count + n_count + B_count + b_count + R_count * 2 + r_count * 2 + Q_count * 4 + q_count * 4;
+
+    //tempo
+    if(phase > 4)
+        tempo = color * TEMPO;
 
     if(phase > 0)
     {
@@ -2003,8 +2378,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_white += 15;
             else if(board[5][5] == 'P')
                 midgame_white += 10;
-            else if(semiOpenFile_white(board, 5)) //semi-open file penalty
-                midgame_white -= 15;
             
             if(board[5][5] == 'p')  //pawn storm penalty
                 midgame_white -= 10;
@@ -2015,8 +2388,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_white += 15;
             else if(board[5][6] == 'P')
                 midgame_white += 10;
-            else if(semiOpenFile_white(board, 6))
-                midgame_white -= 15;
 
             if(board[5][6] == 'p')
                 midgame_white -= 10;
@@ -2027,8 +2398,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_white += 15;
             else if(board[5][7] == 'P')
                 midgame_white += 10;
-            else if(semiOpenFile_white(board, 7))
-                midgame_white -= 15;
             
             if(board[5][7] == 'p')
                 midgame_white -= 10;
@@ -2044,8 +2413,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_white += 15;
             else if(board[5][0] == 'P')
                 midgame_white += 10; 
-            else if(semiOpenFile_white(board, 0))
-                midgame_white -= 15;
 
             if(board[5][0] == 'p')
                 midgame_white -= 10;
@@ -2056,8 +2423,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_white += 15;
             else if(board[5][1] == 'P')
                 midgame_white += 10;
-            else if(semiOpenFile_white(board, 1))
-                midgame_white -= 15;
 
             if(board[5][1] == 'p')
                 midgame_white -= 10;
@@ -2068,8 +2433,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_white += 15;
             else if(board[5][2] == 'P')
                 midgame_white += 10;
-            else if(semiOpenFile_white(board, 2))
-                midgame_white -= 15;
 
             if(board[5][2] == 'p')
                 midgame_white -= 10;
@@ -2086,8 +2449,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_black += 15;
             else if(board[2][5] == 'p')
                 midgame_black += 10;
-            else if(semiOpenFile_black(board, 5))
-                midgame_black -= 15;
 
             if(board[2][5] == 'P')
                 midgame_black -= 10;
@@ -2098,8 +2459,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_black += 15;
             else if(board[2][6] == 'p')
                 midgame_black += 10;
-            else if(semiOpenFile_black(board, 6))
-                midgame_black -= 15;
             
             if(board[2][6] == 'P')
                 midgame_black -= 10;
@@ -2110,8 +2469,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_black += 15;
             else if(board[2][7] == 'p')
                 midgame_black += 10;
-            else if(semiOpenFile_black(board, 7))
-                midgame_black -= 15;
             
             if(board[2][7] == 'P')
                 midgame_black -= 10;
@@ -2127,8 +2484,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_black += 15;
             else if(board[2][0] == 'p')
                 midgame_black += 10;
-            else if(semiOpenFile_black(board, 0))
-                midgame_black -= 15;
             
             if(board[2][0] == 'P')
                 midgame_black -= 10;
@@ -2139,8 +2494,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_black += 15;
             else if(board[2][1] == 'p')
                 midgame_black += 10;
-            else if(semiOpenFile_black(board, 1))
-                midgame_black -= 15;
             
             if(board[2][1] == 'P')
                 midgame_black -= 10;
@@ -2151,24 +2504,30 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 midgame_black += 15;
             else if(board[2][2] == 'p')
                 midgame_black += 10;
-            else if(semiOpenFile_black(board, 2))
-                midgame_black -= 15;
             
             if(board[2][2] == 'P')
                 midgame_black -= 10;
             else if(board[3][2] == 'P')
                 midgame_black -= 5; 
         }
+        //open files next to king penalty
+        midgame_white -= wking_file(board, white_king_y);
+        midgame_black -= bking_file(board, black_king_y);
+        //unable to castle penalty
+        if(!pos->wcastled && !pos->ksw && !pos->qsw)
+            midgame_white -= 15;
+        if(!pos->bcastled && !pos->ksb && !pos->qsb)
+            midgame_black -= 15;
     }
 
     //king position bonus endgame
     endgame_white += white_king_endgame[white_king_x][white_king_y];
     endgame_black += black_king_endgame[black_king_x][black_king_y];
     
-    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900  + position_bonus_black 
-            + ((b_count >= 2)? 1 : 0) * BISHOPPAIR + ((n_count >= 2)? 1 : 0) * KNIGHTPAIR + ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black + pawn_black
+    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900 + position_bonus_black 
+            + ((b_count >= 2)? 1 : 0) * BISHOPPAIR - ((n_count >= 2)? 1 : 0) * KNIGHTPAIR - ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black + pawn_black
             - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900 - position_bonus_white 
-            - ((B_count >= 2)? 1 : 0) * BISHOPPAIR - ((N_count >= 2)? 1 : 0) * KNIGHTPAIR - ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white - pawn_white + tempo;
+            - ((B_count >= 2)? 1 : 0) * BISHOPPAIR + ((N_count >= 2)? 1 : 0) * KNIGHTPAIR + ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white - pawn_white + tempo;
     
     //adjust phase score based on materials
     if(phase > 24)
@@ -2176,7 +2535,15 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     int mg_weight = phase;
     int eg_weight = 24 - mg_weight;
     points += (((midgame_black - midgame_white) * mg_weight + (endgame_black - endgame_white) * eg_weight) / 24);
-    
+
+    //king attack score
+    if(wattack_count < 2 || !Q_count)
+        wattack_weight = 0;
+    if(battack_count < 2 || !q_count)
+        battack_weight = 0;
+    points += SafetyTable[battack_weight];
+    points -= SafetyTable[wattack_weight];
+
     //material draw
     if(!P_count && !p_count)
     {

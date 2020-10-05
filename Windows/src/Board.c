@@ -414,6 +414,7 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos)
                 index = pos->index_board[h1];
                 pos->index_board[f1] = index;
                 pos->piece_list[wR][index] = f1;
+                pos->wcastled = true;
                 return 3;
             }
             else if(!strncmp(cur_p, "e1", 2) && !strncmp(new_p, "c1", 2))
@@ -426,6 +427,7 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos)
                 index = pos->index_board[a1];
                 pos->index_board[d1] = index;
                 pos->piece_list[wR][index] = d1;
+                pos->wcastled = true;
                 return 3;
             }
             break;
@@ -441,6 +443,7 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos)
                 index = pos->index_board[h8];
                 pos->index_board[f8] = index;
                 pos->piece_list[bR][index] = f8;
+                pos->bcastled = true;
                 return 3;
             }
             else if(!strncmp(cur_p, "e8", 2) && !strncmp(new_p, "c8", 2))
@@ -453,6 +456,7 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos)
                 index = pos->index_board[a8];
                 pos->index_board[d8] = index;
                 pos->piece_list[bR][index] = d8;
+                pos->bcastled = true;
                 return 3;
             }
             break;

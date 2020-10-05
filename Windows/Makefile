@@ -1,27 +1,27 @@
 # Makefile
 
 # Variables
-CFLAGS = gcc -ansi -std=c99 -Wall -c -O3
-FLAGS = gcc -ansi -std=c99 -Wall -O3
-CDEPS = ./bin/Main.o ./bin/Board.o ./bin/CheckMove.o ./bin/Attack.o ./bin/Search.o ./bin/MoveGeneration.o ./bin/Evaluate.o
+CFLAGS = gcc -ansi -std=c99 -c -O3
+FLAGS = gcc -ansi -std=c99 -O3
+CDEPS = ./bin/Main.o ./bin/Board.o ./bin/CheckMove.o ./bin/MoveGen.o ./bin/OrderMove.o ./bin/Attack.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
+
 # Default target
-all: ./bin/Supernova_1.4.0.exe
+all: ./bin/Supernova_2.0.exe
 
 test: 
-	./bin/Supernova_1.4.0.exe
+	./bin/Supernova_2.0.exe
 
 ######################### Generate object files #######################
 # Target for object files
 ./bin/%.o: ./src/%.c
 	$(CFLAGS) $^ -o $@
 
-
 ######################### Generate the executable #####################
 # Target for Supernova
-./bin/Supernova_1.4.0.exe: $(CDEPS)
+./bin/Supernova_2.0.exe: $(CDEPS)
 	$(FLAGS) $^ -o $@
 
 ###############################  others  ##############################
 # Target for clean
 clean:
-	rm -rf ./bin/*.o ./bin/Supernova_1.4.0.exe
+	rm -rf ./bin/*.o ./bin/Supernova_2.0.exe

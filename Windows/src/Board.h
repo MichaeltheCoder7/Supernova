@@ -1,6 +1,8 @@
 #ifndef BOARD__H
 #define BOARD__H
 
+#include <stdbool.h>
+
 enum{ wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 
 enum positions {
@@ -28,6 +30,8 @@ typedef struct{
     int piece_list[12][10];
     int piece_count[12];
     int index_board[64];
+    bool wcastled;
+    bool bcastled;
 
 } BOARD;
 

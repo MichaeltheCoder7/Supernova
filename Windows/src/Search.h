@@ -22,6 +22,6 @@ bool node_mode;
 int search_nodes;
 bool stop_search;
 
-void search(BOARD *pos, int piece_color); 
+void search(BOARD *pos, int piece_color, char op_move[6]);
 
 #endif

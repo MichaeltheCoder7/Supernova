@@ -18,7 +18,7 @@ unsigned long EVALHASHSIZE;
 
 struct DataItem 
 {
-   unsigned long long key;   
+   unsigned long long key;
    int evaluation;
    short statEval;
    char depth;
