@@ -1,20 +1,18 @@
 #ifndef CHECKMOVE_H
 #define CHECKMOVE_H
 
-int CheckMove_wpawn(char board[8][8], int index_y, int new_x, int new_y, char op_cp[3], char op_np[3]);
+#include "Board.h"
 
-int CheckMove_bpawn(char board[8][8], int index_y, int new_x, int new_y, char op_cp[3], char op_np[3]);
+int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y);
 
-int CheckMove_wkingside(char board[8][8], int ksw);
+int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y);
 
-int CheckMove_wqueenside(char board[8][8], int qsw);
+int CheckMove_wkingside(BOARD *pos);
 
-int CheckMove_bkingside(char board[8][8], int ksb);
+int CheckMove_wqueenside(BOARD *pos);
 
-int CheckMove_bqueenside(char board[8][8], int qsb);
+int CheckMove_bkingside(BOARD *pos);
 
-int CheckCapture_wpawn(char board[8][8], int new_x, int new_y, char op_cp[3], char op_np[3]);
-
-int CheckCapture_bpawn(char board[8][8], int new_x, int new_y, char op_cp[3], char op_np[3]);
+int CheckMove_bqueenside(BOARD *pos);
 
 #endif
