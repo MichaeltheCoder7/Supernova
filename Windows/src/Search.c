@@ -223,8 +223,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     char promotion = ' ';
     int isTactical;
     BOARD pos_copy;
-    int extension;
-    bool check_extend = false;
 
     //check if time is up
     timeUp();
@@ -244,7 +242,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     if(isCheck)
     {
         depth++;
-        check_extend = true;
     }
 
     //check draw of repetition
@@ -403,11 +400,9 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
         moves_made++;
 
-        extension = 0;
-
         //late move reduction
         reduction_depth = 0;
-        new_depth = depth - 1 + extension;
+        new_depth = depth - 1;
        
         if(!is_PV 
             && new_depth > 3

@@ -12,10 +12,10 @@
 #include "Transposition.h"
 
 char board[8][8] = {
-						
+
 			{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
 			{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},			
+			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -135,20 +135,20 @@ void handle_newgame()
 
 void init_board(BOARD *pos)
 {
-    memcpy(pos->board, board, sizeof(pos->board));
+	memcpy(pos->board, board, sizeof(pos->board));
 	//set the castling flags
-    pos->ksb = 1;
-    pos->qsb = 1;
-    pos->ksw = 1;
-    pos->qsw = 1;
+	pos->ksb = 1;
+	pos->qsb = 1;
+	pos->ksw = 1;
+	pos->qsw = 1;
 	//set en passant files
-    pos->ep_file = 0;
-    pos->halfmove_counter = 0;
-    pos->piece_num = 32;
-    memcpy(pos->piece_list, pieceList, sizeof(pos->piece_list));
-    memcpy(pos->piece_count, pieceCount, sizeof(pos->piece_count));
-    memcpy(pos->index_board, indexBoard, sizeof(pos->index_board));
-    pos->key = getHash(pos, -1);
+	pos->ep_file = 0;
+	pos->halfmove_counter = 0;
+	pos->piece_num = 32;
+	memcpy(pos->piece_list, pieceList, sizeof(pos->piece_list));
+	memcpy(pos->piece_count, pieceCount, sizeof(pos->piece_count));
+	memcpy(pos->index_board, indexBoard, sizeof(pos->index_board));
+	pos->key = getHash(pos, -1);
 	pos->wcastled = false;
 	pos->bcastled = false;
 }
