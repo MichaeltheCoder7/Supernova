@@ -210,15 +210,19 @@ void parse_fen(char *position, BOARD *pos)
 		{
 			case 'K':
 				pos->ksw = 1;
+				pos->wcastled = false;
 				break;
 			case 'Q':
 				pos->qsw = 1;
+				pos->wcastled = false;
 				break;
 			case 'k':
 				pos->ksb = 1;
+				pos->bcastled = false;
 				break;
 			case 'q':
 				pos->qsb = 1;
+				pos->bcastled = false;
 				break;
 			case '-':
 				break;

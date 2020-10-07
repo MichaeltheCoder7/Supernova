@@ -20,7 +20,7 @@ int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
     else
     {
         //en passant
-        if(pos->ep_file && pos->ep_file == new_y + 1)
+        if(pos->ep_file == new_y + 1)
         {
             if(new_x == 2)
             {
@@ -46,7 +46,7 @@ int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
     else
     {
         //en passant
-        if(pos->ep_file && pos->ep_file == new_y + 1)
+        if(pos->ep_file == new_y + 1)
         {
             if(new_x == 5)
             {
