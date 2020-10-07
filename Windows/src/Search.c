@@ -13,6 +13,7 @@
 #include "OrderMove.h"
 #include "Evaluate.h"
 #include "Transposition.h"
+#include "SEE.h"
 
 #define LOWERBOUND  0
 #define EXACT       1
@@ -159,7 +160,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         sscanf(moves[x], "%2s%2s", cp, np);
         moved_piece = position_to_piece(pos_copy.board, cp);
         piece = position_to_piece(pos_copy.board, np);
-        isprom = makeMove_qsearch(cp, np, moved_piece, piece, &pos_copy);
+        isprom = makeMove_qsearch(&pos_copy, cp, np, moved_piece, piece);
             
         //check if check is ignored
         if(ifCheck(&pos_copy, color))
@@ -375,19 +376,21 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         //find the move with highest score
         if(x != 0 || !move_exist)
             movesort(moves, scores, length, x);
-        if(x == 0)
-            strncpy(bm, moves[0], 6);
         //make a copy of the board
         pos_copy = *pos;
         sscanf(moves[x], "%2s%2s%c", cp, np, &promotion);
-        isTactical = makeMove(cp, np, promotion, &pos_copy);
+        isTactical = makeMove(&pos_copy, cp, np, promotion);
 
         //check if check is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
         }
-
+        
+        //hack to ensure pv line is intact
+        if(x == 0)
+            strncpy(bm, moves[0], 6);
+        
         //fultility prunning
         //try at least one move
         if(futility && !isTactical && moves_made)
@@ -547,7 +550,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         //make a copy of the board
         pos_copy = *pos;
         sscanf(moves[x], "%2s%2s%c", cp, np, &promotion);
-        isTactical = makeMove(cp, np, promotion, &pos_copy);
+        isTactical = makeMove(&pos_copy, cp, np, promotion);
         
         //check if check is ignored
         if(ifCheck(&pos_copy, color))
@@ -634,7 +637,7 @@ static inline void getPVline(BOARD *pos, char bestmove[6], int depth)
             return;
         }
         sscanf(move, "%2s%2s%c", cp, np, &promotion);
-        makeMove(cp, np, promotion, &pos_copy);
+        makeMove(&pos_copy, cp, np, promotion);
 
         item = probeTT(pos_copy.key);
         if(item != NULL)
@@ -745,20 +748,20 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         //send info to gui
         if(val > 19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv ", current_depth, (INFINITE - val - 1) / 2 + 1, nodes, (int)(secs*1000), get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1, nodes, (int)(secs*1000), get_nps(nodes, secs));
         }
         else if(val < -19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv ", current_depth, -(INFINITE + val - 1) / 2 - 1, nodes, (int)(secs*1000), get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1, nodes, (int)(secs*1000), get_nps(nodes, secs));
         }
         else
         {
-            printf("info depth %d score cp %d nodes %d time %d nps %d pv ", current_depth, val, nodes, (int)(secs*1000), get_nps(nodes, secs));
+            printf("info depth %d score cp %d nodes %d time %d nps %d pv", current_depth, val, nodes, (int)(secs*1000), get_nps(nodes, secs));
         }
 
         for(int i = 0; i < current_depth; i++)
         {
-            printf("%s ", pv_table[i]);
+            printf(" %s", pv_table[i]);
         }
         printf("\n");
 

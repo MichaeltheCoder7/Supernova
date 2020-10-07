@@ -11,49 +11,6 @@
 #include "Search.h"
 #include "Transposition.h"
 
-char board[8][8] = {
-
-			{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-			{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-			{'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
-
-			};
-
-int pieceList[12][10] = {
-
-                    { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, //wP
-                    { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wN
-                    { c1, f1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wB
-                    { a1, h1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wR
-                    { d1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wQ
-                    { e1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wK
-                    { a7, b7, c7, d7, e7, f7, g7, h7, -1, -1 }, //bP
-                    { b8, g8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bN
-                    { c8, f8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bB
-                    { a8, h8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bR
-                    { d8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bQ
-                    { e8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bK
-
-                    };
-
-int pieceCount[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
-
-int indexBoard[64] = {
-	  0,   0,   0,   0,   0,   1,   1,   1,
-	  0,   1,   2,   3,   4,   5,   6,   7,
-	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-	  0,   1,   2,   3,   4,   5,   6,   7,
-	  0,   0,   0,   0,   0,   1,   1,   1
-};
-
 //global variables
 //specify color for engine
 //1: black
@@ -62,6 +19,7 @@ int engine_color;
 int outofbook;
 BOARD pos;
 char op_move[6] = "";
+bool newgame;
 
 void * engine(void * param)
 {
@@ -73,7 +31,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-	printf("id name Supernova 2.0\n");
+	printf("id name Supernova 2.1\n");
 	printf("id author Minkai Yang\n");
 	//options
 	printf("option name Hash type spin default 32 min 1 max 2048\n");
@@ -112,9 +70,9 @@ void configure_hash(char *input)
 	clearEvalTT();
 }
 
+//some GUI might not support this command
 void handle_newgame()
 {
-	//start the game
 	if(tt == NULL) //default tt if not set
 	{
 		HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
@@ -125,91 +83,253 @@ void handle_newgame()
 		EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
 		Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
 	}
-	engine_color = 0;
+	//start the game
 	init_zobrist();
 	memset(history, 0, sizeof(history)); //clear history heuristic table
 	outofbook = 0;
 	clearTT();
 	clearEvalTT();
+	newgame = true;
 }
 
-void init_board(BOARD *pos)
+void parse_fen(char *position, BOARD *pos)
 {
-	memcpy(pos->board, board, sizeof(pos->board));
-	//set the castling flags
-	pos->ksb = 1;
-	pos->qsb = 1;
-	pos->ksw = 1;
-	pos->qsw = 1;
-	//set en passant files
+	char halfmove[20] = "";
+	char fullmove[20] = "";
+	int piece_count = 0;
+	resetboard(pos->board);
+	int x = 0, y = 0;
+	position+=4;
+	//loop through fen
+	while(*position && x < 8)
+	{
+		switch(*position)
+		{
+			case 'p':
+				pos->board[x][y] = 'p';
+				y++;
+				piece_count++;
+				break;
+			case 'n':
+				pos->board[x][y] = 'n';
+				y++;
+				piece_count++;
+				break;
+			case 'b':
+				pos->board[x][y] = 'b';
+				y++;
+				piece_count++;
+				break;
+			case 'r':
+				pos->board[x][y] = 'r';
+				y++;
+				piece_count++;
+				break;
+			case 'q':
+				pos->board[x][y] = 'q';
+				y++;
+				piece_count++;
+				break;
+			case 'k':
+				pos->board[x][y] = 'k';
+				y++;
+				piece_count++;
+				break;
+			case 'P':
+				pos->board[x][y] = 'P';
+				y++;
+				piece_count++;
+				break;
+			case 'N':
+				pos->board[x][y] = 'N';
+				y++;
+				piece_count++;
+				break;
+			case 'B':
+				pos->board[x][y] = 'B';
+				y++;
+				piece_count++;
+				break;
+			case 'R':
+				pos->board[x][y] = 'R';
+				y++;
+				piece_count++;
+				break;
+			case 'Q':
+				pos->board[x][y] = 'Q';
+				y++;
+				piece_count++;
+				break;
+			case 'K':
+				pos->board[x][y] = 'K';
+				y++;
+				piece_count++;
+				break;
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+				y += *position - '0';
+				break;
+			case '/':
+				x++;
+				y = 0;
+				break;
+			case ' ':
+				x++;
+				break;
+			default:
+				printf("Can't parse fen!\n");
+				exit(0);
+				break;
+		}
+		position++;
+	}
+	//save number of pieces
+	pos->piece_num = piece_count;
+	//side to move
+	if(*position == 'w')
+		engine_color = -1;
+	else if(*position == 'b')
+		engine_color = 1;
+	//castling rights
+	position+=2;
+	pos->ksb = 0;
+	pos->qsb = 0;
+	pos->ksw = 0;
+	pos->qsw = 0;
+	pos->wcastled = true;
+	pos->bcastled = true;
+	for(int i = 0; i < 4; i++)
+	{
+		switch(*position)
+		{
+			case 'K':
+				pos->ksw = 1;
+				break;
+			case 'Q':
+				pos->qsw = 1;
+				break;
+			case 'k':
+				pos->ksb = 1;
+				break;
+			case 'q':
+				pos->qsb = 1;
+				break;
+			case '-':
+				break;
+		}
+		position++;
+		if(*position == ' ')
+			break;
+	}
+	//en passant
+	position++;
 	pos->ep_file = 0;
-	pos->halfmove_counter = 0;
-	pos->piece_num = 32;
-	memcpy(pos->piece_list, pieceList, sizeof(pos->piece_list));
-	memcpy(pos->piece_count, pieceCount, sizeof(pos->piece_count));
-	memcpy(pos->index_board, indexBoard, sizeof(pos->index_board));
-	pos->key = getHash(pos, -1);
-	pos->wcastled = false;
-	pos->bcastled = false;
+	if(*position != '-')
+	{
+		pos->ep_file = *position - 96;
+		position++;
+	}
+	//half move counter
+	position+=2;
+	sscanf(position, "%s %s", halfmove, fullmove);
+	pos->halfmove_counter = atoi(halfmove);
+	history_index = pos->halfmove_counter;
+	set_piecelists(pos);
+	pos->key = getHash(pos, engine_color);
 }
 
 void handle_position(char *input)
 {
-	char move[6];
-	char cp[3];
-	char np[3];
+	char move[6] = "";
+	char cp[3] = "";
+	char np[3] = "";
 	char own_piece = ' ';
 	char op_piece = ' ';
 	char promotion_piece = ' ';
 	//parse the positon input
 	char *position;
+	char *move_str;
 	const char s[2] = " ";
+	memset(op_move, 0, sizeof(op_move));
 	memset(history_log, -1, sizeof(history_log)); //clear history table
-	position = strtok(input, s);
 
-	//set the board struct to initial state
-	init_board(&pos);
-
-	history_log[0] = pos.key; //get the initial hash key
-	history_index = 0;
-
-	while(position != NULL) 
+	//in case GUI doesn't send ucinewgame command
+	if(!newgame)
 	{
-		position = strtok(NULL, s);
-		if(position != NULL)
+		if(tt == NULL) //default tt if not set
 		{
-			strncpy(move, position, 6); //get opponent's move
-			move[5] = '\0';
-			//set the board at the start of the game
-			if(strncmp("start", move, 5) && strncmp("moves", move, 5))
+			HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
+			tt = malloc(HASHSIZE * sizeof(struct DataItem));
+			clearTT();
+		}
+		if(Evaltt == NULL) //default tt if not set
+		{
+			EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
+			Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
+			clearEvalTT();
+		}
+		init_zobrist();
+		memset(history, 0, sizeof(history)); //clear history heuristic table
+		outofbook = 0;
+		newgame = true;
+	}
+
+	//parse start position
+	if((position = strstr(input, "startpos")))
+	{
+		//set the board struct to initial state
+		init_board(&pos);
+		history_log[0] = pos.key; //get the initial hash key
+		history_index = 0;
+		engine_color = -1; //white
+	}
+	//parse fen notation
+	else if((position = strstr(input, "fen")))
+	{
+		parse_fen(position, &pos);
+	}
+
+	//parse moves
+	if((position = strstr(input, "moves")))
+	{
+		move_str = strtok(position, s);
+		while(move_str != NULL) 
+		{
+			move_str = strtok(NULL, s);
+			if(move_str != NULL)
 			{
+				memcpy(move, move_str, 6);
+				move[5] = '\0';
+				//set the board at the start of the game
 				sscanf(move, "%2s%2s%c", cp, np, &promotion_piece);
 				own_piece = position_to_piece(pos.board, cp);
 				op_piece = position_to_piece(pos.board, np);
-				makeMove(cp, np, promotion_piece, &pos);
+				makeMove(&pos, cp, np, promotion_piece);
 				
 				//store board into move history
 				history_index++;
 				history_log[history_index] = pos.key;
 			}
 		}
-	}
-	//get opponent's move
-	if(strncmp("start", move, 5))
-	{
-		memset(op_move, 0, sizeof(op_move));
+		//get opponent's move
 		//only when it's a capture
 		if(op_piece != ' ')
 			strncpy(op_move, move, 6);
-	}
-	//check what color does the gui wants the engine to be
-	if(!strncmp("start", move, 5) || islower(own_piece))
-	{
-		engine_color = -1; //white
-	}
-	else
-	{
-		engine_color = 1; //black
+		//check what color does the gui wants the engine to be
+		if(islower(own_piece))
+		{
+			engine_color = -1; //white
+		}
+		else
+		{
+			engine_color = 1; //black
+		}
 	}
 }   
 
@@ -432,6 +552,7 @@ int main(void)
 {
 	tt = NULL; //set hash table pointer to null
 	Evaltt = NULL;
+	newgame = false;
 	uci_loop();
 	return 0;
 }

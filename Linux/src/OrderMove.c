@@ -5,9 +5,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "OrderMove.h"
-#include "MoveGen.h"
+#include "SEE.h"
 #include "Search.h"
-#include "Attack.h"
 
 #define BESTMOVE    1000000
 #define HASHMOVE    900000
@@ -21,7 +20,7 @@
 #define LCAPTURE    800000
 
 //swap two ints
-static inline void swap(int* a, int* b) 
+static inline void swap(int* a, int* b)
 { 
     int t = *a; 
     *a = *b; 

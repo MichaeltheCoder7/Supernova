@@ -19,6 +19,50 @@ black pieces
 white pieces
 */
 
+//starting board
+char board[8][8] = {
+
+			{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
+			{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+			{'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+			{'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
+
+			};
+
+int piece_list[12][10] = {
+
+                    { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, //wP
+                    { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wN
+                    { c1, f1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wB
+                    { a1, h1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wR
+                    { d1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wQ
+                    { e1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wK
+                    { a7, b7, c7, d7, e7, f7, g7, h7, -1, -1 }, //bP
+                    { b8, g8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bN
+                    { c8, f8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bB
+                    { a8, h8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bR
+                    { d8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bQ
+                    { e8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bK
+
+                    };
+
+int piece_count[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
+
+int index_board[64] = {
+	  0,   0,   0,   0,   0,   1,   1,   1,
+	  0,   1,   2,   3,   4,   5,   6,   7,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	 -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+	  0,   1,   2,   3,   4,   5,   6,   7,
+	  0,   0,   0,   0,   0,   1,   1,   1
+};
+
 void displayboard(char board[8][8])
 {
     int j = 8; /*row numbers*/
@@ -104,7 +148,7 @@ char position_to_piece(char board[8][8], char current_position[3])
 //return 1 for capture
 //return 2 for promotion
 //return 3 for castling
-int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos)
+int makeMove(BOARD *pos, char cur_p[3], char new_p[3], char promotion)
 {  
     int cur_x = position_to_x(cur_p);
     int cur_y = position_to_y(cur_p);
@@ -467,7 +511,7 @@ int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos)
 
 //return 1 if promotion
 //for quiescence search
-int makeMove_qsearch(char cur_p[3], char new_p[3], char piece, char op_piece, BOARD *pos)
+int makeMove_qsearch(BOARD *pos, char cur_p[3], char new_p[3], char piece, char op_piece)
 {
     int cur_x = position_to_x(cur_p);
     int cur_y = position_to_y(cur_p);
@@ -692,12 +736,8 @@ void undo_nullmove(BOARD *pos, int ep_file)
 }
 
 //for static exchange evaluation
-void makeMove_SEE(char cur_p[3], char new_p[3], char board[8][8])
+void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
 {
-    int cur_x = position_to_x(cur_p);
-    int cur_y = position_to_y(cur_p);
-    int new_x = position_to_x(new_p);
-    int new_y = position_to_y(new_p);
     char piece = board[cur_x][cur_y];
 
 	board[new_x][new_y] = board[cur_x][cur_y];
@@ -705,18 +745,133 @@ void makeMove_SEE(char cur_p[3], char new_p[3], char board[8][8])
 
     if(piece == 'P' || piece == 'p') 
     {
-        switch(new_p[1])
+        switch(new_x)
         {
-            case '8':
+            case '0':
                 //white Pawn Promotion 
                 board[0][new_y] = 'Q';
                 break;
-            case '1':
+            case '7':
                 //black Pawn Promotion 
                 board[7][new_y] = 'q';
                 break;
             default:
                 break;
+        }
+    }
+}
+
+void init_board(BOARD *pos)
+{
+	memcpy(pos->board, board, sizeof(pos->board));
+	//set the castling flags
+	pos->ksb = 1;
+	pos->qsb = 1;
+	pos->ksw = 1;
+	pos->qsw = 1;
+	//set en passant files
+	pos->ep_file = 0;
+	pos->halfmove_counter = 0;
+	pos->piece_num = 32;
+	memcpy(pos->piece_list, piece_list, sizeof(pos->piece_list));
+	memcpy(pos->piece_count, piece_count, sizeof(pos->piece_count));
+	memcpy(pos->index_board, index_board, sizeof(pos->index_board));
+	pos->key = getHash(pos, -1);
+	pos->wcastled = false;
+	pos->bcastled = false;
+}
+
+void resetboard(char board[8][8])
+{
+    char board_reset[8][8] = {
+						
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},			
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+
+						};
+    
+    memcpy(board, board_reset, sizeof(board_reset));
+}
+
+void set_piecelists(BOARD *pos)
+{
+    int i;
+    pos->piece_count[wP] = pos->piece_count[wN] = pos->piece_count[wB] = 0;
+    pos->piece_count[wR] = pos->piece_count[wQ] = 0;
+    pos->piece_count[bP] = pos->piece_count[bN] = pos->piece_count[bB] = 0;
+    pos->piece_count[bR] = pos->piece_count[bQ] = 0;
+    for(int x = 0; x < 8; x++)
+    {
+        for(int y = 0; y < 8; y++)
+        {
+            i = 8*x+y;
+            switch(pos->board[x][y])
+            {
+                case 'P':
+                    pos->piece_list[wP][pos->piece_count[wP]] = i;
+                    pos->index_board[i] = pos->piece_count[wP];
+                    pos->piece_count[wP]++;
+                    break;
+                case 'N':
+                    pos->piece_list[wN][pos->piece_count[wN]] = i;
+                    pos->index_board[i] = pos->piece_count[wN];
+                    pos->piece_count[wN]++;
+                    break;
+                case 'B':
+                    pos->piece_list[wB][pos->piece_count[wB]] = i;
+                    pos->index_board[i] = pos->piece_count[wB];
+                    pos->piece_count[wB]++;
+                    break;
+                case 'R':
+                    pos->piece_list[wR][pos->piece_count[wR]] = i;
+                    pos->index_board[i] = pos->piece_count[wR];
+                    pos->piece_count[wR]++;
+                    break;
+                case 'Q':
+                    pos->piece_list[wQ][pos->piece_count[wQ]] = i;
+                    pos->index_board[i] = pos->piece_count[wQ];
+                    pos->piece_count[wQ]++;
+                    break;
+                case 'K':
+                    pos->piece_list[wK][0] = i;
+                    pos->index_board[i] = 0;
+                    break;
+                case 'p':
+                    pos->piece_list[bP][pos->piece_count[bP]] = i;
+                    pos->index_board[i] = pos->piece_count[bP];
+                    pos->piece_count[bP]++;
+                    break;
+                case 'n':
+                    pos->piece_list[bN][pos->piece_count[bN]] = i;
+                    pos->index_board[i] = pos->piece_count[bN];
+                    pos->piece_count[bN]++;
+                    break;
+                case 'b':
+                    pos->piece_list[bB][pos->piece_count[bB]] = i;
+                    pos->index_board[i] = pos->piece_count[bB];
+                    pos->piece_count[bB]++;
+                    break;
+                case 'r':
+                    pos->piece_list[bR][pos->piece_count[bR]] = i;
+                    pos->index_board[i] = pos->piece_count[bR];
+                    pos->piece_count[bR]++;
+                    break;
+                case 'q':
+                    pos->piece_list[bQ][pos->piece_count[bQ]] = i;
+                    pos->index_board[i] = pos->piece_count[bQ];
+                    pos->piece_count[bQ]++;
+                    break;
+                case 'k':
+                    pos->piece_list[bK][0] = i;
+                    pos->index_board[i] = 0;
+                    break;
+            }
         }
     }
 }

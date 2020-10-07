@@ -409,15 +409,13 @@ int ifCheck(BOARD *pos, int color)
 }
 
 //check if a piece in a given position is threatened
+//x and y are the indexes of the position
 //return 1 if yes
 //return 0 if no
 //color = 1: check if a position is threatened by white pieces
 //color = -1: check if a position is threatened by black pieces
-int isThreatened(char board[8][8], char location[3], int color)
+int isThreatened(char board[8][8], int x, int y, int color)
 {
-    int x = position_to_x(location);
-    int y = position_to_y(location);
-
     switch(color)
     {
         case 1:
@@ -808,10 +806,8 @@ int isThreatened(char board[8][8], char location[3], int color)
 //-1: black attackers
 //return index 0 - 63 of the smallest attacker on the board
 //return -1 if not attacked
-int get_smallest_attacker(char board[8][8], char location[3], int color)
+int get_smallest_attacker(char board[8][8], int x, int y, int color)
 {
-    int x = position_to_x(location);
-    int y = position_to_y(location);
     int attackers_index[2] = {-2, -2}; //for queen and king
 
     switch(color)

@@ -69,12 +69,13 @@ int CheckMove_wkingside(BOARD *pos)
         if(pos->board[7][5] == ' ' && pos->board[7][6] == ' ')
         {
             //check if king is in check and the two other spots are threatened
-            if(!ifCheck(pos, -1) && !isThreatened(pos->board, "f1", -1) && !isThreatened(pos->board, "g1", -1))
+            if(!ifCheck(pos, -1) && !isThreatened(pos->board, 7, 5, -1) && !isThreatened(pos->board, 7, 6, -1))
             {
                 return 1;
             }
         }   
-    }   
+    }
+
     return 0; 
 }
 
@@ -89,7 +90,7 @@ int CheckMove_wqueenside(BOARD *pos)
         if(pos->board[7][1] == ' ' && pos->board[7][2] == ' ' && pos->board[7][3] == ' ')
         {
             //check if king is in check and the two other spots are threatened
-            if(!ifCheck(pos, -1) && !isThreatened(pos->board, "c1", -1) && !isThreatened(pos->board, "d1", -1))
+            if(!ifCheck(pos, -1) && !isThreatened(pos->board, 7, 2, -1) && !isThreatened(pos->board, 7, 3, -1))
             {
                 return 1;      
             }
@@ -110,7 +111,7 @@ int CheckMove_bkingside(BOARD *pos)
         if(pos->board[0][5] == ' ' && pos->board[0][6] == ' ')
         {
             //check if king is in check and the two other spots are threatened
-            if(!ifCheck(pos, 1) && !isThreatened(pos->board, "f8", 1) && !isThreatened(pos->board, "g8", 1))
+            if(!ifCheck(pos, 1) && !isThreatened(pos->board, 0, 5, 1) && !isThreatened(pos->board, 0, 6, 1))
             {
                 return 1;
             }
@@ -131,7 +132,7 @@ int CheckMove_bqueenside(BOARD *pos)
         if(pos->board[0][1] == ' ' && pos->board[0][2] == ' ' && pos->board[0][3] == ' ')
         {
             //check if king is in check and the two other spots are threatened
-            if(!ifCheck(pos, 1) && !isThreatened(pos->board, "c8", 1) && !isThreatened(pos->board, "d8", 1))
+            if(!ifCheck(pos, 1) && !isThreatened(pos->board, 0, 2, 1) && !isThreatened(pos->board, 0, 3, 1))
             {
                 return 1;
             }

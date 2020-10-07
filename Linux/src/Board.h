@@ -43,14 +43,20 @@ int position_to_y(char position[3]);
 
 char position_to_piece(char board[8][8], char current_position[3]);
 
-int makeMove(char cur_p[3], char new_p[3], char promotion, BOARD *pos);
+int makeMove(BOARD *pos, char cur_p[3], char new_p[3], char promotion);
 
-int makeMove_qsearch(char cur_p[3], char new_p[3], char piece, char op_piece, BOARD *pos);
+int makeMove_qsearch(BOARD *pos, char cur_p[3], char new_p[3], char piece, char op_piece);
 
 int make_nullmove(BOARD *pos);
 
 void undo_nullmove(BOARD *pos, int ep_file);
 
-void makeMove_SEE(char cur_p[3], char new_p[3], char board[8][8]);
+void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y);
+
+void init_board(BOARD *pos);
+
+void resetboard(char board[8][8]);
+
+void set_piecelists(BOARD *pos);
 
 #endif
