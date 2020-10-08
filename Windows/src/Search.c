@@ -9,6 +9,7 @@
 #include "Attack.h"
 #include "Search.h"
 #include "Board.h"
+#include "Move.h"
 #include "MoveGen.h"
 #include "OrderMove.h"
 #include "Evaluate.h"
@@ -25,7 +26,21 @@
 int nodes;
 struct timeval starting_time;
 char BestMove[6];
-char searched_move[6];
+MOVE searched_move;
+
+//clear killer moves table
+static inline void clearKiller()
+{
+    for(int x = 0; x < MAXDEPTH; x++)
+    {
+        killers[x][0].from = NOMOVE;
+        killers[x][0].to = NOMOVE;
+        killers[x][0].promotion = ' ';
+        killers[x][1].from = NOMOVE;
+        killers[x][1].to = NOMOVE;
+        killers[x][1].promotion = ' ';
+    }
+}
 
 //age history heuristics array
 static inline void ageHistory()
@@ -112,11 +127,10 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
 {
     int value;
     int length;
-    char cp[3];
-    char np[3];
     int isprom;
     char moved_piece, piece;
     int cap_piece_value;
+    int new_x, new_y;
     BOARD pos_copy;
 
     //check if time is up
@@ -134,7 +148,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     }
     
     //delta prunning
-    if(standing_pat + 900 < alpha) 
+    if(standing_pat + 900 < alpha)
     {
         return alpha;
     }
@@ -146,7 +160,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     
     value = -INFINITE;
     //get children of node
-    char moves[100][6];
+    MOVE moves[256];
     int scores[100];
     length = captureGen(pos, moves, scores, color);
 
@@ -157,17 +171,18 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         
         //make a copy of the board
         pos_copy = *pos;
-        sscanf(moves[x], "%2s%2s", cp, np);
-        moved_piece = position_to_piece(pos_copy.board, cp);
-        piece = position_to_piece(pos_copy.board, np);
-        isprom = makeMove_qsearch(&pos_copy, cp, np, moved_piece, piece);
+        isprom = makeMove_qsearch(&pos_copy, &moves[x]);
             
         //check if check is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
         }
-
+        
+        //get piece value
+        new_x = moves[x].to / 8;
+        new_y = moves[x].to % 8;
+        piece = pos->board[new_x][new_y];
         cap_piece_value = piece_value(piece);
 
         //delta prunning
@@ -177,11 +192,13 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
                 continue;
         }
 
+        moved_piece = pos->board[moves[x].from / 8][moves[x].from % 8];
+
         //SEE prunning
         //only check when higher takes lower and not promotion
         if(!isprom && piece_value(moved_piece) > cap_piece_value)
         {
-            if(SEE(pos_copy.board, np, cap_piece_value, color) < 0)
+            if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
             {
                 continue;
             }
@@ -209,21 +226,20 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 {   
     int value = -INFINITE;
     int length;
-    char cp[3];
-    char np[3];
     struct DataItem* entry;
     int entryFlag = UPPERBOUND;
-    char bm[6] = "";
-    char hash_move[6] = "";
     bool alpha_raised = false;
     int mate_value = INFINITE - ply;
     bool futility = false;
     int moves_made = 0;
     int reduction_depth = 0;
     int new_depth;
-    char promotion = ' ';
     int isTactical;
     BOARD pos_copy;
+    MOVE bm;
+    MOVE hash_move;
+    bm.from = NOMOVE;
+    hash_move.from = NOMOVE;
 
     //check if time is up
     timeUp();
@@ -300,7 +316,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
         //get the pv move
         if(entry->flag != UPPERBOUND)
-            strncpy(hash_move, entry->bestmove, 6);
+            hash_move = entry->bestmove;
         //get static eval from tt
         eval = entry->statEval;
     }
@@ -366,10 +382,10 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     //get children of node
-    char moves[256][6];
+    MOVE moves[256];
     int scores[256];
     length = moveGen(pos, moves, scores, ply, color);
-    int move_exist = orderHashMove(moves, scores, length, hash_move);
+    int move_exist = orderHashMove(moves, scores, length, &hash_move);
 
     for(int x = 0; x < length; x++)
     {
@@ -378,8 +394,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             movesort(moves, scores, length, x);
         //make a copy of the board
         pos_copy = *pos;
-        sscanf(moves[x], "%2s%2s%c", cp, np, &promotion);
-        isTactical = makeMove(&pos_copy, cp, np, promotion);
+        isTactical = makeMove(&pos_copy, &moves[x]);
 
         //check if check is ignored
         if(ifCheck(&pos_copy, color))
@@ -389,7 +404,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         
         //hack to ensure pv line is intact
         if(x == 0)
-            strncpy(bm, moves[0], 6);
+            bm = moves[0];
         
         //fultility prunning
         //try at least one move
@@ -412,8 +427,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             && moves_made > 3
             && !isCheck 
             && !isTactical 
-            && strncmp(killers[ply][0], moves[x], 5)
-            && strncmp(killers[ply][1], moves[x], 5))
+            && !compareMove(&killers[ply][0], &moves[x])
+            && !compareMove(&killers[ply][1], &moves[x]))
         {
             if(!ifCheck(&pos_copy, -color))
             {
@@ -453,22 +468,22 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
         if(value > alpha)
         {
-            strncpy(bm, moves[x], 6);
+            bm = moves[x];
             if(value >= beta)
             {   
                 if(!isTactical)
                 {
                     //make sure killer moves are different
-                    if(strncmp(killers[ply][0], moves[x], 5))
+                    if(!compareMove(&killers[ply][0], &moves[x]))
                     {
-                        strncpy(killers[ply][1], killers[ply][0], 6);
+                        killers[ply][1] = killers[ply][0];
                     }
                     //save killer move
-                    strncpy(killers[ply][0], moves[x], 6);
+                    killers[ply][0] = moves[x];
                     //save data in the history table for move ordering
                     int a = (color==1)?1:0;
-                    int b = 8*position_to_x(cp) + position_to_y(cp);
-                    int c = 8*position_to_x(np) + position_to_y(np);
+                    int b = moves[x].from;
+                    int c = moves[x].to;
                     history[a][b][c] += depth*depth;
                     //prevent overflow 
                     if(history[a][b][c] > 800000)
@@ -488,7 +503,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
     if(!moves_made)
     {
-        strncpy(bm, "", 6);
+        bm.from = NOMOVE;
         if(isCheck)
         {
             alpha = -INFINITE + ply; //checkmate
@@ -505,8 +520,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     //transposition table store:    
-    storeTT(pos->key, alpha, eval, depth, bm, entryFlag);
-    return alpha; 
+    storeTT(pos->key, alpha, eval, depth, &bm, entryFlag);
+    return alpha;
 }
 
 //principal variation search at root
@@ -514,15 +529,14 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 {   
     int value = -INFINITE;
     int length;
-    char cp[3];
-    char np[3];
     struct DataItem* entry;
     int entryFlag = UPPERBOUND;
-    char bm[6] = "";
-    char hash_move[6] = "";
-    char promotion = ' ';
     int isTactical;
     BOARD pos_copy;
+    MOVE bm;
+    MOVE hash_move;
+    bm.from = NOMOVE;
+    hash_move.from = NOMOVE;
 
     int isCheck = ifCheck(pos, color);
     //check extension
@@ -535,13 +549,18 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     entry = probeTT(pos->key);
     if(entry != NULL && entry->flag != UPPERBOUND)
     { 
-        strncpy(hash_move, entry->bestmove, 6);
+        hash_move = entry->bestmove;
     }
 
     //get children of node
-    char moves[256][6];
+    MOVE moves[256];
     int scores[256];
-    length = moveGen_root(pos, moves, scores, BestMove, hash_move, color);
+    
+    MOVE pv_move;
+    clear_move(&pv_move);
+    if(strncmp(BestMove, "", 5))
+        pv_move = string_to_move(BestMove);
+    length = moveGen_root(pos, moves, scores, &pv_move, &hash_move, color);
 
     for(int x = 0; x < length; x++)
     {
@@ -549,8 +568,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         movesort(moves, scores, length, x);
         //make a copy of the board
         pos_copy = *pos;
-        sscanf(moves[x], "%2s%2s%c", cp, np, &promotion);
-        isTactical = makeMove(&pos_copy, cp, np, promotion);
+        isTactical = makeMove(&pos_copy, &moves[x]);
         
         //check if check is ignored
         if(ifCheck(&pos_copy, color))
@@ -577,22 +595,22 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         
         if(value > alpha)
         {
-            strncpy(bm, moves[x], 6);
+            bm = moves[x];
             if(value >= beta)
             {   
                 if(!isTactical)
                 {
                     //make sure killer moves are different
-                    if(strncmp(killers[0][0], moves[x], 5))
+                    if(!compareMove(&killers[0][0], &moves[x]))
                     {
-                        strncpy(killers[0][1], killers[0][0], 6);
+                        killers[0][1] = killers[0][0];
                     }
-                    //save killer move 
-                    strncpy(killers[0][0], moves[x], 6);
+                    //save killer move
+                    killers[0][0] = moves[x];
                     //save data in the history table for move ordering
                     int a = (color==1)?1:0;
-                    int b = 8*position_to_x(cp) + position_to_y(cp);
-                    int c = 8*position_to_x(np) + position_to_y(np);
+                    int b = moves[x].from;
+                    int c = moves[x].to;
                     history[a][b][c] += depth*depth;
                     //prevent overflow 
                     if(history[a][b][c] > 800000)
@@ -608,42 +626,42 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
             entryFlag = EXACT;
         }
     }
-
-    //transposition table store:    
-    strncpy(searched_move, bm, 6); //save the best move
-    storeTT(pos->key, alpha, VALUENONE, depth, bm, entryFlag);
+  
+    searched_move = bm; //save the best move
+    //transposition table store:  
+    storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
     return alpha;
 }
 
 //obtain the principal variation from the hash table
-static inline void getPVline(BOARD *pos, char bestmove[6], int depth)
+static inline void getPVline(BOARD *pos, MOVE *bestmove, int depth)
 {
     struct DataItem* item;
-    char cp[3];
-    char np[3];
-    char move[6];
-    char promotion = ' ';
+    MOVE smove;
     BOARD pos_copy;
+    char move[6];
     //make a copy
-    pos_copy = *pos;  
-
-    strncpy(move, bestmove, 6);
-    strncpy(pv_table[0], bestmove, 6);
+    pos_copy = *pos; 
+    smove = *bestmove;
+    move_to_string(bestmove, move);
+    strncpy(pv_table[0], move, 6);
+    pv_table[0][5] = '\0';
     
     for(int x = 1; x < depth; x++)
     {   
-        if(!strncmp("", move, 5))
+        if(smove.from == NOMOVE)
         {
             return;
         }
-        sscanf(move, "%2s%2s%c", cp, np, &promotion);
-        makeMove(&pos_copy, cp, np, promotion);
+        makeMove(&pos_copy, &smove);
 
         item = probeTT(pos_copy.key);
         if(item != NULL)
         {
-            strncpy(pv_table[x], item->bestmove, 6);
-            strncpy(move, item->bestmove, 6);
+            move_to_string(&item->bestmove, move);
+            strncpy(pv_table[x], move, 6);
+            pv_table[x][5] = '\0';
+            smove = item->bestmove;
         }
         else
         {
@@ -684,10 +702,11 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     bool valid_partial_search = false;
     bool failed_low = false;
     bool eazy_move = true;
+    char move[6];
 
     for(current_depth = 1; current_depth <= depth; current_depth++)
     {   
-        memset(searched_move, 0, sizeof(searched_move));
+        clear_move(&searched_move);
 
         val = pvs_root(pos, current_depth, color, alpha, beta);
         
@@ -696,7 +715,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         if(stop_search)
         {
             //allow partial search results if at least one move searched and it's within the bounds/not failed low
-            if(strncmp(searched_move, "", 5) && !failed_low && val > alpha && val < beta)
+            if(searched_move.from != NOMOVE && !failed_low && val > alpha && val < beta)
             {
                 valid_partial_search = true;
             }
@@ -738,12 +757,14 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
 
         //get the pv line and best move
         memset(pv_table, 0, sizeof(pv_table));
-        getPVline(pos, searched_move, current_depth);
-        if(current_depth != 1 && strncmp(BestMove, searched_move, 5))
+        getPVline(pos, &searched_move, current_depth);
+        move_to_string(&searched_move, move);
+        if(current_depth != 1 && strncmp(BestMove, move, 5))
         {
             eazy_move = false;
         }
-        strncpy(BestMove, searched_move, 6);
+        strncpy(BestMove, move, 6);
+        BestMove[5] = '\0';
 
         //send info to gui
         if(val > 19000)
@@ -785,7 +806,7 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     //prepare to search
     gettimeofday(&starting_time, NULL);
     ageHistory();
-    memset(killers, 0, sizeof(killers)); //clear killer move table
+    clearKiller(); //clear killer move table
     memset(BestMove, 0, sizeof(BestMove));
     stop_search = false;
     nodes = 0;

@@ -7,6 +7,7 @@
 #include "OrderMove.h"
 #include "SEE.h"
 #include "Search.h"
+#include "Move.h"
 
 #define BESTMOVE    1000000
 #define HASHMOVE    900000
@@ -27,34 +28,34 @@ static inline void swap(int* a, int* b)
     *b = t; 
 } 
 
-//swap two strings
-static inline void swapstr(char *str1, char *str2) 
+//swap two move structs
+static inline void swapMove(MOVE *move1, MOVE *move2) 
 { 
-    char temp[6];
-    strncpy(temp, str1, 6);
-    memmove(str1, str2, 6);
-    strncpy(str2, temp, 6);
+    MOVE temp = *move1;
+    *move1 = *move2;
+    *move2 = temp;
 } 
 
 //insertion sort
-void movesort(char moves[256][6], int sort[256], int length, int current) 
+void movesort(MOVE moves[256], int sort[256], int length, int current) 
 {
     //find the move with the highest score
     int high = current;
 
-    for(int i = current+1; i < length ; i++) 
+    for(int i = current+1; i < length ; i++)
     {
         if(sort[i] > sort[high])
             high = i;
     }
 
     swap(&sort[current], &sort[high]);
-    swapstr(moves[current], moves[high]);
+    swapMove(&moves[current], &moves[high]);
 }
 
-int orderHashMove(char moves[256][6], int sort[256], int length, char hash_move[6])
+//return 1 if hash move exists
+int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
 {
-    if(!strncmp(hash_move, "", 6))
+    if(hash_move->from == NOMOVE)
     {
         return 0;
     }
@@ -62,11 +63,11 @@ int orderHashMove(char moves[256][6], int sort[256], int length, char hash_move[
     {
         for(int x = 0; x < length; x++)
         {
-            if(!strncmp(hash_move, moves[x], 6))
+            if(compareMove(&moves[x], hash_move))
             {
                 sort[x] = HASHMOVE;
                 swap(&sort[0], &sort[x]);
-                swapstr(moves[0], moves[x]);
+                swapMove(&moves[0], &moves[x]);
                 return 1;
             }
         }
@@ -74,7 +75,7 @@ int orderHashMove(char moves[256][6], int sort[256], int length, char hash_move[
     return 0;
 }
 
-int wCapMove_score(char move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3])
+int wCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
 {
     int mvv = 0;
     int lva = 0;
@@ -84,7 +85,7 @@ int wCapMove_score(char move[6], char piece, char op_piece, char board[8][8], in
         case 'P':
             lva = 5;
             //capture + promotion
-            if(move[4] == 'q')
+            if(move->promotion == 'q')
                 lva += 500;
             break;
         case 'N':
@@ -132,7 +133,7 @@ int wCapMove_score(char move[6], char piece, char op_piece, char board[8][8], in
         return mvv + lva + WCAPTURE;
     }
 
-    int value = SEE_MO(board, x, y, np, target, -1);
+    int value = SEE_MO(board, x, y, nx, ny, target, -1);
     
     if(value > 0)
         return mvv + lva + WCAPTURE;
@@ -142,7 +143,7 @@ int wCapMove_score(char move[6], char piece, char op_piece, char board[8][8], in
         return mvv + lva + LCAPTURE;
 }
 
-int bCapMove_score(char move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3])
+int bCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
 {
     int mvv = 0;
     int lva = 0;
@@ -152,7 +153,7 @@ int bCapMove_score(char move[6], char piece, char op_piece, char board[8][8], in
         case 'p':
             lva = 5;
             //capture + promotion
-            if(move[4] == 'q')
+            if(move->promotion == 'q')
                 lva += 500;
             break;
         case 'n':
@@ -200,7 +201,7 @@ int bCapMove_score(char move[6], char piece, char op_piece, char board[8][8], in
         return mvv + lva + WCAPTURE;
     }
 
-    int value = SEE_MO(board, x, y, np, target, 1);
+    int value = SEE_MO(board, x, y, nx, ny, target, 1);
     
     if(value > 0)
         return mvv + lva + WCAPTURE;
@@ -225,13 +226,13 @@ int castling_score()
     return CASTLING;
 }
 
-int quietMove_score(char move[6], int x1, int y1, int x2, int y2, int ply, int color)
+int quietMove_score(MOVE *move, int x1, int y1, int x2, int y2, int ply, int color)
 {
-    if(!strncmp(killers[ply][0], move, 5))
+    if(compareMove(&killers[ply][0], move))
     {
         return KILLER1;
     }
-    else if(!strncmp(killers[ply][1], move, 5))
+    else if(compareMove(&killers[ply][1], move))
     {
         return KILLER2;
     }
@@ -241,16 +242,16 @@ int quietMove_score(char move[6], int x1, int y1, int x2, int y2, int ply, int c
     }
 }
 
-int wCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3])
+int wCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
 {
     int mvv = 0;
     int lva = 0;
 
-    if(!strncmp(best_move, move, 5))
+    if(compareMove(best_move, move))
     {
         return BESTMOVE;
     }
-    else if(!strncmp(hash_move, move, 5))
+    else if(compareMove(hash_move, move))
     {
         return HASHMOVE;
     }
@@ -261,7 +262,7 @@ int wCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char
             case 'P':
                 lva = 5;
                 //capture + promotion
-                if(move[4] == 'q')
+                if(move->promotion == 'q')
                     lva += 500;
                 break;
             case 'N':
@@ -309,7 +310,7 @@ int wCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char
             return mvv + lva + WCAPTURE;
         }
 
-        int value = SEE_MO(board, x, y, np, target, -1);
+        int value = SEE_MO(board, x, y, nx, ny, target, -1);
         
         if(value > 0)
             return mvv + lva + WCAPTURE;
@@ -320,16 +321,16 @@ int wCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char
     }
 }
 
-int bCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3])
+int bCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
 {
     int mvv = 0;
     int lva = 0;
 
-    if(!strncmp(best_move, move, 5))
+    if(compareMove(best_move, move))
     {
         return BESTMOVE;
     }
-    else if(!strncmp(hash_move, move, 5))
+    else if(compareMove(hash_move, move))
     {
         return HASHMOVE;
     }
@@ -340,7 +341,7 @@ int bCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char
             case 'p':
                 lva = 5;
                 //capture + promotion
-                if(move[4] == 'q')
+                if(move->promotion == 'q')
                     lva += 500;
                 break;
             case 'n':
@@ -388,7 +389,7 @@ int bCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char
             return mvv + lva + WCAPTURE;
         }
 
-        int value = SEE_MO(board, x, y, np, target, 1);
+        int value = SEE_MO(board, x, y, nx, ny, target, 1);
         
         if(value > 0)
             return mvv + lva + WCAPTURE;
@@ -399,13 +400,13 @@ int bCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char
     }
 }
 
-int promotion_score_root(char move[6], char best_move[6], char hash_move[6])
+int promotion_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move)
 {
-    if(!strncmp(best_move, move, 5))
+    if(compareMove(best_move, move))
     {
         return BESTMOVE;
     }
-    else if(!strncmp(hash_move, move, 5))
+    else if(compareMove(hash_move, move))
     {
         return HASHMOVE;
     }
@@ -415,13 +416,13 @@ int promotion_score_root(char move[6], char best_move[6], char hash_move[6])
     }
 }
 
-int underpromotion_score_root(char move[6], char best_move[6], char hash_move[6])
+int underpromotion_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move)
 {
-    if(!strncmp(best_move, move, 5))
+    if(compareMove(best_move, move))
     {
         return BESTMOVE;
     }
-    else if(!strncmp(hash_move, move, 5))
+    else if(compareMove(hash_move, move))
     {
         return HASHMOVE;
     }
@@ -431,13 +432,13 @@ int underpromotion_score_root(char move[6], char best_move[6], char hash_move[6]
     }
 }
 
-int castling_score_root(char move[6], char best_move[6], char hash_move[6])
+int castling_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move)
 {
-    if(!strncmp(best_move, move, 5))
+    if(compareMove(best_move, move))
     {
         return BESTMOVE;
     }
-    else if(!strncmp(hash_move, move, 5))
+    else if(compareMove(hash_move, move))
     {
         return HASHMOVE;
     }
@@ -447,21 +448,21 @@ int castling_score_root(char move[6], char best_move[6], char hash_move[6])
     }
 }
 
-int quietMove_score_root(char move[6], char best_move[6], char hash_move[6], int x1, int y1, int x2, int y2, int color)
+int quietMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, int x1, int y1, int x2, int y2, int color)
 {
-    if(!strncmp(best_move, move, 5))
+    if(compareMove(best_move, move))
     {
         return BESTMOVE;
     }
-    else if(!strncmp(hash_move, move, 5))
+    else if(compareMove(hash_move, move))
     {
         return HASHMOVE;
     }
-    else if(!strncmp(killers[0][0], move, 5))
+    else if(compareMove(&killers[0][0], move))
     {
         return KILLER1;
     }
-    else if(!strncmp(killers[0][1], move, 5))
+    else if(compareMove(&killers[0][1], move))
     {
         return KILLER2;
     }

@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "Board.h"
+#include "Move.h"
 
 #define VALUENONE -20100
 
@@ -22,7 +23,7 @@ struct DataItem
    int evaluation;
    short statEval;
    char depth;
-   char bestmove[6];
+   MOVE bestmove;
    char flag;
    bool age;
 };
@@ -48,7 +49,7 @@ unsigned long long getHash(BOARD *pos, int color);
 
 struct DataItem *probeTT(unsigned long long key);
 
-void storeTT(unsigned long long key, int evaluation, int statEval, int depth, char bestmove[5], int flag);
+void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag);
 
 void clearTT();
 

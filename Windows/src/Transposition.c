@@ -5,12 +5,13 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "Board.h"
+#include "Move.h"
 #include "Transposition.h"
 #include "Search.h"
 
 #define EMPTY -1
 
-int piece_code(char piece) 
+int piece_code(char piece)
 { 
     switch(piece)
     {
@@ -175,7 +176,7 @@ struct DataItem *probeTT(unsigned long long key)
 
 }
 
-void storeTT(unsigned long long key, int evaluation, int statEval, int depth, char bestmove[5], int flag)
+void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
 {
     if(stop_search) //don't save when time up
         return;
@@ -190,7 +191,7 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, ch
         tt[hashIndex].statEval = statEval;
         tt[hashIndex].flag = flag;
         tt[hashIndex].depth = depth;
-        strncpy(tt[hashIndex].bestmove, bestmove, 6);
+        tt[hashIndex].bestmove = *bestmove;
         tt[hashIndex].age = false;
     }
     else if(tt[hashIndex].key != key && (tt[hashIndex + 1].depth <= depth || tt[hashIndex + 1].age == true))
@@ -200,7 +201,7 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, ch
         tt[hashIndex + 1].statEval = statEval;
         tt[hashIndex + 1].flag = flag;
         tt[hashIndex + 1].depth = depth;
-        strncpy(tt[hashIndex + 1].bestmove, bestmove, 6);
+        tt[hashIndex + 1].bestmove = *bestmove;
         tt[hashIndex + 1].age = false;
     }
 }
@@ -232,7 +233,9 @@ void clearTT()
         tt[x].evaluation = 0;
         tt[x].statEval = VALUENONE;
         tt[x].age = false;
-        strncpy(tt[x].bestmove, "", 6);
+        tt[x].bestmove.from = NOMOVE;
+        tt[x].bestmove.to = NOMOVE;
+        tt[x].bestmove.promotion = ' ';
     }
 }
 

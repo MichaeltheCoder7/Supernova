@@ -6,14 +6,12 @@
 #include <assert.h>
 #include "SEE.h"
 #include "Attack.h"
-#include "Board.h"
+#include "Move.h"
 #include "OrderMove.h"
 
 //static exchange evaluation for quiescence search
-int SEE(char board[8][8], char location[3], int target, int color)
+int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 {
-    int new_x = position_to_x(location);
-    int new_y = position_to_y(location);
     int attacker_index = get_smallest_attacker(board, new_x, new_y, color);
     //exit if no attackers found
     if(attacker_index == -1)
@@ -37,7 +35,7 @@ int SEE(char board[8][8], char location[3], int target, int color)
         if(toupper(board_copy[x][y]) == 'K')
             king_attack = true;            
 
-        piece = position_to_piece(board_copy, location);
+        piece = board_copy[new_x][new_y];
 
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         color = -color;
@@ -70,7 +68,7 @@ int SEE(char board[8][8], char location[3], int target, int color)
 }
 
 //static exchange evaluation for move ordering
-int SEE_MO(char board[8][8], int att_x, int att_y, char location[3], int target, int color)
+int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int target, int color)
 {
     char board_copy[8][8];
     int x = att_x;
@@ -79,8 +77,6 @@ int SEE_MO(char board[8][8], int att_x, int att_y, char location[3], int target,
     bool king_attack = false;
     int gain[32];
     int d = 0;
-    int new_x = position_to_x(location);
-    int new_y = position_to_y(location);
     gain[d] = target;
     memcpy(board_copy, board, sizeof(board_copy));
 

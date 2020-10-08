@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <assert.h>
 #include "Board.h"
+#include "Move.h"
 #include "Search.h"
 #include "Transposition.h"
 
@@ -314,7 +315,7 @@ void handle_position(char *input)
 				sscanf(move, "%2s%2s%c", cp, np, &promotion_piece);
 				own_piece = position_to_piece(pos.board, cp);
 				op_piece = position_to_piece(pos.board, np);
-				makeMove(&pos, cp, np, promotion_piece);
+				makeMove_UCI(&pos, cp, np, promotion_piece);
 				
 				//store board into move history
 				history_index++;
@@ -324,7 +325,10 @@ void handle_position(char *input)
 		//get opponent's move
 		//only when it's a capture
 		if(op_piece != ' ')
+		{
 			strncpy(op_move, move, 6);
+			op_move[5] = '\0';
+		}
 		//check what color does the gui wants the engine to be
 		if(islower(own_piece))
 		{

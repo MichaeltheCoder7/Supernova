@@ -5,23 +5,10 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "MoveGen.h"
-#include "Attack.h"
 #include "CheckMove.h"
 #include "OrderMove.h"
 #include "Board.h"
-
-char positions[8][8][3] = {
-
-                            {"a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"},
-                            {"a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"},
-                            {"a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6"},
-                            {"a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5"},
-                            {"a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4"},
-                            {"a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3"},
-                            {"a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"},
-                            {"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"},
-
-                            };
+#include "Move.h"
 
 int knight_moves_x[8] = { -2, -2, -1, -1,  1,  1,  2,  2 };
 int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
@@ -30,12 +17,13 @@ int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
 int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 //generate all pseudo-legal moves at root
-int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_move[6], char hash_move[6], int color)
+int moveGen_root(BOARD *pos, MOVE all_moves[256], int sort[256], MOVE *best_move, MOVE *hash_move, int color)
 {
     int index = 0; 
     int index_x;
     int index_y;
     int x, y;
+    int origin;
 
     switch(color)
     {
@@ -45,8 +33,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //pawn
             for(int i = 0; i < pos->piece_count[bP]; i++)
             {
-                index_x = pos->piece_list[bP][i] / 8;
-                index_y = pos->piece_list[bP][i] % 8;
+                origin = pos->piece_list[bP][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //capture
                 for(y = index_y - 1; y < index_y + 2; y += 2)
                 {
@@ -59,30 +48,33 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                         //promotions
                         if(index_x == 6)
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x + 1][y], 3);
-                            all_moves[index][4] = 'q';
-                            all_moves[index][5] = '\0';
-                            sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = 'q';
+                            sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, index+1, y);
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'r';
-                            sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = 'r';
+                            sort[index] = sort[index-1] - 500;
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'b';
-                            sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = 'b';
+                            sort[index] = sort[index-1];
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'n';
-                            sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = 'n';
+                            sort[index] = sort[index-1];
                             index++;
                         }
                         else
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x + 1][y], 3);
-                            sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = ' ';
+                            sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, index+1, y);
                             index++;
                         }
                     }
@@ -93,30 +85,33 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     //promotions
                     if(index_x == 6)
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x + 1][index_y], 3);
-                        all_moves[index][4] = 'q';
-                        all_moves[index][5] = '\0';
-                        sort[index] = promotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = 'q';
+                        sort[index] = promotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'r';
-                        sort[index] = underpromotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = 'r';
+                        sort[index] = underpromotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'b';
-                        sort[index] = underpromotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = 'b';
+                        sort[index] = underpromotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'n';
-                        sort[index] = underpromotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = 'n';
+                        sort[index] = underpromotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
                     }
                     else
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x + 1][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x + 1, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x+1, index_y, color);
                         index++;
                     }
                 }
@@ -125,9 +120,10 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[2][index_y] == ' ' && pos->board[3][index_y] == ' ')  
                     { 
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[3][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, 3, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 24+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, 3, index_y, color);
                         index++;
                     }
                 }
@@ -135,8 +131,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //knight
             for(int i = 0; i < pos->piece_count[bN]; i++)
             {
-                index_x = pos->piece_list[bN][i] / 8;
-                index_y = pos->piece_list[bN][i] % 8;
+                origin = pos->piece_list[bN][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(int j = 0; j < 8; j++)
                 {
                     x = index_x + knight_moves_x[j];
@@ -147,38 +144,43 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'n', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'n', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                 }
             }
             //king
-            index_x = pos->piece_list[bK][0] / 8;
-            index_y = pos->piece_list[bK][0] % 8;
+            origin = pos->piece_list[bK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
             //castling
             if(index_x == 0 && index_y == 4)
             {
                 if(CheckMove_bkingside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[0][6], 3);
-                    sort[index] = castling_score_root(all_moves[index], best_move, hash_move);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 6;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = castling_score_root(&all_moves[index], best_move, hash_move);
                     index++;
                 }
                 if(CheckMove_bqueenside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[0][2], 3);
-                    sort[index] = castling_score_root(all_moves[index], best_move, hash_move);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 2;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = castling_score_root(&all_moves[index], best_move, hash_move);
                     index++;
                 }
             }
@@ -192,39 +194,44 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 }
                 if(pos->board[x][y] == ' ') 
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                     index++;
                 }
                 else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'k', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'k', pos->board[x][y], pos->board, index_x, index_y, x, y);
                     index++;
                 }
             }
             //rook
             for(int i = 0; i < pos->piece_count[bR]; i++)
             {
-                index_x = pos->piece_list[bR][i] / 8;
-                index_y = pos->piece_list[bR][i] % 8;
+                origin = pos->piece_list[bR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {  
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'r', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -237,16 +244,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'r', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -259,16 +268,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'r', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -281,16 +292,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'r', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -302,8 +315,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //bishop
             for(int i = 0; i < pos->piece_count[bB]; i++)
             {
-                index_x = pos->piece_list[bB][i] / 8;
-                index_y = pos->piece_list[bB][i] % 8;
+                origin = pos->piece_list[bB][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -315,16 +329,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -343,16 +359,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -371,16 +389,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -399,16 +419,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -420,8 +442,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //queen
             for(int i = 0; i < pos->piece_count[bQ]; i++)
             {
-                index_x = pos->piece_list[bQ][i] / 8;
-                index_y = pos->piece_list[bQ][i] % 8;
+                origin = pos->piece_list[bQ][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -433,16 +456,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -455,16 +480,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -483,16 +510,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -505,16 +534,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -527,16 +558,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -555,16 +588,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -577,16 +612,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -605,16 +642,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score_root(all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score_root(&all_moves[index], best_move, hash_move, 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -631,8 +670,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //pawn
             for(int i = 0; i < pos->piece_count[wP]; i++)
             {
-                index_x = pos->piece_list[wP][i] / 8;
-                index_y = pos->piece_list[wP][i] % 8;
+                origin = pos->piece_list[wP][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(y = index_y - 1; y < index_y + 2; y+=2)
                 {
                     if(y & 8) //skip when out of board
@@ -644,30 +684,33 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                         //promotions
                         if(index_x == 1)
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x - 1][y], 3);
-                            all_moves[index][4] = 'q';
-                            all_moves[index][5] = '\0';
-                            sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = 'q';
+                            sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, index_x-1, y);
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'r';
-                            sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = 'r';
+                            sort[index] = sort[index-1] - 500;
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'b';
-                            sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = 'b';
+                            sort[index] = sort[index-1];
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'n';
-                            sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = 'n';
+                            sort[index] = sort[index-1];
                             index++;
                         }
                         else
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x - 1][y], 3);
-                            sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = ' ';
+                            sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, index_x-1, y);
                             index++;
                         }
                     }
@@ -678,30 +721,33 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     //promotions
                     if(index_x == 1)
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x - 1][index_y], 3);
-                        all_moves[index][4] = 'q';
-                        all_moves[index][5] = '\0';
-                        sort[index] = promotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = 'q';
+                        sort[index] = promotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'r';
-                        sort[index] = underpromotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = 'r';
+                        sort[index] = underpromotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'b';
-                        sort[index] = underpromotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = 'b';
+                        sort[index] = underpromotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'n';
-                        sort[index] = underpromotion_score_root(all_moves[index], best_move, hash_move);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = 'n';
+                        sort[index] = underpromotion_score_root(&all_moves[index], best_move, hash_move);
                         index++;
                     }
                     else
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x - 1][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x - 1, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x-1, index_y, color);
                         index++;
                     }
                 }
@@ -709,10 +755,11 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 if(index_x == 6)
                 {
                     if(pos->board[5][index_y] == ' ' && pos->board[4][index_y] == ' ')  
-                    { 
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[4][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, 4, index_y, color);
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 32+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, 4, index_y, color);
                         index++;
                     }
                 }
@@ -720,8 +767,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //knight
             for(int i = 0; i < pos->piece_count[wN]; i++)
             {
-                index_x = pos->piece_list[wN][i] / 8;
-                index_y = pos->piece_list[wN][i] % 8;
+                origin = pos->piece_list[wN][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(int j = 0; j < 8; j++)
                 {
                     x = index_x + knight_moves_x[j];
@@ -732,38 +780,43 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')   
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')   
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'N', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'N', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                 }
             }
             //king
-            index_x = pos->piece_list[wK][0] / 8;
-            index_y = pos->piece_list[wK][0] % 8;
+            origin = pos->piece_list[wK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
             //castling
             if(index_x == 7 && index_y == 4)
             {
                 if(CheckMove_wkingside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[7][6], 3);
-                    sort[index] = castling_score_root(all_moves[index], best_move, hash_move);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 62;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = castling_score_root(&all_moves[index], best_move, hash_move);
                     index++;
                 }
                 if(CheckMove_wqueenside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[7][2], 3);
-                    sort[index] = castling_score_root(all_moves[index], best_move, hash_move);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 58;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = castling_score_root(&all_moves[index], best_move, hash_move);
                     index++;
                 }
             }
@@ -777,39 +830,44 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 }
                 if(pos->board[x][y] == ' ')   
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                     index++;
                 }
                 else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')   
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'K', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'K', pos->board[x][y], pos->board, index_x, index_y, x, y);
                     index++;
                 }
             }
             //rook
             for(int i = 0; i < pos->piece_count[wR]; i++)
             {
-                index_x = pos->piece_list[wR][i] / 8;
-                index_y = pos->piece_list[wR][i] % 8;
+                origin = pos->piece_list[wR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'R', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -822,16 +880,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'R', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -844,16 +904,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'R', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -866,16 +928,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'R', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -887,8 +951,9 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //bishop
             for(int i = 0; i < pos->piece_count[wB]; i++)
             {
-                index_x = pos->piece_list[wB][i] / 8;
-                index_y = pos->piece_list[wB][i] % 8;
+                origin = pos->piece_list[wB][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -900,16 +965,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -928,16 +995,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -956,16 +1025,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -984,16 +1055,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1005,6 +1078,7 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
             //queen
             for(int i = 0; i < pos->piece_count[wQ]; i++)
             {
+                origin = pos->piece_list[wQ][i];
                 index_x = pos->piece_list[wQ][i] / 8;
                 index_y = pos->piece_list[wQ][i] % 8;
                 //up left
@@ -1018,16 +1092,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1040,16 +1116,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1068,16 +1146,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1090,16 +1170,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1112,16 +1194,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, index_x, j, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1140,16 +1224,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1162,16 +1248,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, j, index_y, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1190,16 +1278,18 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score_root(all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score_root(&all_moves[index], best_move, hash_move, index_x, index_y, x, y, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score_root(all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score_root(&all_moves[index], best_move, hash_move, 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1217,12 +1307,13 @@ int moveGen_root(BOARD *pos, char all_moves[256][6], int sort[256], char best_mo
 
 //generate all pseudo-legal moves
 //don't generate under promotions to bishop and rook
-int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int color)
+int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
 {
     int index = 0; 
     int index_x;
     int index_y;
     int x, y;
+    int origin;
 
     switch(color)
     {
@@ -1232,8 +1323,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //pawn
             for(int i = 0; i < pos->piece_count[bP]; i++)
             {
-                index_x = pos->piece_list[bP][i] / 8;
-                index_y = pos->piece_list[bP][i] % 8;
+                origin = pos->piece_list[bP][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //capture
                 for(y = index_y - 1; y < index_y + 2; y += 2)
                 {
@@ -1246,22 +1338,23 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                         //promotions
                         if(index_x == 6)
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x + 1][y], 3);
-                            all_moves[index][4] = 'q';
-                            all_moves[index][5] = '\0';
-                            sort[index] = bCapMove_score(all_moves[index], 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index_x+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = 'q';
+                            sort[index] = bCapMove_score(&all_moves[index], 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, index_x+1, y);
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'n';
-                            sort[index] = bCapMove_score(all_moves[index], 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index_x+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = 'n';
+                            sort[index] = sort[index-1] - 500;
                             index++;
                         }
                         else
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x + 1][y], 3);
-                            sort[index] = bCapMove_score(all_moves[index], 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, positions[index_x+1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x+1)+y;
+                            all_moves[index].promotion = ' ';
+                            sort[index] = bCapMove_score(&all_moves[index], 'p', pos->board[index_x+1][y], pos->board, index_x, index_y, index_x+1, y);
                             index++;
                         }
                     }
@@ -1272,22 +1365,23 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     //promotions
                     if(index_x == 6)
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x + 1][index_y], 3);
-                        all_moves[index][4] = 'q';
-                        all_moves[index][5] = '\0';
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = 'q';
                         sort[index] = promotion_score();
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'n';
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = 'n';
                         sort[index] = underpromotion_score();
                         index++;
                     }
                     else
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x + 1][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x + 1, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x+1)+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x+1, index_y, ply, color);
                         index++;
                     }
                 }
@@ -1296,9 +1390,10 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[2][index_y] == ' ' && pos->board[3][index_y] == ' ')  
                     { 
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[3][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, 3, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 24+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, 3, index_y, ply, color);
                         index++;
                     }
                 }
@@ -1306,8 +1401,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //knight
             for(int i = 0; i < pos->piece_count[bN]; i++)
             {
-                index_x = pos->piece_list[bN][i] / 8;
-                index_y = pos->piece_list[bN][i] % 8;
+                origin = pos->piece_list[bN][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(int j = 0; j < 8; j++)
                 {
                     x = index_x + knight_moves_x[j];
@@ -1316,39 +1412,44 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         continue;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'n', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'n', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                 }
             }
             //king
-            index_x = pos->piece_list[bK][0] / 8;
-            index_y = pos->piece_list[bK][0] % 8;
+            origin = pos->piece_list[bK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
             //castling
             if(index_x == 0 && index_y == 4)
             {
                 if(CheckMove_bkingside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[0][6], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 6;
+                    all_moves[index].promotion = ' ';
                     sort[index] = castling_score();
                     index++;
                 }
                 if(CheckMove_bqueenside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[0][2], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 2;
+                    all_moves[index].promotion = ' ';
                     sort[index] = castling_score();
                     index++;
                 }
@@ -1363,22 +1464,25 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 }
                 if(pos->board[x][y] == ' ') 
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                     index++;
                 }
                 else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = bCapMove_score(all_moves[index], 'k', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = bCapMove_score(&all_moves[index], 'k', pos->board[x][y], pos->board, index_x, index_y, x, y);
                     index++;
                 }
             }
             //rook
             for(int i = 0; i < pos->piece_count[bR]; i++)
             {
+                origin = pos->piece_list[bR][i];
                 index_x = pos->piece_list[bR][i] / 8;
                 index_y = pos->piece_list[bR][i] % 8;
                 //up
@@ -1386,16 +1490,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {  
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'r', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1408,16 +1514,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'r', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1430,16 +1538,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'r', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1452,16 +1562,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'r', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1473,8 +1585,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //bishop
             for(int i = 0; i < pos->piece_count[bB]; i++)
             {
-                index_x = pos->piece_list[bB][i] / 8;
-                index_y = pos->piece_list[bB][i] % 8;
+                origin = pos->piece_list[bB][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -1486,16 +1599,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1512,18 +1627,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1540,18 +1657,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1568,18 +1687,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'b', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1591,8 +1712,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //queen
             for(int i = 0; i < pos->piece_count[bQ]; i++)
             {
-                index_x = pos->piece_list[bQ][i] / 8;
-                index_y = pos->piece_list[bQ][i] % 8;
+                origin = pos->piece_list[bQ][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -1602,18 +1724,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1626,16 +1750,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1652,18 +1778,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1676,16 +1804,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1698,16 +1828,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1724,18 +1856,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1748,16 +1882,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[j][index_y] == ' ')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1774,18 +1910,20 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     {
                         break;
                     }
-                    if(pos->board[x][y] == ' ') 
+                    if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
-                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q') 
+                    else if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = bCapMove_score(all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score(&all_moves[index], 'q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -1802,8 +1940,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //pawn
             for(int i = 0; i < pos->piece_count[wP]; i++)
             {
-                index_x = pos->piece_list[wP][i] / 8;
-                index_y = pos->piece_list[wP][i] % 8;
+                origin = pos->piece_list[wP][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(y = index_y - 1; y < index_y + 2; y+=2)
                 {
                     if(y & 8) //skip when out of board
@@ -1815,22 +1954,23 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                         //promotions
                         if(index_x == 1)
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x - 1][y], 3);
-                            all_moves[index][4] = 'q';
-                            all_moves[index][5] = '\0';
-                            sort[index] = wCapMove_score(all_moves[index], 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = 'q';
+                            sort[index] = wCapMove_score(&all_moves[index], 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, index_x-1, y);
                             index++;
-                            strncpy(all_moves[index], all_moves[index - 1], 6);
-                            all_moves[index][4] = 'n';
-                            sort[index] = wCapMove_score(all_moves[index], 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = 'n';
+                            sort[index] = sort[index-1] - 500;
                             index++;
                         }
                         else
                         {
-                            strncpy(all_moves[index], positions[index_x][index_y], 3);
-                            strncat(all_moves[index], positions[index_x - 1][y], 3);
-                            sort[index] = wCapMove_score(all_moves[index], 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, positions[index_x-1][y]);
+                            all_moves[index].from = origin;
+                            all_moves[index].to = 8*(index_x-1)+y;
+                            all_moves[index].promotion = ' ';
+                            sort[index] = wCapMove_score(&all_moves[index], 'P', pos->board[index_x-1][y], pos->board, index_x, index_y, index_x-1, y);
                             index++;
                         }
                     }
@@ -1841,22 +1981,23 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     //promotions
                     if(index_x == 1)
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x - 1][index_y], 3);
-                        all_moves[index][4] = 'q';
-                        all_moves[index][5] = '\0';
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = 'q';
                         sort[index] = promotion_score();
                         index++;
-                        strncpy(all_moves[index], all_moves[index - 1], 6);
-                        all_moves[index][4] = 'n';
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = 'n';
                         sort[index] = underpromotion_score();
                         index++;
                     }
                     else
                     {
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x - 1][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x - 1, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*(index_x-1)+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x-1, index_y, ply, color);
                         index++;
                     }
                 }
@@ -1864,10 +2005,11 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 if(index_x == 6)
                 {
                     if(pos->board[5][index_y] == ' ' && pos->board[4][index_y] == ' ')  
-                    { 
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[4][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, 4, index_y, ply, color);
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 32+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, 4, index_y, ply, color);
                         index++;
                     }
                 }
@@ -1875,8 +2017,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //knight
             for(int i = 0; i < pos->piece_count[wN]; i++)
             {
-                index_x = pos->piece_list[wN][i] / 8;
-                index_y = pos->piece_list[wN][i] % 8;
+                origin = pos->piece_list[wN][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(int j = 0; j < 8; j++)
                 {
                     x = index_x + knight_moves_x[j];
@@ -1887,37 +2030,42 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')   
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')   
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'N', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'N', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                 }
             }
             //king
-            index_x = pos->piece_list[wK][0] / 8;
-            index_y = pos->piece_list[wK][0] % 8;
+            origin = pos->piece_list[wK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
             //castling
             if(index_x == 7 && index_y == 4)
             {
                 if(CheckMove_wkingside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[7][6], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 62;
+                    all_moves[index].promotion = ' ';
                     sort[index] = castling_score();
                     index++;
                 }
                 if(CheckMove_wqueenside(pos))  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[7][2], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 58;
+                    all_moves[index].promotion = ' ';
                     sort[index] = castling_score();
                     index++;
                 }
@@ -1932,39 +2080,44 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 }
                 if(pos->board[x][y] == ' ')   
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                     index++;
                 }
                 else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')   
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
-                    sort[index] = wCapMove_score(all_moves[index], 'K', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = wCapMove_score(&all_moves[index], 'K', pos->board[x][y], pos->board, index_x, index_y, x, y);
                     index++;
                 }
             }
             //rook
             for(int i = 0; i < pos->piece_count[wR]; i++)
             {
-                index_x = pos->piece_list[wR][i] / 8;
-                index_y = pos->piece_list[wR][i] % 8;
+                origin = pos->piece_list[wR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'R', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -1977,16 +2130,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'R', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -1999,16 +2154,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'R', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -2021,16 +2178,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'R', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -2042,8 +2201,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //bishop
             for(int i = 0; i < pos->piece_count[wB]; i++)
             {
-                index_x = pos->piece_list[wB][i] / 8;
-                index_y = pos->piece_list[wB][i] % 8;
+                origin = pos->piece_list[wB][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -2055,16 +2215,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2083,16 +2245,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2111,16 +2275,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2139,16 +2305,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'B', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2160,8 +2328,9 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
             //queen
             for(int i = 0; i < pos->piece_count[wQ]; i++)
             {
-                index_x = pos->piece_list[wQ][i] / 8;
-                index_y = pos->piece_list[wQ][i] % 8;
+                origin = pos->piece_list[wQ][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -2173,16 +2342,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2195,16 +2366,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -2223,16 +2396,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2245,16 +2420,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -2267,16 +2444,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[index_x][j] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, index_x, j, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, index_x, j, ply, color);
                         index++;
                     }
                     else if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[index_x][j], pos->board, index_x, index_y, positions[index_x][j]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -2295,16 +2474,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2317,16 +2498,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                 {
                     if(pos->board[j][index_y] == ' ') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, j, index_y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, j, index_y, ply, color);
                         index++;
                     }
                     else if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[j][index_y], pos->board, index_x, index_y, positions[j][index_y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -2345,16 +2528,18 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
                     }
                     if(pos->board[x][y] == ' ')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = quietMove_score(all_moves[index], index_x, index_y, x, y, ply, color);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], index_x, index_y, x, y, ply, color);
                         index++;
                     }
                     else if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
-                        sort[index] = wCapMove_score(all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, positions[x][y]);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score(&all_moves[index], 'Q', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -2371,12 +2556,13 @@ int moveGen(BOARD *pos, char all_moves[256][6], int sort[256], int ply, int colo
 }
 
 //generate caputures and queen promotion
-int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
+int captureGen(BOARD *pos, MOVE all_moves[256], int sort[100], int color)
 {
     int index = 0; 
     int index_x;
     int index_y;
     int x, y;
+    int origin;
 
     switch(color)
     {
@@ -2386,27 +2572,28 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //pawn
             for(int i = 0; i < pos->piece_count[bP]; i++)
             {
-                index_x = pos->piece_list[bP][i] / 8;
-                index_y = pos->piece_list[bP][i] % 8;
+                origin = pos->piece_list[bP][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 if((index_y - 1) >= 0 && CheckCapture_bpawn(pos, index_x + 1, index_y - 1)) 
                 { 
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[index_x + 1][index_y - 1], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*(index_x+1)+index_y-1;
                     sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y - 1], index_x + 1);
                     index++;
                 }
                 //promotion
                 if(index_x == 6 && pos->board[7][index_y] == ' ')
                 {
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[7][index_y], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 56+index_y;
                     sort[index] = 1000;
                     index++;
                 } 
                 if((index_y + 1) <= 7 && CheckCapture_bpawn(pos, index_x + 1, index_y + 1)) 
                 { 
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[index_x + 1][index_y + 1], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*(index_x+1)+index_y+1;
                     sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y + 1], index_x + 1);
                     index++;
                 }
@@ -2414,8 +2601,9 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //knight
             for(int i = 0; i < pos->piece_count[bN]; i++)
             {
-                index_x = pos->piece_list[bN][i] / 8;
-                index_y = pos->piece_list[bN][i] % 8;
+                origin = pos->piece_list[bN][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(int j = 0; j < 8; j++)
                 {
                     x = index_x + knight_moves_x[j];
@@ -2426,16 +2614,17 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('n', pos->board[x][y], 1);
                         index++;
                     }
                 }
             }
             //king
-            index_x = pos->piece_list[bK][0] / 8;
-            index_y = pos->piece_list[bK][0] % 8;
+            origin = pos->piece_list[bK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
             for(int j = 0; j < 8; j++)
             {
                 x = index_x + king_moves_x[j];
@@ -2446,8 +2635,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 }
                 if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
                     sort[index] = bCapQsearch_score('k', pos->board[x][y], 1);
                     index++;
                 }
@@ -2455,15 +2644,16 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //rook
             for(int i = 0; i < pos->piece_count[bR]; i++)
             {
-                index_x = pos->piece_list[bR][i] / 8;
-                index_y = pos->piece_list[bR][i] % 8;
+                origin = pos->piece_list[bR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {  
                     if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = bCapQsearch_score('r', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -2477,8 +2667,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = bCapQsearch_score('r', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -2492,8 +2682,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = bCapQsearch_score('r', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -2507,8 +2697,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = bCapQsearch_score('r', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -2521,8 +2711,9 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //bishop
             for(int i = 0; i < pos->piece_count[bB]; i++)
             {
-                index_x = pos->piece_list[bB][i] / 8;
-                index_y = pos->piece_list[bB][i] % 8;
+                origin = pos->piece_list[bB][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -2534,8 +2725,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
                         index++;
                     }
@@ -2555,8 +2746,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
                         index++;
                     }
@@ -2576,8 +2767,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
                         index++;
                     }
@@ -2597,8 +2788,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
                         index++;
                     }
@@ -2611,8 +2802,9 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //queen
             for(int i = 0; i < pos->piece_count[bQ]; i++)
             {
-                index_x = pos->piece_list[bQ][i] / 8;
-                index_y = pos->piece_list[bQ][i] % 8;
+                origin = pos->piece_list[bQ][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -2624,8 +2816,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
                         index++;
                     }
@@ -2639,8 +2831,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = bCapQsearch_score('q', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -2660,8 +2852,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
                         index++;
                     }
@@ -2675,8 +2867,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = bCapQsearch_score('q', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -2690,8 +2882,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' || pos->board[index_x][j] == 'Q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = bCapQsearch_score('q', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -2711,8 +2903,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
                         index++;
                     }
@@ -2726,8 +2918,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' || pos->board[j][index_y] == 'Q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = bCapQsearch_score('q', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -2747,8 +2939,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'P' || pos->board[x][y] == 'R' || pos->board[x][y] == 'N' || pos->board[x][y] == 'B' || pos->board[x][y] == 'Q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
                         index++;
                     }
@@ -2766,27 +2958,28 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //pawn
             for(int i = 0; i < pos->piece_count[wP]; i++)
             {
-                index_x = pos->piece_list[wP][i] / 8;
-                index_y = pos->piece_list[wP][i] % 8;
+                origin = pos->piece_list[wP][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 if((index_y - 1) >= 0 && CheckCapture_wpawn(pos, index_x - 1, index_y - 1)) 
                 { 
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[index_x - 1][index_y - 1], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*(index_x-1)+index_y-1;
                     sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y - 1], index_x - 1);
                     index++;
                 }
                 //promotion
                 if(index_x == 1 && pos->board[0][index_y] == ' ')
                 {
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[0][index_y], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = index_y;
                     sort[index] = 1000;
                     index++;
                 } 
                 if((index_y + 1) <= 7 && CheckCapture_wpawn(pos, index_x - 1, index_y + 1)) 
                 { 
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[index_x - 1][index_y + 1], 3);
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*(index_x-1)+index_y+1;
                     sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y + 1], index_x - 1);
                     index++;
                 }
@@ -2794,8 +2987,9 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //knight
             for(int i = 0; i < pos->piece_count[wN]; i++)
             {
-                index_x = pos->piece_list[wN][i] / 8;
-                index_y = pos->piece_list[wN][i] % 8;
+                origin = pos->piece_list[wN][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 for(int j = 0; j < 8; j++)
                 {
                     x = index_x + knight_moves_x[j];
@@ -2806,16 +3000,17 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('N', pos->board[x][y], 1);
                         index++;
                     }
                 }
             }
             //king
-            index_x = pos->piece_list[wK][0] / 8;
-            index_y = pos->piece_list[wK][0] % 8;
+            origin = pos->piece_list[wK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
             for(int j = 0; j < 8; j++)
             {
                 x = index_x + king_moves_x[j];
@@ -2826,8 +3021,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 }
                 if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')
                 {  
-                    strncpy(all_moves[index], positions[index_x][index_y], 3);
-                    strncat(all_moves[index], positions[x][y], 3);
+                    all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                     sort[index] = wCapQsearch_score('K', pos->board[x][y], 1);
                     index++;
                 }
@@ -2835,15 +3030,16 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //rook
             for(int i = 0; i < pos->piece_count[wR]; i++)
             {
-                index_x = pos->piece_list[wR][i] / 8;
-                index_y = pos->piece_list[wR][i] % 8;
+                origin = pos->piece_list[wR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {
                     if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = wCapQsearch_score('R', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -2857,8 +3053,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = wCapQsearch_score('R', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -2872,8 +3068,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = wCapQsearch_score('R', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -2887,8 +3083,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = wCapQsearch_score('R', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -2901,8 +3097,9 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //bishop
             for(int i = 0; i < pos->piece_count[wB]; i++)
             {
-                index_x = pos->piece_list[wB][i] / 8;
-                index_y = pos->piece_list[wB][i] % 8;
+                origin = pos->piece_list[wB][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
                 //up left
                 for(int j = 1; j <= 7; j++)
                 {
@@ -2914,8 +3111,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
                         index++;
                     }
@@ -2935,8 +3132,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
                         index++;
                     }
@@ -2956,8 +3153,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
                         index++;
                     }
@@ -2977,8 +3174,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
                         index++;
                     }
@@ -2991,6 +3188,7 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
             //queen
             for(int i = 0; i < pos->piece_count[wQ]; i++)
             {
+                origin = pos->piece_list[wQ][i];
                 index_x = pos->piece_list[wQ][i] / 8;
                 index_y = pos->piece_list[wQ][i] % 8;
                 //up left
@@ -3004,8 +3202,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
                         index++;
                     }
@@ -3019,8 +3217,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = wCapQsearch_score('Q', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -3040,8 +3238,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
                         index++;
                     }
@@ -3055,8 +3253,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q')   
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = wCapQsearch_score('Q', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -3070,8 +3268,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' || pos->board[index_x][j] == 'q')   
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[index_x][j], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
                         sort[index] = wCapQsearch_score('Q', pos->board[index_x][j], 1);
                         index++;
                     }
@@ -3091,8 +3289,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
                         index++;
                     }
@@ -3106,8 +3304,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                 {
                     if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' || pos->board[j][index_y] == 'q') 
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[j][index_y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
                         sort[index] = wCapQsearch_score('Q', pos->board[j][index_y], 1);
                         index++;
                     }
@@ -3127,8 +3325,8 @@ int captureGen(BOARD *pos, char all_moves[100][6], int sort[100], int color)
                     }
                     if(pos->board[x][y] == 'p' || pos->board[x][y] == 'r' || pos->board[x][y] == 'n' || pos->board[x][y] == 'b' || pos->board[x][y] == 'q')  
                     {  
-                        strncpy(all_moves[index], positions[index_x][index_y], 3);
-                        strncat(all_moves[index], positions[x][y], 3);
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
                         index++;
                     }

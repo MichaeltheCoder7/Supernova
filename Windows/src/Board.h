@@ -6,6 +6,7 @@
 enum{ wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 
 enum positions {
+    
     a8, b8, c8, d8, e8, f8, g8, h8,
     a7, b7, c7, d7, e7, f7, g7, h7,
     a6, b6, c6, d6, e6, f6, g6, h6,
@@ -42,16 +43,6 @@ int position_to_x(char position[3]);
 int position_to_y(char position[3]);
 
 char position_to_piece(char board[8][8], char current_position[3]);
-
-int makeMove(BOARD *pos, char cur_p[3], char new_p[3], char promotion);
-
-int makeMove_qsearch(BOARD *pos, char cur_p[3], char new_p[3], char piece, char op_piece);
-
-int make_nullmove(BOARD *pos);
-
-void undo_nullmove(BOARD *pos, int ep_file);
-
-void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y);
 
 void init_board(BOARD *pos);
 
