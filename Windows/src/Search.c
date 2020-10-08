@@ -557,9 +557,12 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     
     MOVE pv_move;
     clear_move(&pv_move);
+    //get the best move from last iteration if any
     if(strncmp(BestMove, "", 5))
         pv_move = string_to_move(BestMove);
-    length = moveGen_root(pos, moves, scores, &pv_move, &hash_move, color);
+
+    length = moveGen_root(pos, moves, scores, color);
+    orderMove_root(moves, scores, length, &pv_move, &hash_move);
 
     for(int x = 0; x < length; x++)
     {

@@ -4,7 +4,7 @@
 #include "Board.h"
 #include "Move.h"
 
-int moveGen_root(BOARD *pos, MOVE all_moves[256], int sort[256], MOVE *best_move, MOVE *hash_move, int color);
+int moveGen_root(BOARD *pos, MOVE all_moves[256], int sort[256], int color);
 
 int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color);
 
