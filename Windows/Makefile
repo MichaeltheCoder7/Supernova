@@ -1,9 +1,9 @@
 # Makefile
 
 # Variables
-CFLAGS = gcc -ansi -std=c99 -c -O3
-FLAGS = gcc -ansi -std=c99 -O3
-CDEPS = ./bin/Main.o ./bin/Board.o ./bin/CheckMove.o ./bin/MoveGen.o ./bin/SEE.o ./bin/OrderMove.o ./bin/Attack.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
+CFLAGS = gcc -ansi -std=c99 -c -O3 -Wall
+FLAGS = gcc -ansi -std=c99 -O3 -Wall
+CDEPS = ./bin/Main.o ./bin/Board.o ./bin/Move.o ./bin/CheckMove.o ./bin/MoveGen.o ./bin/SEE.o ./bin/OrderMove.o ./bin/Attack.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
 
 # Default target
 all: ./bin/Supernova_2.1.exe
