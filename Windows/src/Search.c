@@ -168,7 +168,6 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     {
         //find the move with highest score
         movesort(moves, scores, length, x);
-        
         //make a copy of the board
         pos_copy = *pos;
         isprom = makeMove_qsearch(&pos_copy, &moves[x]);
@@ -731,7 +730,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
             alpha = -INFINITE;
             beta = INFINITE;
             //search longer if failed low
-            if(current_depth >= 6 && more_time && extra_time)
+            if(current_depth >= 7 && more_time && extra_time)
             {
                 search_time *= 1.8;
                 ponder_time *= 1.8;

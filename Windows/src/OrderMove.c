@@ -75,7 +75,7 @@ int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
     return 0;
 }
 
-int wCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
+int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
     int lva = 0;
@@ -84,9 +84,6 @@ int wCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int 
     {
         case 'P':
             lva = 5;
-            //capture + promotion
-            if(move->promotion == 'q')
-                lva += 500;
             break;
         case 'N':
             lva = 4;
@@ -133,7 +130,7 @@ int wCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int 
         return mvv + lva + WCAPTURE;
     }
 
-    int value = SEE_MO(board, x, y, nx, ny, target, -1);
+    int value = SEE_MO(board, x1, y1, x2, y2, target, -1);
     
     if(value > 0)
         return mvv + lva + WCAPTURE;
@@ -143,7 +140,7 @@ int wCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int 
         return mvv + lva + LCAPTURE;
 }
 
-int bCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
+int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
     int lva = 0;
@@ -152,9 +149,6 @@ int bCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int 
     {
         case 'p':
             lva = 5;
-            //capture + promotion
-            if(move->promotion == 'q')
-                lva += 500;
             break;
         case 'n':
             lva = 4;
@@ -201,7 +195,7 @@ int bCapMove_score(MOVE *move, char piece, char op_piece, char board[8][8], int 
         return mvv + lva + WCAPTURE;
     }
 
-    int value = SEE_MO(board, x, y, nx, ny, target, 1);
+    int value = SEE_MO(board, x1, y1, x2, y2, target, 1);
     
     if(value > 0)
         return mvv + lva + WCAPTURE;
@@ -226,7 +220,7 @@ int castling_score()
     return CASTLING;
 }
 
-int quietMove_score(MOVE *move, int x1, int y1, int x2, int y2, int ply, int color)
+int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
 {
     if(compareMove(&killers[ply][0], move))
     {
@@ -238,11 +232,11 @@ int quietMove_score(MOVE *move, int x1, int y1, int x2, int y2, int ply, int col
     }
     else
     {
-        return history[(color==1)?1:0][8*x1 + x2][8*y1 + y2];
+        return history[(color==1)?1:0][origin][8*x+y];
     }
 }
 
-int wCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
+int wCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
     int lva = 0;
@@ -261,9 +255,6 @@ int wCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece
         {
             case 'P':
                 lva = 5;
-                //capture + promotion
-                if(move->promotion == 'q')
-                    lva += 500;
                 break;
             case 'N':
                 lva = 4;
@@ -310,7 +301,7 @@ int wCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece
             return mvv + lva + WCAPTURE;
         }
 
-        int value = SEE_MO(board, x, y, nx, ny, target, -1);
+        int value = SEE_MO(board, x1, y1, x2, y2, target, -1);
         
         if(value > 0)
             return mvv + lva + WCAPTURE;
@@ -321,7 +312,7 @@ int wCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece
     }
 }
 
-int bCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece, char op_piece, char board[8][8], int x, int y, int nx, int ny)
+int bCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
     int lva = 0;
@@ -340,9 +331,6 @@ int bCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece
         {
             case 'p':
                 lva = 5;
-                //capture + promotion
-                if(move->promotion == 'q')
-                    lva += 500;
                 break;
             case 'n':
                 lva = 4;
@@ -389,7 +377,7 @@ int bCapMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, char piece
             return mvv + lva + WCAPTURE;
         }
 
-        int value = SEE_MO(board, x, y, nx, ny, target, 1);
+        int value = SEE_MO(board, x1, y1, x2, y2, target, 1);
         
         if(value > 0)
             return mvv + lva + WCAPTURE;
@@ -448,7 +436,7 @@ int castling_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move)
     }
 }
 
-int quietMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, int x1, int y1, int x2, int y2, int color)
+int quietMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, int origin, int x, int y, int color)
 {
     if(compareMove(best_move, move))
     {
@@ -468,7 +456,7 @@ int quietMove_score_root(MOVE *move, MOVE *best_move, MOVE *hash_move, int x1, i
     }
     else
     {
-        return history[(color==1)?1:0][8*x1 + x2][8*y1 + y2];
+        return history[(color==1)?1:0][origin][8*x+y];
     }
 }
 
