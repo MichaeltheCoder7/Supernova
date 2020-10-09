@@ -25,8 +25,8 @@
 #define RETURNINGBISHOP 30 
 #define TEMPO           10 
 
-int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 }; 
-int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 }; 
+int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 };
+int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 };
 int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
 int rook_val[9] = { 15, 12,  9,  6,  3,  0, -3, -6, -9 };
 
