@@ -72,6 +72,7 @@ int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
             }
         }
     }
+    
     return 0;
 }
 

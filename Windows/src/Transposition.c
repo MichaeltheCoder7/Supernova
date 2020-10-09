@@ -42,7 +42,7 @@ int piece_code(char piece)
         default:
             break;
     }
-    
+
     return -1;
 } 
 
@@ -79,6 +79,8 @@ void init_zobrist()
     qswcr = llrand();
     ksbcr = llrand();
     qsbcr = llrand();
+    wcas = llrand();
+    bcas = llrand();
 }
 
 //use zobrist hashing to encode chess board
@@ -119,6 +121,15 @@ unsigned long long getHash(BOARD *pos, int color)
     {
         h ^= qsbcr;
     }
+    //encode castling status
+    if(pos->wcastled)
+    {
+        h ^= wcas;
+    }
+    if(pos->bcastled)
+    {
+        h ^= bcas;
+    }
     //encode enpassant
     switch(pos->ep_file)
     {
@@ -149,7 +160,7 @@ unsigned long long getHash(BOARD *pos, int color)
             pos->key ^= ep[7];
             break;  
     }
-    
+
     return h;
 }
 
@@ -173,7 +184,6 @@ struct DataItem *probeTT(unsigned long long key)
     {
         return NULL;
     }
-
 }
 
 void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
@@ -251,7 +261,6 @@ struct Eval *probeEvalTT(unsigned long long key)
     {
         return NULL;
     }
-
 }
 
 void storeEvalTT(unsigned long long key, int evaluation)

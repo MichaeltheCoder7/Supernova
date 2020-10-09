@@ -41,6 +41,7 @@ int compareMove(MOVE *move1, MOVE *move2)
     {
         return 1;
     }
+
     return 0;
 }
 
@@ -65,6 +66,7 @@ MOVE string_to_move(char move[6])
     {
         smove.promotion = ' ';
     }
+
     return smove;
 }
 
@@ -412,6 +414,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 pos->board[7][7] = ' ';
                 pos->key ^= table[7][7][3];
                 pos->key ^= table[7][5][3];
+                pos->key ^= wcas;
                 //piece list update
                 index = pos->index_board[h1];
                 pos->index_board[f1] = index;
@@ -425,6 +428,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 pos->board[7][0] = ' ';
                 pos->key ^= table[7][0][3];
                 pos->key ^= table[7][3][3];
+                pos->key ^= wcas;
                 //piece list update
                 index = pos->index_board[a1];
                 pos->index_board[d1] = index;
@@ -441,6 +445,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 pos->board[0][7] = ' ';
                 pos->key ^= table[0][7][9];
                 pos->key ^= table[0][5][9];
+                pos->key ^= bcas;
                 //piece list update
                 index = pos->index_board[h8];
                 pos->index_board[f8] = index;
@@ -454,6 +459,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 pos->board[0][0] = ' ';
                 pos->key ^= table[0][0][9];
                 pos->key ^= table[0][3][9];
+                pos->key ^= bcas;
                 //piece list update
                 index = pos->index_board[a8];
                 pos->index_board[d8] = index;
@@ -699,8 +705,8 @@ void undo_nullmove(BOARD *pos, int ep_file)
 void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
 {
     char piece = board[cur_x][cur_y];
-
-	board[new_x][new_y] = board[cur_x][cur_y];
+    char op_piece = board[new_x][new_y];
+	board[new_x][new_y] = piece;
 	board[cur_x][cur_y] = ' ';
 
     if(piece == 'P' || piece == 'p') 
@@ -718,6 +724,9 @@ void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
             default:
                 break;
         }
+        //en passant
+        if(op_piece == ' ')
+            board[cur_x][new_y] = ' ';
     }
 }
 
@@ -1022,6 +1031,7 @@ void makeMove_UCI(BOARD *pos, char cur_p[3], char new_p[3], char promotion)
                 pos->board[7][7] = ' ';
                 pos->key ^= table[7][7][3];
                 pos->key ^= table[7][5][3];
+                pos->key ^= wcas;
                 //piece list update
                 index = pos->index_board[h1];
                 pos->index_board[f1] = index;
@@ -1034,6 +1044,7 @@ void makeMove_UCI(BOARD *pos, char cur_p[3], char new_p[3], char promotion)
                 pos->board[7][0] = ' ';
                 pos->key ^= table[7][0][3];
                 pos->key ^= table[7][3][3];
+                pos->key ^= wcas;
                 //piece list update
                 index = pos->index_board[a1];
                 pos->index_board[d1] = index;
@@ -1049,6 +1060,7 @@ void makeMove_UCI(BOARD *pos, char cur_p[3], char new_p[3], char promotion)
                 pos->board[0][7] = ' ';
                 pos->key ^= table[0][7][9];
                 pos->key ^= table[0][5][9];
+                pos->key ^= bcas;
                 //piece list update
                 index = pos->index_board[h8];
                 pos->index_board[f8] = index;
@@ -1061,6 +1073,7 @@ void makeMove_UCI(BOARD *pos, char cur_p[3], char new_p[3], char promotion)
                 pos->board[0][0] = ' ';
                 pos->key ^= table[0][0][9];
                 pos->key ^= table[0][3][9];
+                pos->key ^= bcas;
                 //piece list update
                 index = pos->index_board[a8];
                 pos->index_board[d8] = index;

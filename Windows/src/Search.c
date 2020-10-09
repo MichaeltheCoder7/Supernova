@@ -212,11 +212,12 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         {
             if(value >= beta)
             {
-                return beta;   //beta cut-off
+                return beta; //beta cut-off
             } 
             alpha = value;   
         }
     }
+    
     return alpha;
 }
 
@@ -401,10 +402,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             continue;
         }
         
-        //hack to ensure pv line is intact
-        if(x == 0)
-            bm = moves[0];
-        
         //fultility prunning
         //try at least one move
         if(futility && !isTactical && moves_made)
@@ -416,6 +413,10 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
 
         moves_made++;
+
+        //hack to ensure pv line is more intact
+        if(moves_made == 1)
+            bm = moves[x];
 
         //late move reduction
         reduction_depth = 0;
@@ -492,7 +493,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                 }
                 alpha = beta;
                 entryFlag = LOWERBOUND;
-                break;   //beta cut-off
+                break; //beta cut-off
             }
             alpha_raised = true;
             alpha = value;
@@ -509,7 +510,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
         else
         {
-            alpha = 0;  //stalemate
+            alpha = 0; //stalemate
         }
     }
     //draw by fifty moves
@@ -618,7 +619,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                 }
                 alpha = beta;
                 entryFlag = LOWERBOUND;
-                break;   //beta cut-off
+                break; //beta cut-off
             }
             alpha = value;
             entryFlag = EXACT;
@@ -729,11 +730,18 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
             alpha = -INFINITE;
             beta = INFINITE;
             //search longer if failed low
-            if(current_depth >= 7 && more_time && extra_time)
+            if(more_time && extra_time)
             {
-                search_time *= 1.8;
-                ponder_time *= 1.8;
-                more_time = false;
+                if(secs >= (search_time / 4))
+                {
+                    search_time *= 1.8;
+                    more_time = false;
+                }
+                else if(secs >= (ponder_time / 4))
+                {
+                    ponder_time *= 1.8;
+                    more_time = false;
+                }
             }
             failed_low = true;
             current_depth -= 1;
@@ -815,8 +823,8 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     //clear tables in analyze mode
     if(analyze)
     {
-        clearTT();  //clear hash table
-        clearEvalTT();  //clear evaluation hash table
+        clearTT(); //clear hash table
+        clearEvalTT(); //clear evaluation hash table
         memset(history, 0, sizeof(history)); //clear history heuristic table
     }
     else

@@ -13,6 +13,8 @@ unsigned long long kswcr;
 unsigned long long qswcr;
 unsigned long long ksbcr;
 unsigned long long qsbcr;
+unsigned long long wcas;
+unsigned long long bcas;
 unsigned long long ep[8]; 
 unsigned long HASHSIZE;
 unsigned long EVALHASHSIZE;

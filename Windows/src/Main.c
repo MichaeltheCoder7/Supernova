@@ -355,7 +355,7 @@ void handle_go(char *input)
 	double winc = 0, binc = 0;
 	int moves_left = 30;
 	search_depth = -1;
-	ponder_time = 0;
+	ponder_time = __DBL_MAX__;
 	extra_time = true;
 	analyze = false;
 	node_mode = false;

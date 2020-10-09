@@ -263,6 +263,7 @@ static inline int wpawn_controlled(char board[8][8], int x, int y)
                 break;
         }
     }
+    
     return squares;
 }
 
@@ -297,6 +298,7 @@ static inline int bpawn_controlled(char board[8][8], int x, int y)
                 break;
         }
     }
+
     return squares;
 }
 
@@ -314,6 +316,7 @@ static inline bool candidate_passed_white(char board[8][8], int x, int y)
             return false;
         }
     }
+
     return true;    
 }
 
@@ -331,6 +334,7 @@ static inline bool candidate_passed_black(char board[8][8], int x, int y)
             return false;
         }
     }
+
     return true;    
 }
 
@@ -358,6 +362,7 @@ static inline bool connected_white(char board[8][8], int x, int y)
             break;
 
     }
+
     return false;    
 }
 
@@ -385,6 +390,7 @@ static inline bool connected_black(char board[8][8], int x, int y)
             break;
 
     }
+
     return false;    
 }
 
@@ -412,6 +418,7 @@ static inline bool phalanx_white(char board[8][8], int x, int y)
             break;
 
     }
+
     return false;    
 }
 
@@ -439,6 +446,7 @@ static inline bool phalanx_black(char board[8][8], int x, int y)
             break;
 
     }
+
     return false;    
 }
 
@@ -478,6 +486,7 @@ static inline bool isolated_white(char board[8][8], int y)
             }
             break;
     }
+
     return true;    
 }
 
@@ -517,6 +526,7 @@ static inline bool isolated_black(char board[8][8], int y)
             }
             break;  
     }
+
     return true;    
 }
 
@@ -556,6 +566,7 @@ static inline bool backward_white(char board[8][8], int x, int y)
             }
             break; 
     }
+
     return true;    
 }
 
@@ -595,6 +606,7 @@ static inline bool backward_black(char board[8][8], int x, int y)
             }
             break;  
     }
+
     return true;    
 }
 
@@ -607,6 +619,7 @@ static inline bool openFile(char board[8][8], int y)
             return false;
         }
     }
+
     return true;
 }
 
@@ -626,6 +639,7 @@ static inline bool queenFile(BOARD *pos, int y)
             return true;
         }
     }
+
     return false;
 }
 
@@ -638,6 +652,7 @@ static inline bool semiOpenFile_white(char board[8][8], int y)
             return false;
         }
     }
+
     return true;
 }
 
@@ -650,6 +665,7 @@ static inline bool semiOpenFile_black(char board[8][8], int y)
             return false;
         }
     }
+
     return true;
 }
 
@@ -782,6 +798,7 @@ static inline bool wTarrasch_wrook(BOARD *pos, int x, int y)
             return true;
         }
     }
+
     return false;
 }
 
@@ -794,6 +811,7 @@ static inline bool wTarrasch_brook(BOARD *pos, int x, int y)
             return true;
         }
     }
+
     return false;
 }
 
@@ -806,6 +824,7 @@ static inline bool bTarrasch_wrook(BOARD *pos, int x, int y)
             return true;
         }
     }
+
     return false;
 }
 
@@ -818,6 +837,7 @@ static inline bool bTarrasch_brook(BOARD *pos, int x, int y)
             return true;
         }
     }
+
     return false;
 }
 
@@ -861,6 +881,7 @@ int wking_file(char board[8][8], int y)
             }
             break;
     }
+
     return result;
 }
 
@@ -904,6 +925,7 @@ int bking_file(char board[8][8], int y)
             }
             break;
     }
+
     return result;
 }
 
