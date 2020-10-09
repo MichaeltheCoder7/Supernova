@@ -33,12 +33,8 @@ static inline void clearKiller()
 {
     for(int x = 0; x < MAXDEPTH; x++)
     {
-        killers[x][0].from = NOMOVE;
-        killers[x][0].to = NOMOVE;
-        killers[x][0].promotion = ' ';
-        killers[x][1].from = NOMOVE;
-        killers[x][1].to = NOMOVE;
-        killers[x][1].promotion = ' ';
+        clear_move(&killers[x][0]);
+        clear_move(&killers[x][1]);
     }
 }
 
@@ -129,6 +125,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     int length;
     int isprom;
     char moved_piece, piece;
+    int moved_piece_value;
     int cap_piece_value;
     int new_x, new_y;
     BOARD pos_copy;
@@ -185,17 +182,19 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         cap_piece_value = piece_value(piece);
 
         //delta prunning
-        if(!isprom && (standing_pat + cap_piece_value + 200) < alpha)
+        if((standing_pat + cap_piece_value + 200) < alpha && !isprom)
         {
             if(pos_copy.piece_num > 14)
                 continue;
         }
 
-        moved_piece = pos->board[moves[x].from / 8][moves[x].from % 8];
+        moved_piece = pos_copy.board[new_x][new_y];
+        moved_piece_value = piece_value(moved_piece);
 
         //SEE prunning
         //only check when higher takes lower and not promotion
-        if(!isprom && piece_value(moved_piece) > cap_piece_value)
+        //do not check when king is capturing
+        if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && !isprom)
         {
             if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
             {
@@ -484,8 +483,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                     int b = moves[x].from;
                     int c = moves[x].to;
                     history[a][b][c] += depth*depth;
-                    //prevent overflow 
-                    if(history[a][b][c] > 800000)
+                    //prevent overflow
+                    if(history[a][b][c] > 80000000)
                     {
                         preventOverflow();
                     }
@@ -554,14 +553,10 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     //get children of node
     MOVE moves[256];
     int scores[256];
-    
-    MOVE pv_move;
-    clear_move(&pv_move);
     //get the best move from last iteration if any
-    if(strncmp(BestMove, "", 5))
-        pv_move = string_to_move(BestMove);
+    MOVE pv_move = string_to_move(BestMove);
 
-    length = moveGen_root(pos, moves, scores, color);
+    length = moveGen(pos, moves, scores, 0, color);
     orderMove_root(moves, scores, length, &pv_move, &hash_move);
 
     for(int x = 0; x < length; x++)
@@ -614,8 +609,8 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                     int b = moves[x].from;
                     int c = moves[x].to;
                     history[a][b][c] += depth*depth;
-                    //prevent overflow 
-                    if(history[a][b][c] > 800000)
+                    //prevent overflow
+                    if(history[a][b][c] > 80000000)
                     {
                         preventOverflow();
                     }
@@ -803,7 +798,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);
 }
 
-void search(BOARD *pos, int piece_color, char op_move[6]) 
+void search(BOARD *pos, int piece_color, char op_move[6])
 {
     //prepare to search
     gettimeofday(&starting_time, NULL);

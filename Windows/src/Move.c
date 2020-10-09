@@ -50,7 +50,10 @@ MOVE string_to_move(char move[6])
     char np[3];
     char promotion = ' ';
     MOVE smove;
-
+    
+    clear_move(&smove);
+    if(!strncmp(move, "", 5))
+        return smove;
     sscanf(move, "%2s%2s%c", cp, np, &promotion);
     smove.from = 8*position_to_x(cp) + position_to_y(cp);
     smove.to = 8*position_to_x(np) + position_to_y(np);
@@ -68,6 +71,8 @@ MOVE string_to_move(char move[6])
 void move_to_string(MOVE *smove, char move[6])
 {
     memset(move, 0, 6);
+    if(smove->from == NOMOVE)
+        return;
     strncpy(move, positions[smove->from], 3);
     strncat(move, positions[smove->to], 3);
     switch(smove->promotion)

@@ -28,6 +28,8 @@ int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 };
 int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 }; 
 int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
 int rook_val[9] = { 15, 12,  9,  6,  3,  0, -3, -6, -9 };
+int knight_x[8] = {-2, -2, -1, -1,  1,  1,  2,  2};
+int knight_y[8] = {-1,  1, -2,  2, -2,  2, -1,  1};
 int wattack_count;
 int battack_count;
 int wattack_weight;
@@ -1002,12 +1004,11 @@ static inline int wknight_mobility(char board[8][8], int index_x, int index_y, i
     int attack = 0;
     int move_count = 0;
     int x, y;
-    int knight_moves_x[8] = {-2, -2, -1, -1,  1,  1,  2,  2};
-    int knight_moves_y[8] = {-1,  1, -2,  2, -2,  2, -1,  1};
+
     for(int j = 0; j < 8; j++)
     {
-        x = index_x + knight_moves_x[j];
-        y = index_y + knight_moves_y[j];
+        x = index_x + knight_x[j];
+        y = index_y + knight_y[j];
         if(x & 8 || y & 8) //out of board
         {
             continue;
@@ -1036,12 +1037,11 @@ static inline int bknight_mobility(char board[8][8], int index_x, int index_y, i
     int attack = 0;
     int move_count = 0;
     int x, y;
-    int knight_moves_x[8] = {-2, -2, -1, -1,  1,  1,  2,  2};
-    int knight_moves_y[8] = {-1,  1, -2,  2, -2,  2, -1,  1};
+
     for(int j = 0; j < 8; j++)
     {
-        x = index_x + knight_moves_x[j];
-        y = index_y + knight_moves_y[j];
+        x = index_x + knight_x[j];
+        y = index_y + knight_y[j];
         if(x & 8 || y & 8) //out of board
         {
             continue;

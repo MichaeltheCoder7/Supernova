@@ -9,16 +9,16 @@
 #include "Search.h"
 #include "Move.h"
 
-#define BESTMOVE    1000000
-#define HASHMOVE    900000
-#define WCAPTURE    801200
-#define PROMOTION   801200
-#define CASTLING    801200
-#define ECAPTURE    800600
-#define KILLER1     800550
-#define KILLER2     800540
-#define UNDERPROM   800530
-#define LCAPTURE    800000
+#define BESTMOVE    100000000
+#define HASHMOVE    90000000
+#define WCAPTURE    80001200
+#define PROMOTION   80001150
+#define CASTLING    80001140
+#define ECAPTURE    80000600
+#define KILLER1     80000550
+#define KILLER2     80000540
+#define UNDERPROM   80000530
+#define LCAPTURE    80000000
 
 //swap two ints
 static inline void swap(int* a, int* b)
@@ -276,10 +276,15 @@ int piece_value(char piece)
             return 900;
         case 'q':
             return 900;
+        case 'K':
+            return 20000;
+        case 'k':
+            return 20000;
         case ' ':
             return 100;
+        default:
+            return 0;
     }
-    return 0;
 }
 
 int wCapQsearch_score(char piece, char op_piece, int new_x)

@@ -42,7 +42,7 @@ int position_to_x(char position[3]);
 
 int position_to_y(char position[3]);
 
-char position_to_piece(char board[8][8], char current_position[3]);
+char position_to_piece(char board[8][8], char position[3]);
 
 void init_board(BOARD *pos);
 
