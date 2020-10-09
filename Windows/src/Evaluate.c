@@ -1872,7 +1872,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         passed = false;
         if(board[x-1][y] == 'P')
         {
-            pawn_white -= DOUBLEDPAWN;     //doubled pawn penalty    
+            pawn_white -= DOUBLEDPAWN; //doubled pawn penalty    
             pawn_white += white_pawn[x][y];
         }
         else if(candidate_passed_white(board, x, y))
@@ -1910,7 +1910,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             if(passed)
                 pawn_white += CONNECTEDPAWN*2;
             else
-                pawn_white += CONNECTEDPAWN;    //connected pawn bonus
+                pawn_white += CONNECTEDPAWN; //connected pawn bonus
         }
         else if(isolated_white(board, y))
         {
@@ -1931,7 +1931,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         passed = false;
         if(board[x+1][y] == 'p')
         {
-            pawn_black -= DOUBLEDPAWN;     //doubled pawn penalty
+            pawn_black -= DOUBLEDPAWN; //doubled pawn penalty
             pawn_black += black_pawn[x][y];
         }
         else if(candidate_passed_black(board, x, y))
@@ -1944,7 +1944,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 pawn_black += PawnPassed_black[x];
             if(phalanx_black(board, x, y))
             {
-                pawn_black += 20;    //connected pawn bonus
+                pawn_black += 20; //connected pawn bonus
             }
             //Tarrasch rule
             if(bTarrasch_brook(pos, x, y))
@@ -1967,7 +1967,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         if(connected_black(board, x, y))
         {
             if(passed)
-                pawn_black += CONNECTEDPAWN*2;    //connected pawn bonus
+                pawn_black += CONNECTEDPAWN*2; //connected pawn bonus
             else
                 pawn_black += CONNECTEDPAWN; 
         }
@@ -2071,7 +2071,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         position_bonus_white += white_bishop[x][y];
         if(badBishop_white(board, x, y))
         {
-            other_bonus_white -= BADBISHOP;    //bad bishop penalty
+            other_bonus_white -= BADBISHOP; //bad bishop penalty
         }
         if(outpost_white(board, x, y))
         {
@@ -2258,7 +2258,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         position_bonus_black += black_bishop[x][y];
         if(badBishop_black(board, x, y))
         {
-            other_bonus_black -= BADBISHOP;    //bad bishop penalty
+            other_bonus_black -= BADBISHOP; //bad bishop penalty
         }
         if(outpost_black(board, x, y))
         {
