@@ -9,7 +9,7 @@ CDEPS = ./bin/Main.o ./bin/Board.o ./bin/Move.o ./bin/CheckMove.o ./bin/MoveGen.
 # Default target
 all: ./bin/Supernova_2.1.exe
 
-test: 
+test:
 	./bin/Supernova_2.1.exe
 
 ######################### Generate object files #######################
