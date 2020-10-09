@@ -4,8 +4,11 @@
 #include "Board.h"
 #include "Move.h"
 
-int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color);
+int knight_moves_x[8];
+int knight_moves_y[8];
+int king_moves_x[8];
+int king_moves_y[8];
 
-int captureGen(BOARD *pos, MOVE all_moves[256], int sort[100], int color);
+int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color);
 
 #endif

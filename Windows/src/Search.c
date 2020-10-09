@@ -11,6 +11,7 @@
 #include "Board.h"
 #include "Move.h"
 #include "MoveGen.h"
+#include "CaptureGen.h"
 #include "OrderMove.h"
 #include "Evaluate.h"
 #include "Transposition.h"
