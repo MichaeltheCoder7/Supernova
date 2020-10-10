@@ -119,7 +119,7 @@ int makeMove(BOARD *pos, MOVE *move)
     int index, square;
 
     //update board
-	pos->board[new_x][new_y] = pos->board[cur_x][cur_y];
+	pos->board[new_x][new_y] = piece;
 	pos->board[cur_x][cur_y] = ' ';
 
     //castling rights check
@@ -489,7 +489,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     int index, square;
 
     //update board
-	pos->board[new_x][new_y] = pos->board[cur_x][cur_y];
+	pos->board[new_x][new_y] = piece;
 	pos->board[cur_x][cur_y] = ' ';
 
     //zobrist key update
@@ -745,7 +745,7 @@ void makeMove_UCI(BOARD *pos, char cur_p[3], char new_p[3], char promotion)
     int index, square;
 
     //update board
-	pos->board[new_x][new_y] = pos->board[cur_x][cur_y];
+	pos->board[new_x][new_y] = piece;
 	pos->board[cur_x][cur_y] = ' ';
 
     //castling rights check

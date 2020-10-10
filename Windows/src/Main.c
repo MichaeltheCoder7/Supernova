@@ -440,6 +440,9 @@ void handle_go(char *input)
 	{
 		search_time = __DBL_MAX__;
 		search_depth = atoi(buffer);
+		//prevent depth > MAXDETPTH
+		if(search_depth > MAXDEPTH)
+			search_depth = MAXDEPTH;
 	}
 	else if(!strncmp("nodes", option, 5))
 	{
