@@ -18,7 +18,7 @@
 #define ROOKHALFFILE    8
 #define ROOKQUEENFILE   7
 #define BISHOPPAIR      30
-#define BADBISHOP       6
+#define BADBISHOP       5
 #define OUTPOST         10
 #define KNIGHTPAIR      8
 #define ROOKPAIR        16
@@ -1472,7 +1472,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         //pawn shield bonus
         if(white_king_x > 5 && white_king_y > 4)
         {
-            if(board[7][6] == 'R' || board[7][7] == 'R') //blocked rook penalty
+            if(board[7][6] == 'R' || board[7][7] == 'R' || board[6][7] == 'R') //blocked rook penalty
                 midgame_white -= 40;
             
             if(board[6][5] == 'P')  
@@ -1507,7 +1507,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         }
         else if(white_king_x > 5 && white_king_y < 3)
         {
-            if(board[7][0] == 'R' || board[7][1] == 'R')
+            if(board[7][0] == 'R' || board[7][1] == 'R' || board[6][0] == 'R')
                 midgame_white -= 40;
             
             if(board[6][0] == 'P')
@@ -1543,7 +1543,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
 
         if(black_king_x < 2 && black_king_y > 4)
         {
-            if(board[0][6] == 'r' || board[0][7] == 'r')
+            if(board[0][6] == 'r' || board[0][7] == 'r' || board[1][7] == 'r')
                 midgame_black -= 40;
             
             if(board[1][5] == 'p')
@@ -1578,7 +1578,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         }
         else if(black_king_x < 2 && black_king_y < 3)
         {
-            if(board[0][0] == 'r' || board[0][1] == 'r')
+            if(board[0][0] == 'r' || board[0][1] == 'r' || board[1][0] == 'r')
                 midgame_black -= 40;
 
             if(board[1][0] == 'p')
@@ -1614,11 +1614,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         //open files next to king penalty
         midgame_white -= wking_file(board, white_king_y);
         midgame_black -= bking_file(board, black_king_y);
-        //unable to castle penalty
-        if(!pos->wcastled && !pos->ksw && !pos->qsw)
-            midgame_white -= 15;
-        if(!pos->bcastled && !pos->ksb && !pos->qsb)
-            midgame_black -= 15;
     }
 
     //king position bonus endgame

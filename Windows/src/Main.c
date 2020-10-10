@@ -203,27 +203,21 @@ void parse_fen(char *position, BOARD *pos)
 	pos->qsb = 0;
 	pos->ksw = 0;
 	pos->qsw = 0;
-	pos->wcastled = true;
-	pos->bcastled = true;
 	for(int i = 0; i < 4; i++)
 	{
 		switch(*position)
 		{
 			case 'K':
 				pos->ksw = 1;
-				pos->wcastled = false;
 				break;
 			case 'Q':
 				pos->qsw = 1;
-				pos->wcastled = false;
 				break;
 			case 'k':
 				pos->ksb = 1;
-				pos->bcastled = false;
 				break;
 			case 'q':
 				pos->qsb = 1;
-				pos->bcastled = false;
 				break;
 			case '-':
 				break;
@@ -252,11 +246,9 @@ void parse_fen(char *position, BOARD *pos)
 void handle_position(char *input)
 {
 	char move[6] = "";
-	char cp[3] = "";
-	char np[3] = "";
+	MOVE smove;
 	char own_piece = ' ';
 	char op_piece = ' ';
-	char promotion_piece = ' ';
 	//parse the positon input
 	char *position;
 	char *move_str;
@@ -311,11 +303,12 @@ void handle_position(char *input)
 			{
 				memcpy(move, move_str, 6);
 				move[5] = '\0';
+				//convert move string to move struct
+				smove = string_to_move(move);
 				//set the board at the start of the game
-				sscanf(move, "%2s%2s%c", cp, np, &promotion_piece);
-				own_piece = position_to_piece(pos.board, cp);
-				op_piece = position_to_piece(pos.board, np);
-				makeMove_UCI(&pos, cp, np, promotion_piece);
+				own_piece = pos.board[smove.from / 8][smove.from % 8];
+				op_piece = pos.board[smove.to / 8][smove.to % 8];
+				makeMove(&pos, &smove);
 				
 				//store board into move history
 				history_index++;
@@ -339,7 +332,7 @@ void handle_position(char *input)
 			engine_color = 1; //black
 		}
 	}
-}   
+}
 
 void handle_go(char *input)
 {

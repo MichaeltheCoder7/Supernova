@@ -33,6 +33,4 @@ void undo_nullmove(BOARD *pos, int ep_file);
 
 void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y);
 
-void makeMove_UCI(BOARD *pos, char cur_p[3], char new_p[3], char promotion);
-
 #endif

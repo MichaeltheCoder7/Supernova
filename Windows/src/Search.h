@@ -5,7 +5,7 @@
 #include "Board.h"
 #include "Move.h"
 
-#define MAXDEPTH 40
+#define MAXDEPTH 50
 
 unsigned long long history_log[800];
 int history_index;

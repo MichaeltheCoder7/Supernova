@@ -31,8 +31,6 @@ typedef struct{
     int piece_list[12][10];
     int piece_count[12];
     int index_board[64];
-    bool wcastled;
-    bool bcastled;
 
 } BOARD;
 
@@ -41,8 +39,6 @@ void displayboard(char board[8][8]);
 int position_to_x(char position[3]);
 
 int position_to_y(char position[3]);
-
-char position_to_piece(char board[8][8], char position[3]);
 
 void init_board(BOARD *pos);
 

@@ -79,8 +79,6 @@ void init_zobrist()
     qswcr = llrand();
     ksbcr = llrand();
     qsbcr = llrand();
-    wcas = llrand();
-    bcas = llrand();
 }
 
 //use zobrist hashing to encode chess board
@@ -120,15 +118,6 @@ unsigned long long getHash(BOARD *pos, int color)
     if(pos->qsb)
     {
         h ^= qsbcr;
-    }
-    //encode castling status
-    if(pos->wcastled)
-    {
-        h ^= wcas;
-    }
-    if(pos->bcastled)
-    {
-        h ^= bcas;
     }
     //encode enpassant
     switch(pos->ep_file)

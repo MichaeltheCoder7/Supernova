@@ -140,12 +140,6 @@ int position_to_y(char position[3])
     return -1; //when nothing is matched
 }
 
-//get a position string and translate it to a piece character on the board
-char position_to_piece(char board[8][8], char position[3])
-{
-    return board[position_to_x(position)][position_to_y(position)];
-}
-
 void init_board(BOARD *pos)
 {
 	memcpy(pos->board, board, sizeof(pos->board));
@@ -162,8 +156,6 @@ void init_board(BOARD *pos)
 	memcpy(pos->piece_count, piece_count, sizeof(pos->piece_count));
 	memcpy(pos->index_board, index_board, sizeof(pos->index_board));
 	pos->key = getHash(pos, -1);
-	pos->wcastled = false;
-	pos->bcastled = false;
 }
 
 void resetboard(char board[8][8])
