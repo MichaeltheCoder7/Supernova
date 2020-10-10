@@ -42,7 +42,7 @@ int position_to_y(char position[3]);
 
 void init_board(BOARD *pos);
 
-void resetboard(char board[8][8]);
+void clear_board(char board[8][8]);
 
 void set_piecelists(BOARD *pos);
 

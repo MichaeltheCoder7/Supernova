@@ -98,7 +98,7 @@ void parse_fen(char *position, BOARD *pos)
 	char halfmove[20] = "";
 	char fullmove[20] = "";
 	int piece_count = 0;
-	resetboard(pos->board);
+	clear_board(pos->board);
 	int x = 0, y = 0;
 	position+=4;
 	//loop through fen
@@ -352,6 +352,7 @@ void handle_go(char *input)
 	extra_time = true;
 	analyze = false;
 	node_mode = false;
+	time_management = false;
 	sscanf(input, "go %s %s", option, buffer); //get the go command
 	if(!strncmp("wtime", option, 5))
 	{	
@@ -392,6 +393,7 @@ void handle_go(char *input)
 			search_time *= 1.2;
 			outofbook++;
 		}
+		time_management = true;
 	}
 	else if(!strncmp("ponder", option, 6))
 	{

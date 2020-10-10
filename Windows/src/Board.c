@@ -158,7 +158,7 @@ void init_board(BOARD *pos)
 	pos->key = getHash(pos, -1);
 }
 
-void resetboard(char board[8][8])
+void clear_board(char board[8][8])
 {
     char board_reset[8][8] = {
 						

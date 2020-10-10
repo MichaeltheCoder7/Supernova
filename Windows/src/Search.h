@@ -19,6 +19,7 @@ double ponder_time;
 bool extra_time;
 bool analyze;
 int search_depth;
+bool time_management;
 bool node_mode;
 int search_nodes;
 bool stop_search;
