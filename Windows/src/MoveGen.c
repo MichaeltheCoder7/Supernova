@@ -55,17 +55,17 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                             all_moves[index].from = origin;
                             all_moves[index].to = 8*(index_x+1)+y;
                             all_moves[index].promotion = 'r';
-                            sort[index] = underpromotion_score();
+                            sort[index] = UNDERPROM;
                             index++;
                             all_moves[index].from = origin;
                             all_moves[index].to = 8*(index_x+1)+y;
                             all_moves[index].promotion = 'b';
-                            sort[index] = underpromotion_score();
+                            sort[index] = UNDERPROM;
                             index++;
                             all_moves[index].from = origin;
                             all_moves[index].to = 8*(index_x+1)+y;
                             all_moves[index].promotion = 'n';
-                            sort[index] = underpromotion_score();
+                            sort[index] = UNDERPROM;
                             index++;
                         }
                         else
@@ -87,22 +87,22 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x+1)+index_y;
                         all_moves[index].promotion = 'q';
-                        sort[index] = promotion_score();
+                        sort[index] = PROMOTION;
                         index++;
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x+1)+index_y;
                         all_moves[index].promotion = 'r';
-                        sort[index] = underpromotion_score();
+                        sort[index] = UNDERPROM;
                         index++;
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x+1)+index_y;
                         all_moves[index].promotion = 'b';
-                        sort[index] = underpromotion_score();
+                        sort[index] = UNDERPROM;
                         index++;
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x+1)+index_y;
                         all_moves[index].promotion = 'n';
-                        sort[index] = underpromotion_score();
+                        sort[index] = UNDERPROM;
                         index++;
                     }
                     else
@@ -171,7 +171,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 6;
                     all_moves[index].promotion = ' ';
-                    sort[index] = castling_score();
+                    sort[index] = CASTLING;
                     index++;
                 }
                 if(CheckMove_bqueenside(pos))  
@@ -179,7 +179,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 2;
                     all_moves[index].promotion = ' ';
-                    sort[index] = castling_score();
+                    sort[index] = CASTLING;
                     index++;
                 }
             }
@@ -691,17 +691,17 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                             all_moves[index].from = origin;
                             all_moves[index].to = 8*(index_x-1)+y;
                             all_moves[index].promotion = 'r';
-                            sort[index] = underpromotion_score();
+                            sort[index] = UNDERPROM;
                             index++;
                             all_moves[index].from = origin;
                             all_moves[index].to = 8*(index_x-1)+y;
                             all_moves[index].promotion = 'b';
-                            sort[index] = underpromotion_score();
+                            sort[index] = UNDERPROM;
                             index++;
                             all_moves[index].from = origin;
                             all_moves[index].to = 8*(index_x-1)+y;
                             all_moves[index].promotion = 'n';
-                            sort[index] = underpromotion_score();
+                            sort[index] = UNDERPROM;
                             index++;
                         }
                         else
@@ -723,22 +723,22 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x-1)+index_y;
                         all_moves[index].promotion = 'q';
-                        sort[index] = promotion_score();
+                        sort[index] = PROMOTION;
                         index++;
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x-1)+index_y;
                         all_moves[index].promotion = 'r';
-                        sort[index] = underpromotion_score();
+                        sort[index] = UNDERPROM;
                         index++;
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x-1)+index_y;
                         all_moves[index].promotion = 'b';
-                        sort[index] = underpromotion_score();
+                        sort[index] = UNDERPROM;
                         index++;
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*(index_x-1)+index_y;
                         all_moves[index].promotion = 'n';
-                        sort[index] = underpromotion_score();
+                        sort[index] = UNDERPROM;
                         index++;
                     }
                     else
@@ -807,7 +807,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 62;
                     all_moves[index].promotion = ' ';
-                    sort[index] = castling_score();
+                    sort[index] = CASTLING;
                     index++;
                 }
                 if(CheckMove_wqueenside(pos))  
@@ -815,7 +815,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 58;
                     all_moves[index].promotion = ' ';
-                    sort[index] = castling_score();
+                    sort[index] = CASTLING;
                     index++;
                 }
             }

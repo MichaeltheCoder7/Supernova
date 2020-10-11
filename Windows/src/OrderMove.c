@@ -9,17 +9,6 @@
 #include "Search.h"
 #include "Move.h"
 
-#define BESTMOVE    100000000
-#define HASHMOVE    90000000
-#define WCAPTURE    80001200
-#define PROMOTION   80001150
-#define CASTLING    80001140
-#define ECAPTURE    80000600
-#define KILLER1     80000550
-#define KILLER2     80000540
-#define UNDERPROM   80000530
-#define LCAPTURE    80000000
-
 //swap two ints
 static inline void swap(int* a, int* b)
 { 
@@ -220,21 +209,6 @@ int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, 
         return mvv + lva + ECAPTURE;
     else
         return mvv + lva + LCAPTURE;
-}
-
-int promotion_score()
-{
-    return PROMOTION;
-}
-
-int underpromotion_score()
-{
-    return UNDERPROM;
-}
-
-int castling_score()
-{
-    return CASTLING;
 }
 
 int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
