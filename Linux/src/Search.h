@@ -3,14 +3,15 @@
 
 #include <stdbool.h>
 #include "Board.h"
+#include "Move.h"
 
-#define MAXDEPTH 30
+#define MAXDEPTH 50
 
 unsigned long long history_log[800];
 int history_index;
 bool stop;
 char pv_table[MAXDEPTH][6];
-char killers[MAXDEPTH][2][6];
+MOVE killers[MAXDEPTH][2];
 double search_time;
 int history[2][64][64];
 bool ponderhit;
@@ -18,6 +19,7 @@ double ponder_time;
 bool extra_time;
 bool analyze;
 int search_depth;
+bool time_management;
 bool node_mode;
 int search_nodes;
 bool stop_search;

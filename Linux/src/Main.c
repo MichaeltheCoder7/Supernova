@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include "Board.h"
+#include "Move.h"
 #include "Search.h"
 #include "Transposition.h"
 
@@ -83,21 +84,24 @@ void handle_newgame()
 		EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
 		Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
 	}
-	//start the game
+	//generate random zobrist numbers
 	init_zobrist();
 	memset(history, 0, sizeof(history)); //clear history heuristic table
 	outofbook = 0;
+	//clear hash tables
 	clearTT();
 	clearEvalTT();
+	clearPawnTT();
 	newgame = true;
 }
 
+//parse fen notation
 void parse_fen(char *position, BOARD *pos)
 {
 	char halfmove[20] = "";
 	char fullmove[20] = "";
 	int piece_count = 0;
-	resetboard(pos->board);
+	clear_board(pos->board);
 	int x = 0, y = 0;
 	position+=4;
 	//loop through fen
@@ -202,27 +206,21 @@ void parse_fen(char *position, BOARD *pos)
 	pos->qsb = 0;
 	pos->ksw = 0;
 	pos->qsw = 0;
-	pos->wcastled = true;
-	pos->bcastled = true;
 	for(int i = 0; i < 4; i++)
 	{
 		switch(*position)
 		{
 			case 'K':
 				pos->ksw = 1;
-				pos->wcastled = false;
 				break;
 			case 'Q':
 				pos->qsw = 1;
-				pos->wcastled = false;
 				break;
 			case 'k':
 				pos->ksb = 1;
-				pos->bcastled = false;
 				break;
 			case 'q':
 				pos->qsb = 1;
-				pos->bcastled = false;
 				break;
 			case '-':
 				break;
@@ -246,16 +244,16 @@ void parse_fen(char *position, BOARD *pos)
 	history_index = pos->halfmove_counter;
 	set_piecelists(pos);
 	pos->key = getHash(pos, engine_color);
+	pos->pawn_key = getPawnHash(pos->board);
+	pos->pawn_push = false;
 }
 
 void handle_position(char *input)
 {
 	char move[6] = "";
-	char cp[3] = "";
-	char np[3] = "";
+	MOVE smove;
 	char own_piece = ' ';
 	char op_piece = ' ';
-	char promotion_piece = ' ';
 	//parse the positon input
 	char *position;
 	char *move_str;
@@ -280,6 +278,7 @@ void handle_position(char *input)
 		}
 		init_zobrist();
 		memset(history, 0, sizeof(history)); //clear history heuristic table
+		clearPawnTT();
 		outofbook = 0;
 		newgame = true;
 	}
@@ -310,11 +309,12 @@ void handle_position(char *input)
 			{
 				memcpy(move, move_str, 6);
 				move[5] = '\0';
+				//convert move string to move struct
+				smove = string_to_move(move);
 				//set the board at the start of the game
-				sscanf(move, "%2s%2s%c", cp, np, &promotion_piece);
-				own_piece = position_to_piece(pos.board, cp);
-				op_piece = position_to_piece(pos.board, np);
-				makeMove(&pos, cp, np, promotion_piece);
+				own_piece = pos.board[smove.from / 8][smove.from % 8];
+				op_piece = pos.board[smove.to / 8][smove.to % 8];
+				makeMove(&pos, &smove);
 				
 				//store board into move history
 				history_index++;
@@ -324,7 +324,10 @@ void handle_position(char *input)
 		//get opponent's move
 		//only when it's a capture
 		if(op_piece != ' ')
+		{
 			strncpy(op_move, move, 6);
+			op_move[5] = '\0';
+		}
 		//check what color does the gui wants the engine to be
 		if(islower(own_piece))
 		{
@@ -335,7 +338,7 @@ void handle_position(char *input)
 			engine_color = 1; //black
 		}
 	}
-}   
+}
 
 void handle_go(char *input)
 {
@@ -351,16 +354,17 @@ void handle_go(char *input)
 	double winc = 0, binc = 0;
 	int moves_left = 30;
 	search_depth = -1;
-	ponder_time = 0;
+	ponder_time = __DBL_MAX__;
 	extra_time = true;
 	analyze = false;
 	node_mode = false;
+	time_management = false;
 	sscanf(input, "go %s %s", option, buffer); //get the go command
 	if(!strncmp("wtime", option, 5))
 	{	
 		//get remaining time on the clock
 		sscanf(input, "go wtime %s btime %s winc %s binc %s movestogo %s", white_time, black_time, white_inc, black_inc, movestogo);
-		wt = (double)atoi(white_time) / 1000;	//convert to sec
+		wt = (double)atoi(white_time) / 1000; //convert to sec
 		bt = (double)atoi(black_time) / 1000;
 		if(strncmp("", white_inc, 19))
 		{
@@ -395,6 +399,7 @@ void handle_go(char *input)
 			search_time *= 1.2;
 			outofbook++;
 		}
+		time_management = true;
 	}
 	else if(!strncmp("ponder", option, 6))
 	{
@@ -436,6 +441,9 @@ void handle_go(char *input)
 	{
 		search_time = __DBL_MAX__;
 		search_depth = atoi(buffer);
+		//prevent depth > MAXDETPTH
+		if(search_depth > MAXDEPTH)
+			search_depth = MAXDEPTH;
 	}
 	else if(!strncmp("nodes", option, 5))
 	{
@@ -530,6 +538,7 @@ void uci_loop()
 			//clear hash tables 
 			clearTT();
 			clearEvalTT();
+			clearPawnTT();
 			memset(history, 0, sizeof(history)); //clear history heuristic table
 		}
 		else if(!strncmp("quit", string, 4))

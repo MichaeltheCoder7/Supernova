@@ -1,29 +1,24 @@
 #ifndef ORDERMOVE_H
 #define ORDERMOVE_H
 
-int wCapMove_score(char move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3]);
+#include "Move.h"
 
-int bCapMove_score(char move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3]);
+#define BESTMOVE    100000000
+#define HASHMOVE    90000000
+#define WCAPTURE    80001200
+#define PROMOTION   80001150
+#define CASTLING    80001140
+#define ECAPTURE    80000600
+#define KILLER1     80000550
+#define KILLER2     80000540
+#define UNDERPROM   80000530
+#define LCAPTURE    80000000
 
-int promotion_score();
+int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2);
 
-int underpromotion_score();
+int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2);
 
-int castling_score();
-
-int quietMove_score(char move[6], int x1, int y1, int x2, int y2, int ply, int color);
-
-int wCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3]);
-
-int bCapMove_score_root(char move[6], char best_move[6], char hash_move[6], char piece, char op_piece, char board[8][8], int x, int y, char np[3]);
-
-int promotion_score_root(char move[6], char best_move[6], char hash_move[6]);
-
-int underpromotion_score_root(char move[6], char best_move[6], char hash_move[6]);
-
-int castling_score_root(char move[6], char best_move[6], char hash_move[6]);
-
-int quietMove_score_root(char move[6], char best_move[6], char hash_move[6], int x1, int y1, int x2, int y2, int color);
+int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color);
 
 int wCapQsearch_score(char piece, char op_piece, int new_x);
 
@@ -31,8 +26,10 @@ int bCapQsearch_score(char piece, char op_piece, int new_x);
 
 int piece_value(char piece);
 
-void movesort(char moves[256][6], int sort[256], int length, int current);
+void movesort(MOVE moves[256], int sort[256], int length, int current);
 
-int orderHashMove(char moves[256][6], int sort[256], int length, char hash_move[6]);
+int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move);
+
+void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move);
 
 #endif

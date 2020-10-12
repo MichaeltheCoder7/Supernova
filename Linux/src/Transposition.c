@@ -5,12 +5,13 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "Board.h"
+#include "Move.h"
 #include "Transposition.h"
 #include "Search.h"
 
 #define EMPTY -1
 
-int piece_code(char piece) 
+int piece_code(char piece)
 { 
     switch(piece)
     {
@@ -41,7 +42,7 @@ int piece_code(char piece)
         default:
             break;
     }
-    
+
     return -1;
 } 
 
@@ -148,7 +149,7 @@ unsigned long long getHash(BOARD *pos, int color)
             pos->key ^= ep[7];
             break;  
     }
-    
+
     return h;
 }
 
@@ -172,10 +173,9 @@ struct DataItem *probeTT(unsigned long long key)
     {
         return NULL;
     }
-
 }
 
-void storeTT(unsigned long long key, int evaluation, int statEval, int depth, char bestmove[5], int flag)
+void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
 {
     if(stop_search) //don't save when time up
         return;
@@ -190,7 +190,7 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, ch
         tt[hashIndex].statEval = statEval;
         tt[hashIndex].flag = flag;
         tt[hashIndex].depth = depth;
-        strncpy(tt[hashIndex].bestmove, bestmove, 6);
+        tt[hashIndex].bestmove = *bestmove;
         tt[hashIndex].age = false;
     }
     else if(tt[hashIndex].key != key && (tt[hashIndex + 1].depth <= depth || tt[hashIndex + 1].age == true))
@@ -200,7 +200,7 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, ch
         tt[hashIndex + 1].statEval = statEval;
         tt[hashIndex + 1].flag = flag;
         tt[hashIndex + 1].depth = depth;
-        strncpy(tt[hashIndex + 1].bestmove, bestmove, 6);
+        tt[hashIndex + 1].bestmove = *bestmove;
         tt[hashIndex + 1].age = false;
     }
 }
@@ -232,7 +232,9 @@ void clearTT()
         tt[x].evaluation = 0;
         tt[x].statEval = VALUENONE;
         tt[x].age = false;
-        strncpy(tt[x].bestmove, "", 6);
+        tt[x].bestmove.from = NOMOVE;
+        tt[x].bestmove.to = NOMOVE;
+        tt[x].bestmove.promotion = ' ';
     }
 }
 
@@ -248,7 +250,6 @@ struct Eval *probeEvalTT(unsigned long long key)
     {
         return NULL;
     }
-
 }
 
 void storeEvalTT(unsigned long long key, int evaluation)
@@ -268,5 +269,73 @@ void clearEvalTT()
         Evaltt[x].key = 0;
         Evaltt[x].evaluation = 0;
         Evaltt[x].valid = false;
+    }
+}
+
+//include king positions
+unsigned long long getPawnHash(char board[8][8])
+{
+    unsigned long long h = 0;
+    for(int x = 0; x < 8; x++)
+    {
+        for(int y = 0; y < 8; y++)
+        {
+            switch(board[x][y])
+            {
+                case 'P':
+                    h ^= table[x][y][wP];
+                    break;
+                case 'p':
+                    h ^= table[x][y][bP];
+                    break;
+                case 'K':
+                    h ^= table[x][y][wK];
+                    break;
+                case 'k':
+                    h ^= table[x][y][bK];
+                    break;
+                default:
+                    continue;
+            }
+        }
+    }
+
+    return h;
+}
+
+struct Pawn *probePawnTT(unsigned long long key)
+{
+    //get the hash 
+    int hashIndex = key % PAWNHASHSIZE;
+    if(Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
+    {    
+        return &Pawntt[hashIndex];
+    }
+    else
+    {
+        return NULL;
+    }
+
+}
+
+void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
+{
+    //get the hash 
+    int hashIndex = key % PAWNHASHSIZE;
+
+    Pawntt[hashIndex].key = key;
+    Pawntt[hashIndex].eval_mg = eval_mg;
+    Pawntt[hashIndex].eval_eg = eval_eg;
+    Pawntt[hashIndex].valid = true;
+}
+
+void clearPawnTT()
+{
+    for(int x = 0; x < PAWNHASHSIZE; x++)
+    {
+        Pawntt[x].key = 0;
+        Pawntt[x].eval_mg = 0;
+        Pawntt[x].eval_eg = 0;
+        Pawntt[x].valid = false;
     }
 }
