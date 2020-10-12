@@ -511,8 +511,8 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     int index, square;
 
     //update board
-	pos->board[new_x][new_y] = piece;
-	pos->board[cur_x][cur_y] = ' ';
+    pos->board[new_x][new_y] = piece;
+    pos->board[cur_x][cur_y] = ' ';
 
     //zobrist key update
     pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
@@ -754,8 +754,8 @@ void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
 {
     char piece = board[cur_x][cur_y];
     char op_piece = board[new_x][new_y];
-	board[new_x][new_y] = piece;
-	board[cur_x][cur_y] = ' ';
+    board[new_x][new_y] = piece;
+    board[cur_x][cur_y] = ' ';
 
     if(piece == 'P' || piece == 'p') 
     {

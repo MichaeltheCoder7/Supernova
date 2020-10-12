@@ -23,16 +23,16 @@ white pieces
 //starting board
 char board[8][8] = {
 
-			{'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
-			{'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-			{'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
-			{'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
+            {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
+            {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
+            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+            {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
+            {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
 
-			};
+            };
 
 //starting piece list
 int piece_list[12][10] = {
@@ -144,20 +144,20 @@ int position_to_y(char position[3])
 //initialize board struct to starting position
 void init_board(BOARD *pos)
 {
-	memcpy(pos->board, board, sizeof(pos->board));
-	//set the castling flags
-	pos->ksb = 1;
-	pos->qsb = 1;
-	pos->ksw = 1;
-	pos->qsw = 1;
-	//set en passant files
-	pos->ep_file = 0;
-	pos->halfmove_counter = 0;
-	pos->piece_num = 32;
-	memcpy(pos->piece_list, piece_list, sizeof(pos->piece_list));
-	memcpy(pos->piece_count, piece_count, sizeof(pos->piece_count));
-	memcpy(pos->index_board, index_board, sizeof(pos->index_board));
-	pos->key = getHash(pos, -1);
+    memcpy(pos->board, board, sizeof(pos->board));
+    //set the castling flags
+    pos->ksb = 1;
+    pos->qsb = 1;
+    pos->ksw = 1;
+    pos->qsw = 1;
+    //set en passant files
+    pos->ep_file = 0;
+    pos->halfmove_counter = 0;
+    pos->piece_num = 32;
+    memcpy(pos->piece_list, piece_list, sizeof(pos->piece_list));
+    memcpy(pos->piece_count, piece_count, sizeof(pos->piece_count));
+    memcpy(pos->index_board, index_board, sizeof(pos->index_board));
+    pos->key = getHash(pos, -1);
     pos->pawn_key = getPawnHash(pos->board);
     pos->pawn_push = false;
 }
@@ -166,14 +166,14 @@ void clear_board(char board[8][8])
 {
     char board_reset[8][8] = {
 						
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},			
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-							{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+                        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
 						};
     
