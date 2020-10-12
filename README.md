@@ -49,7 +49,7 @@ Details
 * FEN Support
 * Pondering  
 * Configurable Hash Tables from 1MB to 2048MB  
-* Clear Hash Tables
+* Clear Hash Tables Option
 * Search Information and Principal Variation
 
 **Board Representation**
@@ -57,7 +57,7 @@ Details
 * Piece Lists
 
 **Move Generation**  
-* All Legal Moves of Chess (including castling, en passant, queen promotion and under promotions)
+* All Pseudo-Legal Moves of Chess (including castling, en passant, queen promotion and under promotions)
 * Capture and Queen Promotion Generator for Qsearch
 
 **Search** 
@@ -80,13 +80,19 @@ Details
 * Pawn Hash Table
 * Piece Square Tables
 * Mobility
+* Trapped Pieces
 * Piece-specific Evaluations
+* Passed Pawn
+  * Candidate
+  * Connected
+  * King Proximity
 * King Safety
   * Pawn Shield
   * Pawn Storm
   * Semi-open Files
   * King Tropism
   * King Attack
+* Game Phase
 
 Author
 ------
