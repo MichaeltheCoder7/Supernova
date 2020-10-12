@@ -121,8 +121,8 @@ int makeMove(BOARD *pos, MOVE *move)
     int index, square;
 
     //update board
-	pos->board[new_x][new_y] = piece;
-	pos->board[cur_x][cur_y] = ' ';
+    pos->board[new_x][new_y] = piece;
+    pos->board[cur_x][cur_y] = ' ';
 
     //castling rights check
     if(pos->board[7][4] != 'K')

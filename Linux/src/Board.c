@@ -175,7 +175,7 @@ void clear_board(char board[8][8])
                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
-						};
+                        };
     
     memcpy(board, board_reset, sizeof(board_reset));
 }
