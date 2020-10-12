@@ -5,6 +5,7 @@
 #include "Board.h"
 #include "Move.h"
 
+#define PAWNHASHSIZE 667013 //10MB
 #define VALUENONE -20100
 
 unsigned long long table[8][8][12];
@@ -35,9 +36,19 @@ struct Eval
    bool valid;
 };
 
+struct Pawn
+{
+   unsigned long long key;
+   short eval_mg;
+   short eval_eg;
+   bool valid;
+};
+
 struct DataItem* tt;
 
-struct Eval* Evaltt; 
+struct Eval* Evaltt;
+
+struct Pawn Pawntt[PAWNHASHSIZE];
 
 int piece_code(char piece);
 
@@ -60,5 +71,13 @@ struct Eval *probeEvalTT(unsigned long long key);
 void storeEvalTT(unsigned long long key, int evaluation);
 
 void clearEvalTT();
+
+unsigned long long getPawnHash(char board[8][8]);
+
+struct Pawn *probePawnTT(unsigned long long key);
+
+void storePawnTT(unsigned long long key, short eval_mg, short eval_eg);
+
+void clearPawnTT();
 
 #endif

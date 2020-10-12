@@ -211,6 +211,7 @@ int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, 
         return mvv + lva + LCAPTURE;
 }
 
+//quiet move ordering based on killer moves and history heuristic
 int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
 {
     if(compareMove(&killers[ply][0], move))
@@ -262,6 +263,7 @@ int piece_value(char piece)
     }
 }
 
+//capture ordering for qsearch
 int wCapQsearch_score(char piece, char op_piece, int new_x)
 {
     int mvv = 0;

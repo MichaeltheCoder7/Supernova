@@ -550,7 +550,7 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
         }
 
         gain[d] = piece_value(piece) - gain[d-1];
-        //prunning that won't change the result
+        //prunning that won't change the sign of the result
         if(((-gain[d-1] >= gain[d])? -gain[d-1]:gain[d]) < 0)
         {
             gain[d] = -gain[d-1];

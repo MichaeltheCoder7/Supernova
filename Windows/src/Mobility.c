@@ -8,6 +8,7 @@
 #include "Mobility.h"
 #include "MoveGen.h"
 
+//check if this square is defended by any pawns
 static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 {
     if(x < 6)
@@ -69,6 +70,7 @@ static inline bool defended_by_bpawn(char board[8][8], int x, int y)
 }
 
 //get king zone
+//including king ring and king's position
 static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
 {
     if(y >= wkingy-1 && y <= wkingy+1 && x >= wkingx-1 && x <= wkingx+1)
@@ -90,11 +92,11 @@ static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
 }
 
 //mobility
-//exclude space protected by enemy pawns
+//exclude space protected by enemy pawns for minor pieces
 //exclude own queen for minor pieces
 //exclude own blocked pawns and own pawns on rank 2 and 3
 //exclude own king
-//also consider king attack
+//also consider attack on enemy king
 int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
@@ -389,8 +391,7 @@ int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int b
         y = index_y;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -408,8 +409,7 @@ int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int b
         y = j;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -427,8 +427,7 @@ int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int b
         y = j;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))   
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -446,8 +445,7 @@ int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int b
         y = index_y;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -480,8 +478,7 @@ int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int w
         y = index_y;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -499,8 +496,7 @@ int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int w
         y = j;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -518,8 +514,7 @@ int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int w
         y = j;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -537,8 +532,7 @@ int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int w
         y = index_y;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -575,8 +569,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         }
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -594,8 +587,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         y = index_y;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -617,8 +609,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         }
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -636,8 +627,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         y = j;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -655,8 +645,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         y = j;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))   
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -678,8 +667,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         }
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -697,8 +685,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         y = index_y;
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -720,8 +707,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
         }
         if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
         {  
-            if(!defended_by_bpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(bking_zone(bkingx, bkingy, x, y))
         {
@@ -758,8 +744,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         }
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -777,8 +762,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         y = index_y;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -800,8 +784,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         }
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -819,8 +802,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         y = j;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -838,8 +820,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         y = j;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -861,8 +842,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         }
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -880,8 +860,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         y = index_y;
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {
@@ -903,8 +882,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
         }
         if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
         {  
-            if(!defended_by_wpawn(board, x, y))
-                move_count++;
+            move_count++;
         }
         if(wking_zone(wkingx, wkingy, x, y))
         {

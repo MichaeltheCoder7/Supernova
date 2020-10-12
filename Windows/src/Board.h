@@ -20,6 +20,7 @@ enum positions {
 typedef struct{
 
     unsigned long long key;
+    unsigned long long pawn_key;
     char board[8][8];
     int ksw;
     int qsw;
@@ -31,6 +32,7 @@ typedef struct{
     int piece_list[12][10];
     int piece_count[12];
     int index_board[64];
+    bool pawn_push;
 
 } BOARD;
 

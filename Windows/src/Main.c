@@ -84,15 +84,18 @@ void handle_newgame()
 		EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
 		Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
 	}
-	//start the game
+	//generate random zobrist numbers
 	init_zobrist();
 	memset(history, 0, sizeof(history)); //clear history heuristic table
 	outofbook = 0;
+	//clear hash tables
 	clearTT();
 	clearEvalTT();
+	clearPawnTT();
 	newgame = true;
 }
 
+//parse fen notation
 void parse_fen(char *position, BOARD *pos)
 {
 	char halfmove[20] = "";
@@ -241,6 +244,8 @@ void parse_fen(char *position, BOARD *pos)
 	history_index = pos->halfmove_counter;
 	set_piecelists(pos);
 	pos->key = getHash(pos, engine_color);
+	pos->pawn_key = getPawnHash(pos->board);
+	pos->pawn_push = false;
 }
 
 void handle_position(char *input)
@@ -273,6 +278,7 @@ void handle_position(char *input)
 		}
 		init_zobrist();
 		memset(history, 0, sizeof(history)); //clear history heuristic table
+		clearPawnTT();
 		outofbook = 0;
 		newgame = true;
 	}
@@ -358,7 +364,7 @@ void handle_go(char *input)
 	{	
 		//get remaining time on the clock
 		sscanf(input, "go wtime %s btime %s winc %s binc %s movestogo %s", white_time, black_time, white_inc, black_inc, movestogo);
-		wt = (double)atoi(white_time) / 1000;	//convert to sec
+		wt = (double)atoi(white_time) / 1000; //convert to sec
 		bt = (double)atoi(black_time) / 1000;
 		if(strncmp("", white_inc, 19))
 		{
@@ -532,6 +538,7 @@ void uci_loop()
 			//clear hash tables 
 			clearTT();
 			clearEvalTT();
+			clearPawnTT();
 			memset(history, 0, sizeof(history)); //clear history heuristic table
 		}
 		else if(!strncmp("quit", string, 4))

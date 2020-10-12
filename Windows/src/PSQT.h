@@ -1,8 +1,8 @@
 #ifndef PSQT_H
 #define PSQT_H
 
-static int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 };
-static int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 };
+static int PawnPassed_black[8] = { 0, 15, 20, 32, 48, 76, 120, 0 };
+static int PawnPassed_white[8] = { 0, 120, 76, 48, 32, 20, 15, 0 };
 static int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
 static int rook_val[9] = { 15, 12,  9,  6,  3,  0, -3, -6, -9 };
 
@@ -23,7 +23,7 @@ static int SafetyTable[100] = {
 
 //piece-square tables:
 //add bonus points based on position
-static int white_pawn[8][8] = {
+static int white_pawn_midgame[8][8] = {
 
                     {  0,   0,	 0,   0,   0,   0,   0,	  0 },
                     { 20,  20,	20,  30,  30,  20,  20,	 20 },
@@ -36,6 +36,18 @@ static int white_pawn[8][8] = {
 
                     };
 
+static int white_pawn_endgame[8][8] = {
+
+                    {  0,   0,	 0,   0,   0,   0,   0,	  0 },
+                    { 20,  20,	20,  20,  20,  20,  20,	 20 },
+                    { 10,  10,	10,  10,  10,  10,  10,	 10 },
+                    {  5,   5,	 5,   5,   5,	5,   5,	  5 },
+                    {  0,   0,	 0,   0,   0,   0,   0,	  0 },
+                    { -5,  -5,  -5,  -5,  -5,  -5,  -5,	 -5 },
+                    {-10, -10, -10, -10, -10, -10, -10,	-10 },
+                    {  0,   0,	 0,   0,   0,	0,   0,	  0 },	
+
+                    };
 
 static int white_knight[8][8] = {
 
@@ -117,7 +129,7 @@ static int white_king_endgame[8][8] = {
                     };
 
 //for black:
-static int black_pawn[8][8] = {
+static int black_pawn_midgame[8][8] = {
 
                     {  0,   0,	 0,   0,   0,	0,   0,	  0 },
                     { 10,  10,	 5, -15, -15,   5,  10,	 10 },
@@ -127,6 +139,19 @@ static int black_pawn[8][8] = {
                     { 10,  10,	10,  20,  20,  10,  10,	 10 },
                     { 20,  20,	20,  30,  30,  20,  20,	 20 },
                     {  0,   0,   0,   0,   0,   0,   0,	  0 },	
+
+                    };
+
+static int black_pawn_endgame[8][8] = {
+
+                    {  0,   0,	 0,   0,   0,   0,   0,	  0 },
+                    {-10, -10, -10, -10, -10, -10, -10,	-10 },
+                    { -5,  -5,  -5,  -5,  -5,  -5,  -5,	 -5 },
+                    {  0,   0,	 0,   0,   0,   0,   0,	  0 },
+                    {  5,   5,	 5,   5,   5,	5,   5,	  5 },
+                    { 10,  10,	10,  10,  10,  10,  10,	 10 },
+                    { 20,  20,	20,  20,  20,  20,  20,	 20 },
+                    {  0,   0,	 0,   0,   0,	0,   0,	  0 },	
 
                     };
 

@@ -39,7 +39,7 @@ static inline void clearKiller()
     }
 }
 
-//age history heuristics array
+//age history heuristic array
 static inline void ageHistory()
 {
     for(int x = 0; x < 2; x++)
@@ -54,7 +54,7 @@ static inline void ageHistory()
     }
 }
 
-//prevent history heuristics array to overflow 
+//prevent history heuristic array to overflow 
 static inline void preventOverflow()
 {
     for(int d = 0; d < 2; d++)
@@ -137,7 +137,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         return 0;
 
     nodes++;
-    
+
     int standing_pat = evaluate(pos, pos->board, color);
 
     if(standing_pat >= beta) 
@@ -240,6 +240,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     MOVE hash_move;
     bm.from = NOMOVE;
     hash_move.from = NOMOVE;
+    int extension;
 
     //check if time is up
     timeUp();
@@ -418,9 +419,16 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if(moves_made == 1)
             bm = moves[x];
 
+        extension = 0;
+        //passed pawn extension
+        if(!isCheck && pos_copy.piece_num <= 18 && pos_copy.pawn_push)
+        {
+            extension = 1;
+        }
+
         //late move reduction
         reduction_depth = 0;
-        new_depth = depth - 1;
+        new_depth = depth - 1 + extension;
        
         if(!is_PV 
             && new_depth > 3
@@ -455,7 +463,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
         }
 
-        //check if lmr failed
+        //search again if lmr failed
         if(reduction_depth && value > alpha)
         {
             new_depth += reduction_depth;
@@ -480,7 +488,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                     }
                     //save killer move
                     killers[ply][0] = moves[x];
-                    //save data in the history table for move ordering
+                    //save data in the history heuristic table for move ordering
                     int a = (color==1)?1:0;
                     int b = moves[x].from;
                     int c = moves[x].to;
@@ -606,7 +614,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                     }
                     //save killer move
                     killers[0][0] = moves[x];
-                    //save data in the history table for move ordering
+                    //save data in the history heuristic table for move ordering
                     int a = (color==1)?1:0;
                     int b = moves[x].from;
                     int c = moves[x].to;
@@ -678,6 +686,7 @@ static inline int get_nps(int nodes, double secs)
     return (int)(nodes / secs);
 }
 
+//check if the destinations of these two moves are the same
 static inline bool isRecapture(char move[6], char op_move[6])
 {
     if(move[2] == op_move[2] && move[3] == op_move[3])
@@ -732,12 +741,12 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
             //search longer if failed low
             if(more_time && extra_time)
             {
-                if(secs >= (search_time / 4))
+                if(secs >= (search_time / 8))
                 {
                     search_time *= 1.8;
                     more_time = false;
                 }
-                else if(secs >= (ponder_time / 4))
+                else if(secs >= (ponder_time / 8))
                 {
                     ponder_time *= 1.8;
                     more_time = false;
@@ -824,8 +833,9 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     //clear tables in analyze mode
     if(analyze)
     {
-        clearTT(); //clear hash table
+        clearTT(); //clear main hash table
         clearEvalTT(); //clear evaluation hash table
+        clearPawnTT(); //clear pawn hash table
         memset(history, 0, sizeof(history)); //clear history heuristic table
     }
     else

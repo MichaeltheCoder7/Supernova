@@ -271,3 +271,71 @@ void clearEvalTT()
         Evaltt[x].valid = false;
     }
 }
+
+//include king positions
+unsigned long long getPawnHash(char board[8][8])
+{
+    unsigned long long h = 0;
+    for(int x = 0; x < 8; x++)
+    {
+        for(int y = 0; y < 8; y++)
+        {
+            switch(board[x][y])
+            {
+                case 'P':
+                    h ^= table[x][y][wP];
+                    break;
+                case 'p':
+                    h ^= table[x][y][bP];
+                    break;
+                case 'K':
+                    h ^= table[x][y][wK];
+                    break;
+                case 'k':
+                    h ^= table[x][y][bK];
+                    break;
+                default:
+                    continue;
+            }
+        }
+    }
+
+    return h;
+}
+
+struct Pawn *probePawnTT(unsigned long long key)
+{
+    //get the hash 
+    int hashIndex = key % PAWNHASHSIZE;
+    if(Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
+    {    
+        return &Pawntt[hashIndex];
+    }
+    else
+    {
+        return NULL;
+    }
+
+}
+
+void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
+{
+    //get the hash 
+    int hashIndex = key % PAWNHASHSIZE;
+
+    Pawntt[hashIndex].key = key;
+    Pawntt[hashIndex].eval_mg = eval_mg;
+    Pawntt[hashIndex].eval_eg = eval_eg;
+    Pawntt[hashIndex].valid = true;
+}
+
+void clearPawnTT()
+{
+    for(int x = 0; x < PAWNHASHSIZE; x++)
+    {
+        Pawntt[x].key = 0;
+        Pawntt[x].eval_mg = 0;
+        Pawntt[x].eval_eg = 0;
+        Pawntt[x].valid = false;
+    }
+}

@@ -34,6 +34,7 @@ char board[8][8] = {
 
 			};
 
+//starting piece list
 int piece_list[12][10] = {
 
                     { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, //wP
@@ -140,6 +141,7 @@ int position_to_y(char position[3])
     return -1; //when nothing is matched
 }
 
+//initialize board struct to starting position
 void init_board(BOARD *pos)
 {
 	memcpy(pos->board, board, sizeof(pos->board));
@@ -156,6 +158,8 @@ void init_board(BOARD *pos)
 	memcpy(pos->piece_count, piece_count, sizeof(pos->piece_count));
 	memcpy(pos->index_board, index_board, sizeof(pos->index_board));
 	pos->key = getHash(pos, -1);
+    pos->pawn_key = getPawnHash(pos->board);
+    pos->pawn_push = false;
 }
 
 void clear_board(char board[8][8])
@@ -176,6 +180,7 @@ void clear_board(char board[8][8])
     memcpy(board, board_reset, sizeof(board_reset));
 }
 
+//set piece lists based on the position
 void set_piecelists(BOARD *pos)
 {
     int i;
