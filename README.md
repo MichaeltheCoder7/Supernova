@@ -1,10 +1,10 @@
 # Supernova
 
-Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface(Arena, Shredder...) to function properly. Elo rating of Supernova 2.0 is estimated to be 2200.
+Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface(Arena, Shredder...) to function properly.
 
 Installation
 ------------
-To download Supernova, you can download the Windows and Linux executables in the bin directory or directly from the latest release. Alternatively, you can download all source files and Makefile and then run make outside the bin directory, then the executable should appear in the bin directory. 
+To download Supernova, you can download the Windows and Linux executables in the bin directory or directly from the latest release. Alternatively, you can download all source files and Makefile and then run make outside the bin directory, then the executable should appear in the bin directory. It's recommended to compile the Linux version on your own since the gcc version that was used for compling is quite old.
 
 Windows:
 ```
@@ -36,6 +36,11 @@ Supernova does not have its own opening book so it's recommended to use the book
 **Arena**
 http://www.playwitharena.de/
 
+Lichess
+-------
+Supernova 2.1 is also on Lichess currently. Free feel to chanllenge it!  
+https://lichess.org/@/SupernovaBot
+
 Details
 -------
 **UCI Features** 
@@ -46,44 +51,53 @@ Details
   * Time per Move
   * Nodes
   * Analyze/Infinite
+* FEN Support
 * Pondering  
 * Configurable Hash Tables from 1MB to 2048MB  
-* Clear Hash Tables
+* Clear Hash Tables Option
 * Search Information and Principal Variation
 
 **Board Representation**
-* 8x8 Board
+* 8x8 Board (mailbox)
 * Piece Lists
 
 **Move Generation**  
-* All Legal Moves of Chess (including castling, en passant, queen promotion and under promotions) 
+* All Pseudo-Legal Moves of Chess (including castling, en passant, queen promotion and under promotions)
+* Capture and Queen Promotion Generator for Qsearch
 
 **Search** 
-* Transposition Table  
-* Iterative Deepening with Aspiration Window  
-* Principal Variation Search  
-* Razoring  
-* Static Null Move Pruning  
-* Null Move Prunning  
-* Futility Prunning  
-* Late Move Reduction  
-* Check Extension  
+* Transposition Table
+* Iterative Deepening with Aspiration Window
+* Principal Variation Search
+* Razoring
+* Static Null Move Pruning
+* Null Move Prunning
+* Futility Prunning
+* Late Move Reduction
+* Check Extension
+* Passed Pawn Extension
 * Move Ordering
-* Quiescence Search  
+* Quiescence Search
 * Static Exchange Evaluation
 
 **Evaluation** 
 * Evaluation Hash Table
-* Piece Square Tables  
+* Pawn Hash Table
+* Piece Square Tables
 * Mobility
-* Piece-specific Evaluations  
+* Trapped Pieces
+* Piece-specific Evaluations
+* Passed Pawn
+  * Candidate
+  * Connected
+  * King Proximity
 * King Safety
   * Pawn Shield
   * Pawn Storm
   * Semi-open Files
   * King Tropism
   * King Attack
-  * Castling
+* Game Phase
 
 Author
 ------
