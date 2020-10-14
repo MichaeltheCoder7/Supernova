@@ -101,8 +101,8 @@ void parse_fen(char *position, BOARD *pos)
     char halfmove[20] = "";
     char fullmove[20] = "";
     int piece_count = 0;
-    clear_board(pos->board);
     int x = 0, y = 0;
+    clear_board(pos->board);
     position+=4;
     //loop through fen
     while(*position && x < 8)
