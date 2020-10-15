@@ -38,7 +38,7 @@ http://www.playwitharena.de/
 
 Lichess
 -------
-Supernova 2.1 is also on Lichess currently. Free feel to chanllenge it!  
+Supernova 2.1.1 is also on Lichess currently. Free feel to chanllenge it!  
 https://lichess.org/@/SupernovaBot
 
 Details
