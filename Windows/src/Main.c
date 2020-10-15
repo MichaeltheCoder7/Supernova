@@ -32,7 +32,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-    printf("id name Supernova 2.1\n");
+    printf("id name Supernova 2.1.1\n");
     printf("id author Minkai Yang\n");
     //options
     printf("option name Hash type spin default 32 min 1 max 2048\n");
@@ -483,9 +483,9 @@ void handle_go(char *input)
 
 void uci_loop()
 {
+    char string[4000];
     setbuf(stdin, NULL);
     setbuf(stdout, NULL);
-    char string[4000];
     //infinite loop for uci gui
     while(true)
     {

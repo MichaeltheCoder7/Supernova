@@ -718,8 +718,18 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
 
         val = pvs_root(pos, current_depth, color, alpha, beta);
         
+        //check time
         gettimeofday(&ending_time, NULL);
         secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
+        if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
+        {
+            stop_search = true;
+        }
+        if(node_mode && nodes >= search_nodes)
+        {
+            stop_search = true;
+        }
+
         if(stop_search)
         {
             //allow partial search results if at least one move searched and it's within the bounds/not failed low
