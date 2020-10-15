@@ -999,7 +999,39 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         //king tropism
         wrook_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wrook_tropism*2; 
-        endgame_black += wrook_tropism*1; 
+        endgame_black += wrook_tropism*1;
+        //trapped rook penalty
+        //when mobility < 4
+        if(wrook_mob < -6)
+        {
+            switch(pos->piece_list[wK][0])
+            {
+                case f1:
+                    if(x >= 6 && y >= 6)
+                    {
+                        midgame_white -= 40;
+                    }
+                    break;
+                case g1:
+                    if(x >= 6 && y >= 6)
+                    {
+                        midgame_white -= 40;
+                    }
+                    break;
+                case b1:
+                    if(x >= 6 && y <= 1)
+                    {
+                        midgame_white -= 40;
+                    }
+                    break;
+                case c1:
+                    if(x >= 6 && y <= 1)
+                    {
+                        midgame_white -= 40;
+                    }
+                    break;
+            }
+        }
     }
     //white knight
     for(int i = 0; i < N_count; i++)
@@ -1019,7 +1051,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         midgame_black += wknight_tropism*3; 
         endgame_black += wknight_tropism*3; 
         //trapped pieces penalty
-        switch(8*x + y)
+        switch(pos->piece_list[wN][i])
         {
             case a8:
                 if(board[1][0] == 'p' || board[1][2] == 'p')
@@ -1053,7 +1085,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 break;
         }
     }
-    //bishop
+    //white bishop
     for(int i = 0; i < B_count; i++)
     {
         x = pos->piece_list[wB][i] / 8;
@@ -1075,7 +1107,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         midgame_black += wbishop_tropism*2; 
         endgame_black += wbishop_tropism*1; 
         //trapped pieces penalty
-        switch(8*x + y)
+        switch(pos->piece_list[wB][i])
         {
             case a7:
                 if(board[2][1] == 'p' && board[1][2] == 'p')
@@ -1104,7 +1136,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             case f1:
                 if(board[7][6] == 'K')
                 {
-                    other_bonus_white += RETURNINGBISHOP; 
+                    other_bonus_white += RETURNINGBISHOP;
                 }
                 if(board[6][4] == 'P' && board[5][4] != ' ')
                 {
@@ -1189,6 +1221,38 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         brook_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += brook_tropism*2; 
         endgame_white += brook_tropism*1;
+        //trapped rook penalty
+        //when mobility < 4
+        if(brook_mob < -6)
+        {
+            switch(pos->piece_list[bK][0])
+            {
+                case f8:
+                    if(x <= 1 && y >= 6)
+                    {
+                        midgame_black -= 40;
+                    }
+                    break;
+                case g8:
+                    if(x <= 1 && y >= 6)
+                    {
+                        midgame_black -= 40;
+                    }
+                    break;
+                case b8:
+                    if(x <= 1 && y <= 1)
+                    {
+                        midgame_black -= 40;
+                    }
+                    break;
+                case c8:
+                    if(x <= 1 && y <= 1)
+                    {
+                        midgame_black -= 40;
+                    }
+                    break;
+            }
+        }
     }
     //black knight
     for(int i = 0; i < n_count; i++)
@@ -1208,7 +1272,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         midgame_white += bknight_tropism*3; 
         endgame_white += bknight_tropism*3;
         //trapped pieces penalty
-        switch(8*x + y)
+        switch(pos->piece_list[bN][i])
         {
             case a1:
                 if(board[6][0] == 'P' || board[6][2] == 'P')
@@ -1264,7 +1328,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         midgame_white += bbishop_tropism*2; 
         endgame_white += bbishop_tropism*1;
         //trapped pieces penalty
-        switch(8*x + y)
+        switch(pos->piece_list[bB][i])
         {
             case a2:
                 if(board[5][1] == 'P' && board[6][2] == 'P')
@@ -1345,29 +1409,8 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         endgame_black += bqueen_mob*2;
         //king tropism
         bqueen_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
-        midgame_white += bqueen_tropism*2; 
-        endgame_white += bqueen_tropism*4; 
-    } 
-    //blocked rook penalty
-    if(white_king_x > 5 && white_king_y > 4)
-    {
-        if(board[7][6] == 'R' || board[7][7] == 'R' || board[6][7] == 'R')
-            midgame_white -= 40;
-    }
-    else if(white_king_x > 5 && white_king_y < 3)
-    {
-        if(board[7][0] == 'R' || board[7][1] == 'R' || board[6][0] == 'R')
-            midgame_white -= 40;
-    }
-    if(black_king_x < 2 && black_king_y > 4)
-    {
-        if(board[0][6] == 'r' || board[0][7] == 'r' || board[1][7] == 'r')
-            midgame_black -= 40;
-    }
-    else if(black_king_x < 2 && black_king_y < 3)
-    {
-        if(board[0][0] == 'r' || board[0][1] == 'r' || board[1][0] == 'r')
-            midgame_black -= 40;
+        midgame_white += bqueen_tropism*2;
+        endgame_white += bqueen_tropism*4;
     }
 
     //game phase based on non-pawn materials

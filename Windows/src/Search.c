@@ -715,7 +715,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     for(current_depth = 1; current_depth <= depth; current_depth++)
     {   
         clear_move(&searched_move);
-
+        //search starts
         val = pvs_root(pos, current_depth, color, alpha, beta);
         
         //check time
