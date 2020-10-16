@@ -826,7 +826,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     //send move to gui
     if(!strncmp(BestMove, "", 5))
     {
-        printf("bestmove\n");
+        printf("bestmove 0000\n");
     }
     else
     {
