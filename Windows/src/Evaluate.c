@@ -704,8 +704,8 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     struct Pawn* pEntry = probePawnTT(pos->pawn_key);
     if(pEntry != NULL)
     {
-        pawn_mg = pEntry -> eval_mg;
-        pawn_eg = pEntry -> eval_eg;
+        pawn_mg = pEntry->eval_mg;
+        pawn_eg = pEntry->eval_eg;
     }
     else
     {
