@@ -824,7 +824,14 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         }
     }
     //send move to gui
-    printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);
+    if(!strncmp(BestMove, "", 5))
+    {
+        printf("bestmove\n");
+    }
+    else
+    {
+        printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);
+    }
 }
 
 void search(BOARD *pos, int piece_color, char op_move[6])
@@ -850,6 +857,6 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     }
     else
     {
-        setAge(false); //age tt
+        setAge(); //age tt
     }
 }
