@@ -206,19 +206,12 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MO
 }
 
 //set age in tt
-//can print out percent of valid entries
-void setAge(bool print_usage)
+void setAge()
 {
-    float count = 0;
     for(int x = 0; x < HASHSIZE; x++)
     {
-        if(tt[x].flag != EMPTY)
-            count++;
-
         tt[x].age = true;
     }
-    if(print_usage)
-        printf("Table Usage: %.2f%%\n", count * 100 / HASHSIZE);
 }
 
 //clear the hash table
@@ -232,9 +225,7 @@ void clearTT()
         tt[x].evaluation = 0;
         tt[x].statEval = VALUENONE;
         tt[x].age = false;
-        tt[x].bestmove.from = NOMOVE;
-        tt[x].bestmove.to = NOMOVE;
-        tt[x].bestmove.promotion = ' ';
+        clear_move(&tt[x].bestmove);
     }
 }
 

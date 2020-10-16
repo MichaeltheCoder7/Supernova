@@ -64,7 +64,7 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MO
 
 void clearTT();
 
-void setAge(bool print_usage);
+void setAge();
 
 struct Eval *probeEvalTT(unsigned long long key);
 
