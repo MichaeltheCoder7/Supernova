@@ -431,12 +431,12 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         new_depth = depth - 1 + extension;
        
         if(!is_PV 
-            && new_depth > 3
-            && moves_made > 3
-            && !isCheck 
-            && !isTactical 
-            && !compareMove(&killers[ply][0], &moves[x])
-            && !compareMove(&killers[ply][1], &moves[x]))
+           && new_depth > 3
+           && moves_made > 3
+           && !isCheck 
+           && !isTactical 
+           && !compareMove(&killers[ply][0], &moves[x])
+           && !compareMove(&killers[ply][1], &moves[x]))
         {
             if(!ifCheck(&pos_copy, -color))
             {
@@ -795,11 +795,13 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         //send info to gui
         if(val > 19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1, nodes, (int)(secs*1000), get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1, nodes, (int)(secs*1000),
+                   get_nps(nodes, secs));
         }
         else if(val < -19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1, nodes, (int)(secs*1000), get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1, nodes, (int)(secs*1000),
+                   get_nps(nodes, secs));
         }
         else
         {

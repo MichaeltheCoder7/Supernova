@@ -495,12 +495,12 @@ void uci_loop()
         {
             continue;
         }
-
+        //skip new line
         if(string[0] == '\n')
         {
             continue;
         }
-
+        //listen for command
         if(!strncmp("isready", string, 7))
         {
             printf("readyok\n");

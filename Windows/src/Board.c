@@ -80,9 +80,9 @@ int index_board[64] = {
 
 void displayboard(char board[8][8])
 {
-    int j = 8; /*row numbers*/
+    int j = 8; //row numbers
     printf("\n    a   b   c   d   e   f   g   h\n");
-    /*nested loops to print the board*/
+    //nested loops to print the board
     for(int i = 0; i < 8; i++){
         printf("  +---+---+---+---+---+---+---+---+\n");
         printf(" %d", j);

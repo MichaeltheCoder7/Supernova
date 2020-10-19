@@ -277,6 +277,7 @@ int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int
     int move_count = 0;
     int x;
     int y;
+
     //up left
     for(int j = 1; j <= 7; j++)
     {
@@ -384,6 +385,7 @@ int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int b
     int move_count = 0;
     int x;
     int y;
+
     //up
     for(int j = index_x-1; j >= 0; j--)
     {
@@ -471,6 +473,7 @@ int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int w
     int move_count = 0;
     int x;
     int y;
+
     //up
     for(int j = index_x-1; j >= 0; j--)
     {  
@@ -558,6 +561,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
     int move_count = 0;
     int x;
     int y;
+    
     //up left
     for(int j = 1; j <= 7; j++)
     {
@@ -733,6 +737,7 @@ int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int 
     int move_count = 0;
     int x;
     int y;
+
     //up left
     for(int j = 1; j <= 7; j++)
     {

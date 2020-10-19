@@ -12,7 +12,8 @@ int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
     //capturing
     if(pos->board[new_x][new_y] != ' ')
     {
-        if(pos->board[new_x][new_y] == 'p' || pos->board[new_x][new_y] == 'r' || pos->board[new_x][new_y] == 'n' || pos->board[new_x][new_y] == 'b' || pos->board[new_x][new_y] == 'q')
+        if(pos->board[new_x][new_y] == 'p' || pos->board[new_x][new_y] == 'r' || pos->board[new_x][new_y] == 'n' || pos->board[new_x][new_y] == 'b' ||
+           pos->board[new_x][new_y] == 'q')
         {
             return 1;
         }
@@ -38,7 +39,8 @@ int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
     //capturing
     if(pos->board[new_x][new_y] != ' ')
     {
-        if(pos->board[new_x][new_y] == 'P' || pos->board[new_x][new_y] == 'R' || pos->board[new_x][new_y] == 'N' || pos->board[new_x][new_y] == 'B' || pos->board[new_x][new_y] == 'Q')
+        if(pos->board[new_x][new_y] == 'P' || pos->board[new_x][new_y] == 'R' || pos->board[new_x][new_y] == 'N' || pos->board[new_x][new_y] == 'B' ||
+           pos->board[new_x][new_y] == 'Q')
         {
             return 1;
         }
