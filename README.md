@@ -36,11 +36,6 @@ Supernova does not have its own opening book so it's recommended to use the book
 **Arena**
 http://www.playwitharena.de/
 
-Lichess
--------
-Supernova 2.1.2 is also on Lichess currently. Free feel to chanllenge it!  
-https://lichess.org/@/SupernovaBot
-
 Details
 -------
 **UCI Features** 
