@@ -828,6 +828,10 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     {
         printf("bestmove 0000\n");
     }
+    else if(!strncmp(pv_table[1], "", 5))
+    {
+        printf("bestmove %s\n", BestMove);
+    }
     else
     {
         printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);

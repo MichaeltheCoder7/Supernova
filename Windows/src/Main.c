@@ -32,7 +32,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-    printf("id name Supernova 2.1.2\n");
+    printf("id name Supernova 2.1.3\n");
     printf("id author Minkai Yang\n");
     //options
     printf("option name Hash type spin default 32 min 1 max 2048\n");

@@ -680,8 +680,6 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     int p_count = pos->piece_count[bP], r_count = pos->piece_count[bR], n_count = pos->piece_count[bN];
     int b_count = pos->piece_count[bB], q_count = pos->piece_count[bQ]; //black chess piece counts
     int points = 0;
-    int position_bonus_white = 0;
-    int position_bonus_black = 0;
     int other_bonus_white = 0;
     int other_bonus_black = 0;
     int white_king_x = pos->piece_list[wK][0] / 8;
@@ -976,7 +974,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[wR][i] / 8;
         y = pos->piece_list[wR][i] % 8;
 
-        position_bonus_white += white_rook[x][y];
+        other_bonus_white += white_rook[x][y];
         if(openFile(board, y))
         {
             midgame_white += ROOKOPENFILEMG;
@@ -1039,7 +1037,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[wN][i] / 8;
         y = pos->piece_list[wN][i] % 8;
 
-        position_bonus_white += white_knight[x][y];
+        other_bonus_white += white_knight[x][y];
         if(outpost_white(board, x, y))
         {
             other_bonus_white += OUTPOST; //outpost bonus
@@ -1091,7 +1089,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[wB][i] / 8;
         y = pos->piece_list[wB][i] % 8;
 
-        position_bonus_white += white_bishop[x][y];
+        other_bonus_white += white_bishop[x][y];
         if(badBishop_white(board, x, y))
         {
             other_bonus_white -= BADBISHOP; //bad bishop penalty
@@ -1161,7 +1159,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[wQ][i] / 8;
         y = pos->piece_list[wQ][i] % 8;
 
-        position_bonus_white += white_queen[x][y];
+        other_bonus_white += white_queen[x][y];
         //queen early development penalty
         if(x < 6)
         {
@@ -1197,7 +1195,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[bR][i] / 8;
         y = pos->piece_list[bR][i] % 8;
 
-        position_bonus_black += black_rook[x][y];
+        other_bonus_black += black_rook[x][y];
         if(openFile(board, y))
         {
             midgame_black += ROOKOPENFILEMG;
@@ -1260,7 +1258,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[bN][i] / 8;
         y = pos->piece_list[bN][i] % 8;
 
-        position_bonus_black += black_knight[x][y];
+        other_bonus_black += black_knight[x][y];
         if(outpost_black(board, x, y))
         {
             other_bonus_black += OUTPOST; //outpost bonus
@@ -1312,7 +1310,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[bB][i] / 8;
         y = pos->piece_list[bB][i] % 8;
 
-        position_bonus_black += black_bishop[x][y];
+        other_bonus_black += black_bishop[x][y];
         if(badBishop_black(board, x, y))
         {
             other_bonus_black -= BADBISHOP; //bad bishop penalty
@@ -1382,7 +1380,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         x = pos->piece_list[bQ][i] / 8;
         y = pos->piece_list[bQ][i] % 8;
 
-        position_bonus_black += black_queen[x][y];
+        other_bonus_black += black_queen[x][y];
         //queen early development penalty
         if(x > 1)
         {
@@ -1420,10 +1418,11 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     if(phase > 4)
         tempo = color * TEMPO;
     
-    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900 + position_bonus_black 
+    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900
             + ((b_count >= 2)? 1 : 0) * BISHOPPAIR - ((n_count >= 2)? 1 : 0) * KNIGHTPAIR - ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black
-            - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900 - position_bonus_white 
-            - ((B_count >= 2)? 1 : 0) * BISHOPPAIR + ((N_count >= 2)? 1 : 0) * KNIGHTPAIR + ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white + tempo;
+            - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900
+            - ((B_count >= 2)? 1 : 0) * BISHOPPAIR + ((N_count >= 2)? 1 : 0) * KNIGHTPAIR + ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white
+            + tempo;
 
     //adjust phase score based on materials
     if(phase > 24)
