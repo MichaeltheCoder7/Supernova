@@ -556,8 +556,8 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
             gain[d] = -gain[d-1];
             break;
         }
-    }
-    while(attacker_index != -1);
+
+    }while(attacker_index != -1);
 
     while(--d)
     {
@@ -608,8 +608,8 @@ int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int tar
         
         x = attacker_index / 8;
         y = attacker_index % 8;
-    }
-    while(attacker_index != -1);
+        
+    }while(attacker_index != -1);
 
     while(--d)
     {
