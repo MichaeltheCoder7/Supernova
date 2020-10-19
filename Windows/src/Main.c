@@ -36,7 +36,7 @@ void handle_uci()
     printf("id author Minkai Yang\n");
     //options
     printf("option name Hash type spin default 32 min 1 max 2048\n");
-    printf("option name Ponder type check default true\n");
+    printf("option name Ponder type check default false\n");
     printf("option name Clear Hash type button\n");
     printf("uciok\n");
 }
