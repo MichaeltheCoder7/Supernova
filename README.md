@@ -17,8 +17,7 @@ Linux:
 cd Linux
 make
 ```
-**Releases**
-https://github.com/MichaeltheCoder7/Supernova/releases  
+[**Releases**](https://github.com/MichaeltheCoder7/Supernova/releases)  
 
 GUI
 ---
@@ -33,8 +32,7 @@ For example, if you are using Arena as GUI, instructions are given below.
 
 Supernova does not have its own opening book so it's recommended to use the book provided by the GUI. Add the book by selecting Engines -> Manage -> Details -> select Supernova -> Books -> choose "Use Arena main books with this engine" -> Apply. The link to download Arena is given below.
 
-**Arena**
-http://www.playwitharena.de/
+[**Arena Download**](http://www.playwitharena.de)
 
 Details
 -------
@@ -48,7 +46,7 @@ Details
   * Analyze/Infinite
 * FEN Support
 * Pondering  
-* Configurable Hash Tables from 1MB to 2048MB  
+* Configurable Hash Tables from 1MB to 4096MB  
 * Clear Hash Tables Option
 * Search Information and Principal Variation
 
@@ -101,4 +99,4 @@ Author
 
 License
 -------
-Supernova is covered by the MIT license. See https://github.com/MichaeltheCoder7/Supernova/blob/master/LICENSE for more details.
+Supernova is covered by the MIT license. See [LICENSE](https://github.com/MichaeltheCoder7/Supernova/blob/master/LICENSE) for more details.
