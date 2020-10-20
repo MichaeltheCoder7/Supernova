@@ -12,9 +12,9 @@
 //swap two ints
 static inline void swap(int* a, int* b)
 { 
-    int t = *a; 
-    *a = *b; 
-    *b = t; 
+    int t = *a;
+    *a = *b;
+    *b = t;
 } 
 
 //swap two move structs
