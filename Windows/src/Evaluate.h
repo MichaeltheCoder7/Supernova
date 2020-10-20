@@ -24,6 +24,6 @@
 #define RETURNINGBISHOP 30
 #define TEMPO           10
 
-int evaluate(BOARD *pos, char board[8][8], int color); 
+int evaluate(BOARD *pos, char board[8][8], int color);
 
 #endif
