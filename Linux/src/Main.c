@@ -32,11 +32,11 @@ void * engine(void * param)
 
 void handle_uci()
 {
-    printf("id name Supernova 2.1.2\n");
+    printf("id name Supernova 2.1.3\n");
     printf("id author Minkai Yang\n");
     //options
-    printf("option name Hash type spin default 32 min 1 max 2048\n");
-    printf("option name Ponder type check default true\n");
+    printf("option name Hash type spin default 32 min 1 max 4096\n");
+    printf("option name Ponder type check default false\n");
     printf("option name Clear Hash type button\n");
     printf("uciok\n");
 }
@@ -61,8 +61,8 @@ void configure_hash(char *input)
     hash_size = atoi(hash_value);
     if(hash_size < 1)
         hash_size = 1;
-    else if(hash_size > 2048)
-        hash_size = 2048;
+    else if(hash_size > 4096)
+        hash_size = 4096;
     HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
     EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
@@ -495,12 +495,12 @@ void uci_loop()
         {
             continue;
         }
-
+        //skip new line
         if(string[0] == '\n')
         {
             continue;
         }
-
+        //listen for command
         if(!strncmp("isready", string, 7))
         {
             printf("readyok\n");

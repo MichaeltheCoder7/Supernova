@@ -279,7 +279,7 @@ int makeMove(BOARD *pos, MOVE *move)
         }
     }
 
-    pos->pawn_push = false;
+    pos->pawn_push = false; //detect pawn push to the 7th / 2nd rank
     switch(piece)
     {
         case 'P':
@@ -573,7 +573,6 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
             pos->key ^= ep[7];
             break;  
     }
-
     pos->ep_file = 0;
 
     switch(piece)
@@ -706,7 +705,6 @@ int make_nullmove(BOARD *pos)
             pos->key ^= ep[7];
             break;  
     }
-
     pos->ep_file = 0;
 
     return temp_ep;

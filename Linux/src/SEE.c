@@ -254,10 +254,8 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-
             break;
         }
-        
         case -1:
         {
             //pawn attack
@@ -493,11 +491,10 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-
             break;
         }
     }
-    
+
     if(attackers_index[0] != -2)
     {
         return attackers_index[0];
@@ -537,7 +534,7 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
             king_attack = true;            
 
         piece = board_copy[new_x][new_y];
-
+        //make the capture
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         color = -color;
         attacker_index = get_smallest_attacker(board_copy, new_x, new_y, color);
@@ -556,8 +553,8 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
             gain[d] = -gain[d-1];
             break;
         }
-    }
-    while(attacker_index != -1);
+
+    }while(attacker_index != -1);
 
     while(--d)
     {
@@ -593,7 +590,7 @@ int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int tar
             if(!king_attack)
                 break;
         }      
-
+        //make the capture
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         attacker_index = get_smallest_attacker(board_copy, new_x, new_y, color);
         color = -color;
@@ -605,11 +602,11 @@ int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int tar
                 return -20000;
             break;
         }
-        
+        //convert index to 2D
         x = attacker_index / 8;
         y = attacker_index % 8;
-    }
-    while(attacker_index != -1);
+        
+    }while(attacker_index != -1);
 
     while(--d)
     {

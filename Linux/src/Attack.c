@@ -207,7 +207,6 @@ int ifCheck(BOARD *pos, int color)
                     break;
                 }
             }
-            
             break;
         }
         case -1:
@@ -399,7 +398,6 @@ int ifCheck(BOARD *pos, int color)
                     break;
                 }
             }
-
             break;
         }
     }
@@ -606,7 +604,6 @@ int isThreatened(char board[8][8], int x, int y, int color)
             }
             break;
         }
-        
         case -1:
         {
             //up left

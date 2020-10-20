@@ -7,10 +7,10 @@ CDEPS = ./bin/Main.o ./bin/Board.o ./bin/Move.o ./bin/CheckMove.o ./bin/MoveGen.
 ./bin/OrderMove.o ./bin/Attack.o ./bin/Mobility.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
 
 # Default target
-all: ./bin/Supernova_2.1.2.exe
+all: ./bin/Supernova_2.1.3.exe
 
 test: 
-	./bin/Supernova_2.1.2.exe
+	./bin/Supernova_2.1.3.exe
 
 ######################### Generate object files #######################
 # Target for object files
@@ -19,10 +19,10 @@ test:
 
 ######################### Generate the executable #####################
 # Target for Supernova
-./bin/Supernova_2.1.2.exe: $(CDEPS)
+./bin/Supernova_2.1.3.exe: $(CDEPS)
 	$(FLAGS) $^ -o $@
 
 ###############################  others  ##############################
 # Target for clean
 clean:
-	rm -rf ./bin/*.o ./bin/Supernova_2.1.2.exe
+	rm -rf ./bin/*.o ./bin/Supernova_2.1.3.exe
