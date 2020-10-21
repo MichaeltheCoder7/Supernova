@@ -376,7 +376,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     
     //futility prunning
     int futilityMargin[4] = {0, 200, 300, 500};
-
     if(depth <= 3 && !is_PV && !isCheck && abs(alpha) < 19000 && (eval + futilityMargin[depth]) <= alpha)
     {
         futility = true;

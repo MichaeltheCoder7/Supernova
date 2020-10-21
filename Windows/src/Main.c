@@ -12,6 +12,8 @@
 #include "Search.h"
 #include "Transposition.h"
 
+#define VERSION "2.1.4"
+
 //global variables
 //specify color for engine
 //1: black
@@ -32,7 +34,7 @@ void * engine(void * param)
 
 void handle_uci()
 {
-    printf("id name Supernova 2.1.3\n");
+    printf("id name Supernova %s\n", VERSION);
     printf("id author Minkai Yang\n");
     //options
     printf("option name Hash type spin default 32 min 1 max 4096\n");
