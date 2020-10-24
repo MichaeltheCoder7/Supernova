@@ -145,7 +145,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         return beta;
     }
     
-    //delta prunning
+    //delta pruning
     if(standing_pat + 900 < alpha)
     {
         return alpha;
@@ -182,7 +182,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         piece = pos->board[new_x][new_y];
         cap_piece_value = piece_value(piece);
 
-        //delta prunning
+        //delta pruning
         if((standing_pat + cap_piece_value + 200) < alpha && !isprom)
         {
             if(pos_copy.piece_num > 14)
@@ -192,7 +192,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         moved_piece = pos_copy.board[new_x][new_y];
         moved_piece_value = piece_value(moved_piece);
 
-        //SEE prunning
+        //SEE pruning
         //only check when higher takes lower and not promotion
         //do not check when king is capturing
         if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && !isprom)
@@ -247,7 +247,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     if(stop_search)
         return 0;
 
-    //mate distance prunning
+    //mate distance pruning
     if(alpha < -mate_value) 
         alpha = -mate_value;
     if(beta > mate_value - 1) 
@@ -334,7 +334,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         return quiescence(pos, color, alpha, beta);
     }
     
-    //static null move prunning
+    //static null move pruning
     if(depth <= 2 && !is_PV && !isCheck && abs(beta) < 19000)
     {
         int margin = 120 * depth;
@@ -344,7 +344,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
     }
 
-    //null move prunning
+    //null move pruning
     //only at non-PV nodes
     if(DoNull && !isCheck && depth >= 3 && !is_PV && eval >= beta)
     {
@@ -374,7 +374,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
     }
     
-    //futility prunning
+    //futility pruning
     int futilityMargin[4] = {0, 200, 300, 500};
     if(depth <= 3 && !is_PV && !isCheck && abs(alpha) < 19000 && (eval + futilityMargin[depth]) <= alpha)
     {
@@ -402,7 +402,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             continue;
         }
         
-        //fultility prunning
+        //fultility pruning
         //try at least one move
         if(futility && !isTactical && moves_made)
         {
