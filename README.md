@@ -64,8 +64,8 @@ Details
 * Principal Variation Search
 * Razoring
 * Static Null Move Pruning
-* Null Move Prunning
-* Futility Prunning
+* Null Move Pruning
+* Futility Pruning
 * Late Move Reduction
 * Check Extension
 * Passed Pawn Extension
