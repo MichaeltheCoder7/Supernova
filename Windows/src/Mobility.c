@@ -70,10 +70,10 @@ static inline bool defended_by_bpawn(char board[8][8], int x, int y)
 }
 
 //get king zone
-//including king ring and king's position
+//including king ring, king's position, and 3 forward positions
 static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
 {
-    if(y >= wkingy-1 && y <= wkingy+1 && x >= wkingx-1 && x <= wkingx+1)
+    if(y >= wkingy-1 && y <= wkingy+1 && x >= wkingx-2 && x <= wkingx+1)
     {
         return true;
     }
@@ -83,7 +83,7 @@ static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
 
 static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
 {
-    if(y >= bkingy-1 && y <= bkingy+1 && x >= bkingx-1 && x <= bkingx+1)
+    if(y >= bkingy-1 && y <= bkingy+1 && x >= bkingx-1 && x <= bkingx+2)
     {
         return true;
     }

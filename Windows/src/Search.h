@@ -5,7 +5,7 @@
 #include "Board.h"
 #include "Move.h"
 
-#define MAXDEPTH 50
+#define MAXDEPTH 100
 
 unsigned long long history_log[800];
 int history_index;
@@ -23,6 +23,9 @@ bool time_management;
 bool node_mode;
 int search_nodes;
 bool stop_search;
+
+static int futilityMargin[9] = { 0, 120, 220, 320, 420, 520, 620, 720, 820 };
+static int lmpMargin[9] = { 0, 5, 8, 12, 17, 23, 30, 38, 47 };
 
 void search(BOARD *pos, int piece_color, char op_move[6]);
 

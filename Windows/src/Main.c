@@ -12,7 +12,7 @@
 #include "Search.h"
 #include "Transposition.h"
 
-#define VERSION "2.1.4"
+#define VERSION "noPVtt"
 
 //global variables
 //specify color for engine
@@ -387,13 +387,13 @@ void handle_go(char *input)
         if(engine_color == -1)
         {
             search_time = wt / moves_left + 0.9 * winc;
-            if((1.75 * search_time) >= wt) //prevent losing on time
+            if((2 * search_time) >= wt) //prevent losing on time
                 extra_time = false;
         }
         else if(engine_color == 1)
         {
             search_time = bt / moves_left + 0.9 * binc;
-            if((1.75 * search_time) >= bt) //prevent losing on time
+            if((2 * search_time) >= bt) //prevent losing on time
                 extra_time = false;
         }
         if(outofbook < 5) //think longer when out of book
@@ -424,13 +424,13 @@ void handle_go(char *input)
         if(engine_color == -1)
         {
             ponder_time = wt / moves_left + 0.9 * winc;
-            if((1.75 * ponder_time) >= wt) //prevent losing on time
+            if((2 * ponder_time) >= wt) //prevent losing on time
                 extra_time = false;
         }
         else if(engine_color == 1)
         {
             ponder_time = bt / moves_left + 0.9 * binc;
-            if((1.75 * ponder_time) >= bt) //prevent losing on time
+            if((2 * ponder_time) >= bt) //prevent losing on time
                 extra_time = false;
         }
     }

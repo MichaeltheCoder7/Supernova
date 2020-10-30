@@ -93,7 +93,7 @@ static inline bool check_repetition(unsigned long long key, int counter, int ply
     //store the current position key into the history table
     history_log[history_index+ply] = key;
     //check positions till an capture or a pawn move
-    for(int x = history_index+ply-2; x >= history_index+ply-counter; x-=2)
+    for(int x = history_index+ply - 2; x >= history_index+ply-counter; x-=2)
     {
         if(key == history_log[x])
         {
@@ -119,6 +119,43 @@ static inline int contempt(BOARD *pos, int ply)
     return 25;
 }
 
+//check if the side to move has non-pawn material
+static inline bool nonPawnMaterial(BOARD *pos, int color)
+{
+    //black
+    if(color == 1)
+    {
+        if(pos->piece_count[bN] || pos->piece_count[bB] || pos->piece_count[bR] || pos->piece_count[bQ])
+        {
+            return true;
+        }
+    }
+    //white
+    else
+    {
+        if(pos->piece_count[wN] || pos->piece_count[wB] || pos->piece_count[wR] || pos->piece_count[wQ])
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+static inline bool isCapturePromotion(BOARD *pos, MOVE *move)
+{
+    if(move->promotion != ' ')
+    {
+        return true;
+    }
+    else if(pos->board[move->to / 8][move->to % 8] != ' ')
+    {
+        return true;
+    }
+
+    return false;
+}
+
 //quiescence search with captures and queen promotion
 static int quiescence(BOARD *pos, int color, int alpha, int beta)
 {
@@ -130,6 +167,9 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     int cap_piece_value;
     int new_x, new_y;
     BOARD pos_copy;
+
+    //prefetch hash table
+    __builtin_prefetch(&Evaltt[pos->key % EVALHASHSIZE]);
 
     //check if time is up
     timeUp();
@@ -145,7 +185,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         return beta;
     }
     
-    //delta prunning
+    //delta pruning
     if(standing_pat + 900 < alpha)
     {
         return alpha;
@@ -159,7 +199,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     value = -INFINITE;
     //get children of node
     MOVE moves[256];
-    int scores[100];
+    int scores[256];
     length = captureGen(pos, moves, scores, color);
 
     for(int x = 0; x < length; x++)
@@ -182,17 +222,17 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         piece = pos->board[new_x][new_y];
         cap_piece_value = piece_value(piece);
 
-        //delta prunning
+        //delta pruning
         if((standing_pat + cap_piece_value + 200) < alpha && !isprom)
         {
-            if(pos_copy.piece_num > 14)
+            if(pos_copy.piece_num > 10)
                 continue;
         }
 
         moved_piece = pos_copy.board[new_x][new_y];
         moved_piece_value = piece_value(moved_piece);
 
-        //SEE prunning
+        //SEE pruning
         //only check when higher takes lower and not promotion
         //do not check when king is capturing
         if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && !isprom)
@@ -213,41 +253,45 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
             if(value >= beta)
             {
                 return beta; //beta cut-off
-            } 
-            alpha = value;   
+            }
+            alpha = value;
         }
     }
     
     return alpha;
 }
 
-//principal variation search
+//fail-hard principal variation search
 static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV)
 {   
     int value = -INFINITE;
+    int best = -INFINITE;
     int length;
     struct DataItem* entry;
     int entryFlag = UPPERBOUND;
     bool alpha_raised = false;
     int mate_value = INFINITE - ply;
     bool futility = false;
-    int moves_made = 0;
-    int reduction_depth = 0;
-    int new_depth;
+    int moves_made = 0, quietCount = 0;
+    int reduction_depth, new_depth;
     int isTactical;
     BOARD pos_copy;
     MOVE bm;
     MOVE hash_move;
+    int extension;
+    int probcutVal, probcutBeta;
     bm.from = NOMOVE;
     hash_move.from = NOMOVE;
-    int extension;
+
+    //prefetch hash table
+    __builtin_prefetch(&tt[pos->key % (HASHSIZE - 1)]);
 
     //check if time is up
     timeUp();
     if(stop_search)
         return 0;
 
-    //mate distance prunning
+    //mate distance pruning
     if(alpha < -mate_value) 
         alpha = -mate_value;
     if(beta > mate_value - 1) 
@@ -282,16 +326,17 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     entry = probeTT(pos->key);
     if(entry != NULL)
     { 
-        if(entry->depth >= depth) 
+        if(entry->depth >= depth)
         {
             //at pv nodes, only exact cutoffs are accepted
-            if(is_PV)
-            {
-                if(entry->flag == EXACT)
-                    return entry -> evaluation;
-            }
+            //if(is_PV)
+            //{
+                //if(entry->flag == EXACT && entry->evaluation > alpha && entry->evaluation < beta)
+                    //return entry->evaluation;
+            //}
             //tt cutoff at none pv nodes
-            else
+            //else
+            if(!is_PV)
             {
                 switch(entry->flag)
                 {
@@ -334,21 +379,21 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         return quiescence(pos, color, alpha, beta);
     }
     
-    //static null move prunning
-    if(depth <= 2 && !is_PV && !isCheck && abs(beta) < 19000)
+    //static null move pruning
+    if(depth <= 7 && !is_PV && !isCheck && abs(beta) < 19000)
     {
-        int margin = 120 * depth;
+        int margin = 96 * depth;
         if(eval - margin >= beta)
         {
-            return eval - margin;
+            return eval - margin; //same as returning beta or eval in fail-hard
         }
     }
 
-    //null move prunning
+    //null move pruning
     //only at non-PV nodes
     if(DoNull && !isCheck && depth >= 3 && !is_PV && eval >= beta)
     {
-        if(pos->piece_num > 14)
+        if(nonPawnMaterial(pos, color))
         {
             int R = 2;
             if(depth > 6)
@@ -359,7 +404,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             //make null move
             int ep_file = make_nullmove(pos);
 
-            value = -pvs(pos, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false);
+            int nullVal = -pvs(pos, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false);
 
             //undo null move
             undo_nullmove(pos, ep_file);
@@ -367,16 +412,68 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             if(stop_search)
                 return 0;
 
-            if(value >= beta)
+            if(nullVal >= beta)
             {
                 return beta;
             }
         }
     }
     
-    //futility prunning
-    int futilityMargin[4] = {0, 200, 300, 500};
-    if(depth <= 3 && !is_PV && !isCheck && abs(alpha) < 19000 && (eval + futilityMargin[depth]) <= alpha)
+    //probcut
+    if(!is_PV && !isCheck && depth > 4 && abs(beta) < 19000 && eval >= beta)
+    {
+        int moved_piece_value;
+        int cap_piece_value;
+        int new_x, new_y;
+        int isprom;
+        MOVE moves[256];
+        int scores[256];
+
+        probcutBeta = ((beta + 80) <= INFINITE)? (beta + 80):INFINITE;
+        length = captureGen(pos, moves, scores, color);
+        //try tactical moves
+        for(int x = 0; x < length; x++)
+        {
+            //find the move with highest score
+            movesort(moves, scores, length, x);
+            //make a copy of the board
+            pos_copy = *pos;
+            isprom = makeMove(&pos_copy, &moves[x]);
+            //check if check is ignored
+            if(ifCheck(&pos_copy, color))
+            {
+                continue;
+            }
+            //get piece value
+            new_x = moves[x].to / 8;
+            new_y = moves[x].to % 8;
+            cap_piece_value = piece_value(pos->board[new_x][new_y]);
+            moved_piece_value = piece_value(pos_copy.board[new_x][new_y]);
+            //SEE pruning
+            if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isprom != 2)
+            {
+                if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
+                {
+                    continue;
+                }
+            }
+            
+            probcutVal = -quiescence(&pos_copy, -color, -probcutBeta, -probcutBeta + 1);
+
+            if(probcutVal >= probcutBeta)
+            {
+                //reduced depth search to confirm the value is above beta
+                probcutVal = -pvs(&pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false);
+            }
+            if(probcutVal >= probcutBeta)
+            {
+                return probcutVal;
+            }
+        }
+    }
+
+    //conditions for futility pruning
+    if((eval + futilityMargin[depth]) <= alpha && abs(alpha) < 19000)
     {
         futility = true;
     }
@@ -401,18 +498,31 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         {
             continue;
         }
-        
-        //fultility prunning
-        //try at least one move
-        if(futility && !isTactical && moves_made)
+
+        if(!is_PV && !isCheck && depth <= 8 && !isTactical && best > -19000) //not mated
         {
-            if(!ifCheck(&pos_copy, -color))
+            //fultility pruning
+            if(futility)
             {
-                continue;
+                if(!ifCheck(&pos_copy, -color))
+                {
+                    continue;
+                }
+            }
+
+            //late move pruning
+            if(!pos_copy.pawn_push && quietCount > lmpMargin[depth])
+            {
+                if(!ifCheck(&pos_copy, -color))
+                {
+                    continue;
+                }
             }
         }
 
         moves_made++;
+        if(!isTactical)
+            quietCount++;
 
         //hack to ensure pv line is more intact
         if(moves_made == 1)
@@ -428,19 +538,18 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         //late move reduction
         reduction_depth = 0;
         new_depth = depth - 1 + extension;
-       
-        if(!is_PV 
-           && new_depth > 3
+
+        if(new_depth >= 2
            && moves_made > 3
-           && !isCheck 
-           && !isTactical 
+           && !isCheck
+           && !isTactical
            && !compareMove(&killers[ply][0], &moves[x])
            && !compareMove(&killers[ply][1], &moves[x]))
         {
             if(!ifCheck(&pos_copy, -color))
             {
                 reduction_depth = 1;
-                if(moves_made > 6)
+                if(moves_made > 6 && new_depth >= 3) //do not drop to qsearch
                     reduction_depth += 1;
                 
                 new_depth -= reduction_depth;
@@ -473,38 +582,42 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if(stop_search)
             return 0;
 
-        if(value > alpha)
+        if(value > best)
         {
-            bm = moves[x];
-            if(value >= beta)
-            {   
-                if(!isTactical)
-                {
-                    //make sure killer moves are different
-                    if(!compareMove(&killers[ply][0], &moves[x]))
+            best = value;
+            if(value > alpha)
+            {
+                bm = moves[x];
+                if(value >= beta)
+                {   
+                    if(!isTactical)
                     {
-                        killers[ply][1] = killers[ply][0];
+                        //make sure killer moves are different
+                        if(!compareMove(&killers[ply][0], &moves[x]))
+                        {
+                            killers[ply][1] = killers[ply][0];
+                        }
+                        //save killer move
+                        killers[ply][0] = moves[x];
+                        //save data in the history heuristic table for move ordering
+                        int a = (color==1)?1:0;
+                        int b = moves[x].from;
+                        int c = moves[x].to;
+                        history[a][b][c] += depth*depth;
+                        //prevent overflow
+                        if(history[a][b][c] > 80000000)
+                        {
+                            preventOverflow();
+                        }
                     }
-                    //save killer move
-                    killers[ply][0] = moves[x];
-                    //save data in the history heuristic table for move ordering
-                    int a = (color==1)?1:0;
-                    int b = moves[x].from;
-                    int c = moves[x].to;
-                    history[a][b][c] += depth*depth;
-                    //prevent overflow
-                    if(history[a][b][c] > 80000000)
-                    {
-                        preventOverflow();
-                    }
+                    alpha = beta;
+                    entryFlag = LOWERBOUND;
+                    break; //beta cut-off
                 }
-                alpha = beta;
-                entryFlag = LOWERBOUND;
-                break; //beta cut-off
+                alpha_raised = true;
+                alpha = value;
+                entryFlag = EXACT;
             }
-            alpha_raised = true;
-            alpha = value;
-            entryFlag = EXACT;
         }
     }
 
@@ -517,13 +630,13 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
         else
         {
-            alpha = 0; //stalemate
+            alpha = contempt(pos, ply); //stalemate
         }
     }
     //draw by fifty moves
     else if(pos->halfmove_counter >= 100)
     {
-        return 0;
+        return contempt(pos, ply);
     }
 
     //transposition table store:    
@@ -817,8 +930,8 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         {
             break;
         }
-        //easy move if the best move is a recapture and has not changed at depth 10
-        if(time_management && eazy_move && current_depth == 10)
+        //easy move if the best move is a recapture and has not changed at depth 12
+        if(time_management && eazy_move && current_depth == 12)
         {
             if(isRecapture(BestMove, op_move))
                 break;

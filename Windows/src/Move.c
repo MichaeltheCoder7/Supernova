@@ -325,15 +325,13 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->index_board[new_64] = pos->piece_count[wN];
                         pos->piece_count[wN]++;
                         break;
-                    case 'q':
+                    default:
                         pos->board[0][new_y] = 'Q';
                         pos->key ^= table[0][new_y][wQ];
                         //add piece
                         pos->piece_list[wQ][pos->piece_count[wQ]] = new_64;
                         pos->index_board[new_64] = pos->piece_count[wQ];
                         pos->piece_count[wQ]++;
-                        break;
-                    default:
                         break;
                 }
                 return 2;
@@ -400,15 +398,13 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->index_board[new_64] = pos->piece_count[bN];
                         pos->piece_count[bN]++;
                         break;
-                    case 'q':
+                    default:
                         pos->board[7][new_y] = 'q';
                         pos->key ^= table[7][new_y][bQ];
                         //add piece
                         pos->piece_list[bQ][pos->piece_count[bQ]] = new_64;
                         pos->index_board[new_64] = pos->piece_count[bQ];
                         pos->piece_count[bQ]++;
-                        break;
-                    default:
                         break;
                 }
                 return 2;
