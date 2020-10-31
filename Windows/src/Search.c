@@ -186,7 +186,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     }
     
     //delta pruning
-    if(standing_pat + 900 < alpha)
+    if(standing_pat + 975 < alpha)
     {
         return alpha;
     }

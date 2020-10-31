@@ -237,21 +237,21 @@ int piece_value(char piece)
         case 'p':
             return 100;
         case 'N':
-            return 320;
+            return 325;
         case 'n':
-            return 320;
+            return 325;
         case 'B':
-            return 330;
+            return 335;
         case 'b':
-            return 330;
+            return 335;
         case 'R':
             return 500;
         case 'r':
             return 500;
         case 'Q':
-            return 900;
+            return 975;
         case 'q':
-            return 900;
+            return 975;
         case 'K':
             return 20000;
         case 'k':

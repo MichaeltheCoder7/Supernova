@@ -1413,9 +1413,9 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     if(phase > 4)
         tempo = color * TEMPO;
     //sum up scores from black's perspective
-    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (320 + knight_val[p_count]) + b_count * 330 + q_count * 900
+    points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (325 + knight_val[p_count]) + b_count * 335 + q_count * 975
             + ((b_count >= 2)? 1 : 0) * BISHOPPAIR - ((n_count >= 2)? 1 : 0) * KNIGHTPAIR - ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black
-            - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (320 + knight_val[P_count]) - B_count * 330 - Q_count * 900
+            - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (325 + knight_val[P_count]) - B_count * 335 - Q_count * 975
             - ((B_count >= 2)? 1 : 0) * BISHOPPAIR + ((N_count >= 2)? 1 : 0) * KNIGHTPAIR + ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white
             + tempo;
     //adjust phase score based on materials
