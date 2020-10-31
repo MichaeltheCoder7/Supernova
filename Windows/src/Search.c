@@ -328,35 +328,24 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     { 
         if(entry->depth >= depth)
         {
-            //at pv nodes, only exact cutoffs are accepted
-            //if(is_PV)
-            //{
-                //if(entry->flag == EXACT && entry->evaluation > alpha && entry->evaluation < beta)
-                    //return entry->evaluation;
-            //}
-            //tt cutoff at none pv nodes
-            //else
-            if(!is_PV)
+            switch(entry->flag)
             {
-                switch(entry->flag)
+                case EXACT:
+                {   
+                    return entry->evaluation;
+                    break;
+                }
+                case LOWERBOUND:
                 {
-                    case EXACT:
-                    {   
-                        return entry->evaluation;
-                        break;
-                    }
-                    case LOWERBOUND:
-                    {
-                        if(beta <= entry->evaluation)
-                            return beta;
-                        break;
-                    }
-                    case UPPERBOUND:
-                    {
-                        if(alpha >= entry->evaluation)
-                            return alpha;
-                        break;
-                    }
+                    if(beta <= entry->evaluation)
+                        return beta;
+                    break;
+                }
+                case UPPERBOUND:
+                {
+                    if(alpha >= entry->evaluation)
+                        return alpha;
+                    break;
                 }
             }
         }

@@ -22,9 +22,10 @@ char positions[64][3] = {
 
 void print_move(MOVE move)
 {
-    printf("from: %hu\n", move.from);
-    printf("to: %hu\n", move.to);
-    printf("promotion: %c\n", move.promotion);
+    char move_string[6];
+
+    move_to_string(&move, move_string);
+    printf("%s\n", move_string);
 }
 
 void clear_move(MOVE *move)
