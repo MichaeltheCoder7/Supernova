@@ -321,6 +321,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     
     nodes++;
 
+    int TTeval;
     short eval = VALUENONE;
     //transposition table look up
     entry = probeTT(pos->key);
@@ -328,22 +329,25 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     { 
         if(entry->depth >= depth)
         {
+            //adjust mate scores form tt
+            TTeval = valueFromTT(entry->evaluation, ply);
+            //cutoff based on the flag
             switch(entry->flag)
             {
                 case EXACT:
                 {   
-                    return entry->evaluation;
+                    return TTeval;
                     break;
                 }
                 case LOWERBOUND:
                 {
-                    if(beta <= entry->evaluation)
+                    if(beta <= TTeval)
                         return beta;
                     break;
                 }
                 case UPPERBOUND:
                 {
-                    if(alpha >= entry->evaluation)
+                    if(alpha >= TTeval)
                         return alpha;
                     break;
                 }
@@ -629,7 +633,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     //transposition table store:    
-    storeTT(pos->key, alpha, eval, depth, &bm, entryFlag);
+    storeTT(pos->key, valueToTT(alpha, ply), eval, depth, &bm, entryFlag);
     return alpha;
 }
 

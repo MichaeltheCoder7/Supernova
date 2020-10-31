@@ -58,6 +58,10 @@ void init_zobrist();
 
 unsigned long long getHash(BOARD *pos, int color);
 
+int valueFromTT(int value, int ply);
+
+int valueToTT(int value, int ply);
+
 struct DataItem *probeTT(unsigned long long key);
 
 void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag);

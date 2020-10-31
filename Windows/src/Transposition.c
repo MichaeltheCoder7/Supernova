@@ -153,6 +153,16 @@ unsigned long long getHash(BOARD *pos, int color)
     return h;
 }
 
+int valueFromTT(int value, int ply)
+{
+    return (value > 19000)? value - ply : (value < -19000)? value + ply : value;
+}
+
+int valueToTT(int value, int ply)
+{
+    return (value > 19000)? value + ply : (value < -19000)? value - ply : value;
+}
+
 //transposition/hash table:
 //+1 index for collision
 struct DataItem *probeTT(unsigned long long key)
