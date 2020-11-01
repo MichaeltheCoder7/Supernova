@@ -651,13 +651,6 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     bm.from = NOMOVE;
     hash_move.from = NOMOVE;
 
-    int isCheck = ifCheck(pos, color);
-    //check extension
-    if(isCheck)
-    {
-        depth++;
-    }
-
     //transposition table look up
     entry = probeTT(pos->key);
     if(entry != NULL && entry->flag != UPPERBOUND)
