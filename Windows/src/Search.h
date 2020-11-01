@@ -24,8 +24,8 @@ bool node_mode;
 int search_nodes;
 bool stop_search;
 
-static int futilityMargin[9] = { 0, 120, 220, 320, 420, 520, 620, 720, 820 };
-static int lmpMargin[9] = { 0, 5, 8, 12, 17, 23, 30, 38, 47 };
+static const int futilityMargin[9] = { 0, 120, 220, 320, 420, 520, 620, 720, 820 };
+static const int lmpMargin[9] = { 0, 5, 8, 12, 17, 23, 30, 38, 47 };
 
 void search(BOARD *pos, int piece_color, char op_move[6]);
 
