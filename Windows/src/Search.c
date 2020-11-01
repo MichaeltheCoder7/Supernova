@@ -29,6 +29,18 @@ struct timeval starting_time;
 char BestMove[6];
 MOVE searched_move;
 
+//save killer moves
+static inline void saveKiller(MOVE move, int ply)
+{
+    //make sure killer moves are different
+    if(!compareMove(&killers[ply][0], &move))
+    {
+        killers[ply][1] = killers[ply][0];
+    }
+    //save killer move
+    killers[ply][0] = move;
+}
+
 //clear killer moves table
 static inline void clearKiller()
 {
@@ -66,6 +78,20 @@ static inline void preventOverflow()
                 history[d][e][f] = history[d][e][f] / 2;
             }
         }
+    }
+}
+
+//save data in the history heuristic table for move ordering
+static inline void saveHistory(MOVE move, int depth, int color)
+{
+    int a = (color==1)?1:0;
+    int b = move.from;
+    int c = move.to;
+    history[a][b][c] += depth*depth;
+    //prevent overflow
+    if(history[a][b][c] > 80000000)
+    {
+        preventOverflow();
     }
 }
 
@@ -139,20 +165,6 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
         }
     }
     
-    return false;
-}
-
-static inline bool isCapturePromotion(BOARD *pos, MOVE *move)
-{
-    if(move->promotion != ' ')
-    {
-        return true;
-    }
-    else if(pos->board[move->to / 8][move->to % 8] != ' ')
-    {
-        return true;
-    }
-
     return false;
 }
 
@@ -238,9 +250,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && !isprom)
         {
             if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
-            {
                 continue;
-            }
         }
 
         value = -quiescence(&pos_copy, -color, -beta, -alpha);
@@ -413,7 +423,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
     
     //probcut
-    if(!is_PV && !isCheck && depth > 4 && abs(beta) < 19000 && eval >= beta)
+    if(!is_PV && !isCheck && depth >= 5 && abs(beta) < 19000 && eval >= beta)
     {
         int moved_piece_value;
         int cap_piece_value;
@@ -446,9 +456,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isprom != 2)
             {
                 if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
-                {
                     continue;
-                }
             }
             
             probcutVal = -quiescence(&pos_copy, -color, -probcutBeta, -probcutBeta + 1);
@@ -471,6 +479,12 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         futility = true;
     }
 
+    //internal iterative deepening
+    if(is_PV && depth >= 5 && hash_move.from == NOMOVE)
+    {
+        hash_move = internalID(pos, depth - 2, ply, color, alpha, beta);
+    }
+    
     //get children of node
     MOVE moves[256];
     int scores[256];
@@ -585,23 +599,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                 {   
                     if(!isTactical)
                     {
-                        //make sure killer moves are different
-                        if(!compareMove(&killers[ply][0], &moves[x]))
-                        {
-                            killers[ply][1] = killers[ply][0];
-                        }
-                        //save killer move
-                        killers[ply][0] = moves[x];
-                        //save data in the history heuristic table for move ordering
-                        int a = (color==1)?1:0;
-                        int b = moves[x].from;
-                        int c = moves[x].to;
-                        history[a][b][c] += depth*depth;
-                        //prevent overflow
-                        if(history[a][b][c] > 80000000)
-                        {
-                            preventOverflow();
-                        }
+                        saveKiller(moves[x], ply);
+                        saveHistory(moves[x], depth, color);
                     }
                     alpha = beta;
                     entryFlag = LOWERBOUND;
@@ -637,6 +636,199 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     return alpha;
 }
 
+//internal iterative deepening
+MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
+{   
+    int value = -INFINITE;
+    int length;
+    int entryFlag = UPPERBOUND;
+    bool alpha_raised = false;
+    int isTactical;
+    int reduction_depth, new_depth;
+    int moves_made = 0;
+    BOARD pos_copy;
+    MOVE bm;
+    bm.from = NOMOVE;
+
+    //check if time is up
+    timeUp();
+    if(stop_search)
+        return bm;
+    
+    int isCheck = ifCheck(pos, color);
+
+    //get children of node
+    MOVE moves[256];
+    int scores[256];
+    length = moveGen(pos, moves, scores, ply, color);
+
+    for(int x = 0; x < length; x++)
+    {
+        //find the move with highest score
+        movesort(moves, scores, length, x);
+        //make a copy of the board
+        pos_copy = *pos;
+        isTactical = makeMove(&pos_copy, &moves[x]);
+        
+        //check if check is ignored
+        if(ifCheck(&pos_copy, color))
+        {
+            continue;
+        }
+        
+        moves_made++;
+
+        //late move reduction
+        reduction_depth = 0;
+        new_depth = depth - 1;
+
+        if(new_depth >= 2
+           && moves_made > 3
+           && !isCheck
+           && !isTactical
+           && !compareMove(&killers[ply][0], &moves[x])
+           && !compareMove(&killers[ply][1], &moves[x]))
+        {
+            if(!ifCheck(&pos_copy, -color))
+            {
+                reduction_depth = 1;
+                if(moves_made > 6 && new_depth >= 3) //do not drop to qsearch
+                    reduction_depth += 1;
+                
+                new_depth -= reduction_depth;
+            }
+        }
+
+        re_search:
+
+        if(!alpha_raised)
+        {
+            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true);
+        }
+        else
+        {
+            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false);
+            if(value > alpha)
+            {
+                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true);
+            }
+        }
+        
+        //search again if lmr failed
+        if(reduction_depth && value > alpha)
+        {
+            new_depth += reduction_depth;
+            reduction_depth = 0;
+            goto re_search;
+        }
+
+        //check if time is up
+        if(stop_search)
+            return bm;
+        
+        if(value > alpha)
+        {
+            bm = moves[x];
+            if(value >= beta)
+            {   
+                if(!isTactical)
+                {
+                    saveKiller(moves[x], ply);
+                    saveHistory(moves[x], depth, color);
+                }
+                alpha = beta;
+                entryFlag = LOWERBOUND;
+                break; //beta cut-off
+            }
+            alpha_raised = true;
+            alpha = value;
+            entryFlag = EXACT;
+        }
+    }
+  
+    //transposition table store:  
+    storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
+    return bm;
+}
+/*
+//internal iterative deepening
+MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
+{   
+    int value = -INFINITE;
+    int length;
+    int entryFlag = UPPERBOUND;
+    bool alpha_raised = false;
+    int isTactical;
+    BOARD pos_copy;
+    MOVE bm;
+    bm.from = NOMOVE;
+
+    //check if time is up
+    timeUp();
+    if(stop_search)
+        return bm;
+    
+    //get children of node
+    MOVE moves[256];
+    int scores[256];
+    length = moveGen(pos, moves, scores, ply, color);
+
+    for(int x = 0; x < length; x++)
+    {
+        //find the move with highest score
+        movesort(moves, scores, length, x);
+        //make a copy of the board
+        pos_copy = *pos;
+        isTactical = makeMove(&pos_copy, &moves[x]);
+        
+        //check if check is ignored
+        if(ifCheck(&pos_copy, color))
+        {
+            continue;
+        }
+        
+        if(!alpha_raised)
+        {
+            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true);
+        }
+        else
+        {
+            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -alpha - 1, -alpha, true, false);
+            if(value > alpha)
+            {
+                value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true);
+            }
+        }
+        
+        //check if time is up
+        if(stop_search)
+            return bm;
+        
+        if(value > alpha)
+        {
+            bm = moves[x];
+            if(value >= beta)
+            {   
+                if(!isTactical)
+                {
+                    saveKiller(moves[x], ply);
+                    saveHistory(moves[x], depth, color);
+                }
+                alpha = beta;
+                entryFlag = LOWERBOUND;
+                break; //beta cut-off
+            }
+            alpha_raised = true;
+            alpha = value;
+            entryFlag = EXACT;
+        }
+    }
+  
+    //transposition table store:  
+    storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
+    return bm;
+}
+*/
 //principal variation search at root
 static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 {   
@@ -705,23 +897,8 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
             {   
                 if(!isTactical)
                 {
-                    //make sure killer moves are different
-                    if(!compareMove(&killers[0][0], &moves[x]))
-                    {
-                        killers[0][1] = killers[0][0];
-                    }
-                    //save killer move
-                    killers[0][0] = moves[x];
-                    //save data in the history heuristic table for move ordering
-                    int a = (color==1)?1:0;
-                    int b = moves[x].from;
-                    int c = moves[x].to;
-                    history[a][b][c] += depth*depth;
-                    //prevent overflow
-                    if(history[a][b][c] > 80000000)
-                    {
-                        preventOverflow();
-                    }
+                    saveKiller(moves[x], 0);
+                    saveHistory(moves[x], depth, color);
                 }
                 alpha = beta;
                 entryFlag = LOWERBOUND;

@@ -12,7 +12,7 @@
 #include "Search.h"
 #include "Transposition.h"
 
-#define VERSION "2.2"
+#define VERSION "IID_withLMR"
 
 //global variables
 //specify color for engine

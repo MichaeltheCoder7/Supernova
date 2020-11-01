@@ -27,6 +27,8 @@ bool stop_search;
 static const int futilityMargin[9] = { 0, 120, 220, 320, 420, 520, 620, 720, 820 };
 static const int lmpMargin[9] = { 0, 5, 8, 12, 17, 23, 30, 38, 47 };
 
+MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta);
+
 void search(BOARD *pos, int piece_color, char op_move[6]);
 
 #endif
