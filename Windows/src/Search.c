@@ -119,7 +119,7 @@ static inline bool check_repetition(unsigned long long key, int counter, int ply
     //store the current position key into the history table
     history_log[history_index+ply] = key;
     //check positions till an capture or a pawn move
-    for(int x = history_index+ply - 2; x >= history_index+ply-counter; x-=2)
+    for(int x = history_index+ply - 2; x >= history_index+ply-counter; x -= 2)
     {
         if(key == history_log[x])
         {
@@ -479,9 +479,9 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     //internal iterative deepening
-    if(is_PV && depth >= 5 && hash_move.from == NOMOVE)
+    if(is_PV && depth >= 6 && hash_move.from == NOMOVE)
     {
-        hash_move = internalID(pos, depth - 2, ply, color, alpha, beta);
+        hash_move = internalID(pos, depth - depth / 4 - 1, ply, color, alpha, beta);
     }
     
     //get children of node
@@ -645,6 +645,8 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     if(stop_search)
         return bm;
     
+    nodes++;
+
     //get children of node
     MOVE moves[256];
     int scores[256];
@@ -721,6 +723,8 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     bm.from = NOMOVE;
     hash_move.from = NOMOVE;
 
+    nodes++;
+    
     //transposition table look up
     entry = probeTT(pos->key);
     if(entry != NULL && entry->flag != UPPERBOUND)
