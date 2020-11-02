@@ -272,7 +272,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
 }
 
 //fail-hard principal variation search
-static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV)
+static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV, int isCheck)
 {   
     int value = -INFINITE;
     int best = -INFINITE;
@@ -284,7 +284,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     bool futility = false;
     int moves_made = 0, quietCount = 0;
     int reduction_depth, new_depth;
-    int isTactical;
+    int isTactical, giveCheck;
     BOARD pos_copy;
     MOVE bm;
     MOVE hash_move;
@@ -309,7 +309,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     if(alpha >= beta) 
         return alpha;
     
-    int isCheck = ifCheck(pos, color);
     //check extension
     if(isCheck)
     {
@@ -407,7 +406,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             //make null move
             int ep_file = make_nullmove(pos);
 
-            int nullVal = -pvs(pos, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false);
+            int nullVal = -pvs(pos, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
 
             //undo null move
             undo_nullmove(pos, ep_file);
@@ -425,14 +424,12 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     //probcut
     if(!is_PV && !isCheck && depth >= 5 && abs(beta) < 19000 && eval >= beta)
     {
-        int moved_piece_value;
-        int cap_piece_value;
+        int moved_piece_value, cap_piece_value;
         int new_x, new_y;
-        int isprom;
         MOVE moves[256];
         int scores[256];
 
-        probcutBeta = ((beta + 80) <= INFINITE)? (beta + 80):INFINITE;
+        probcutBeta = beta + 80;
         length = captureGen(pos, moves, scores, color);
         //try tactical moves
         for(int x = 0; x < length; x++)
@@ -441,7 +438,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             movesort(moves, scores, length, x);
             //make a copy of the board
             pos_copy = *pos;
-            isprom = makeMove(&pos_copy, &moves[x]);
+            isTactical = makeMove(&pos_copy, &moves[x]);
             //check if check is ignored
             if(ifCheck(&pos_copy, color))
             {
@@ -453,18 +450,20 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             cap_piece_value = piece_value(pos->board[new_x][new_y]);
             moved_piece_value = piece_value(pos_copy.board[new_x][new_y]);
             //SEE pruning
-            if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isprom != 2)
+            if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isTactical != 2)
             {
                 if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
                     continue;
             }
             
+            //verify first with qsearch
             probcutVal = -quiescence(&pos_copy, -color, -probcutBeta, -probcutBeta + 1);
 
             if(probcutVal >= probcutBeta)
             {
+                giveCheck = ifCheck(&pos_copy, -color);
                 //reduced depth search to confirm the value is above beta
-                probcutVal = -pvs(&pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false);
+                probcutVal = -pvs(&pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false, giveCheck);
             }
             if(probcutVal >= probcutBeta)
             {
@@ -506,24 +505,20 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             continue;
         }
 
-        if(!is_PV && !isCheck && depth <= 8 && !isTactical && best > -19000) //not mated
+        giveCheck = ifCheck(&pos_copy, -color);
+
+        if(!is_PV && !isCheck && !giveCheck && depth <= 8 && !isTactical && best > -19000) //not mated
         {
             //fultility pruning
             if(futility)
             {
-                if(!ifCheck(&pos_copy, -color))
-                {
-                    continue;
-                }
+                continue;
             }
 
             //late move pruning
             if(!pos_copy.pawn_push && quietCount > lmpMargin[depth])
             {
-                if(!ifCheck(&pos_copy, -color))
-                {
-                    continue;
-                }
+                continue;
             }
         }
 
@@ -549,32 +544,30 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if(new_depth >= 2
            && moves_made > 3
            && !isCheck
+           && !giveCheck
            && !isTactical
            && !compareMove(&killers[ply][0], &moves[x])
            && !compareMove(&killers[ply][1], &moves[x]))
         {
-            if(!ifCheck(&pos_copy, -color))
-            {
-                reduction_depth = 1;
-                if(moves_made > 6 && new_depth >= 3) //do not drop to qsearch
-                    reduction_depth += 1;
-                
-                new_depth -= reduction_depth;
-            }
+            reduction_depth = 1;
+            if(moves_made > 6 && new_depth >= 3) //do not drop to qsearch
+                reduction_depth += 1;
+            
+            new_depth -= reduction_depth;
         }
 
         search_again:
 
         if(!alpha_raised)
         {
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, is_PV);
+            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, is_PV, giveCheck);
         }
         else
         {
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false);
+            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
             if(value > alpha)
             {
-                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true);
+                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
 
@@ -643,122 +636,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     int length;
     int entryFlag = UPPERBOUND;
     bool alpha_raised = false;
-    int isTactical;
-    int reduction_depth, new_depth;
-    int moves_made = 0;
-    BOARD pos_copy;
-    MOVE bm;
-    bm.from = NOMOVE;
-
-    //check if time is up
-    timeUp();
-    if(stop_search)
-        return bm;
-    
-    int isCheck = ifCheck(pos, color);
-
-    //get children of node
-    MOVE moves[256];
-    int scores[256];
-    length = moveGen(pos, moves, scores, ply, color);
-
-    for(int x = 0; x < length; x++)
-    {
-        //find the move with highest score
-        movesort(moves, scores, length, x);
-        //make a copy of the board
-        pos_copy = *pos;
-        isTactical = makeMove(&pos_copy, &moves[x]);
-        
-        //check if check is ignored
-        if(ifCheck(&pos_copy, color))
-        {
-            continue;
-        }
-        
-        moves_made++;
-
-        //late move reduction
-        reduction_depth = 0;
-        new_depth = depth - 1;
-
-        if(new_depth >= 2
-           && moves_made > 3
-           && !isCheck
-           && !isTactical
-           && !compareMove(&killers[ply][0], &moves[x])
-           && !compareMove(&killers[ply][1], &moves[x]))
-        {
-            if(!ifCheck(&pos_copy, -color))
-            {
-                reduction_depth = 1;
-                if(moves_made > 6 && new_depth >= 3) //do not drop to qsearch
-                    reduction_depth += 1;
-                
-                new_depth -= reduction_depth;
-            }
-        }
-
-        re_search:
-
-        if(!alpha_raised)
-        {
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true);
-        }
-        else
-        {
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false);
-            if(value > alpha)
-            {
-                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true);
-            }
-        }
-        
-        //search again if lmr failed
-        if(reduction_depth && value > alpha)
-        {
-            new_depth += reduction_depth;
-            reduction_depth = 0;
-            goto re_search;
-        }
-
-        //check if time is up
-        if(stop_search)
-            return bm;
-        
-        if(value > alpha)
-        {
-            bm = moves[x];
-            if(value >= beta)
-            {   
-                if(!isTactical)
-                {
-                    saveKiller(moves[x], ply);
-                    saveHistory(moves[x], depth, color);
-                }
-                alpha = beta;
-                entryFlag = LOWERBOUND;
-                break; //beta cut-off
-            }
-            alpha_raised = true;
-            alpha = value;
-            entryFlag = EXACT;
-        }
-    }
-  
-    //transposition table store:  
-    storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
-    return bm;
-}
-/*
-//internal iterative deepening
-MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
-{   
-    int value = -INFINITE;
-    int length;
-    int entryFlag = UPPERBOUND;
-    bool alpha_raised = false;
-    int isTactical;
+    int isTactical, giveCheck;
     BOARD pos_copy;
     MOVE bm;
     bm.from = NOMOVE;
@@ -787,16 +665,18 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
             continue;
         }
         
+        giveCheck = ifCheck(&pos_copy, -color);
+
         if(!alpha_raised)
         {
-            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true);
+            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
         }
         else
         {
-            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -alpha - 1, -alpha, true, false);
+            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
             if(value > alpha)
             {
-                value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true);
+                value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
         
@@ -828,7 +708,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
     return bm;
 }
-*/
+
 //principal variation search at root
 static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 {   
@@ -836,7 +716,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     int length;
     struct DataItem* entry;
     int entryFlag = UPPERBOUND;
-    int isTactical;
+    int isTactical, giveCheck;
     BOARD pos_copy;
     MOVE bm;
     MOVE hash_move;
@@ -872,17 +752,19 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         {
             continue;
         }
-        
+
+        giveCheck = ifCheck(&pos_copy, -color);
+
         if(value == -INFINITE)
         {
-            value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true);
+            value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true, giveCheck);
         }
         else
         {
-            value = -pvs(&pos_copy, depth - 1, 1, -color, -alpha - 1, -alpha, true, false);
+            value = -pvs(&pos_copy, depth - 1, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
             if(value > alpha)
             {
-                value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true);
+                value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
         
