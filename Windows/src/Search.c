@@ -309,8 +309,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     if(alpha >= beta) 
         return alpha;
     
-    //check extension
-    if(isCheck)
+    //do not drop to qsearch when in check
+    if(isCheck && depth == 0)
     {
         depth++;
     }
@@ -392,7 +392,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     //null move pruning
-    //only at non-PV nodes
     if(DoNull && !isCheck && depth >= 3 && !is_PV && eval >= beta)
     {
         if(nonPawnMaterial(pos, color))
@@ -532,9 +531,24 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
         extension = 0;
         //passed pawn extension
-        if(!isCheck && pos_copy.piece_num <= 18 && pos_copy.pawn_push)
+        if(pos_copy.piece_num <= 18 && pos_copy.pawn_push)
         {
             extension = 1;
+        }
+        //check extension
+        else if(giveCheck)
+        {
+            //don't extend checks with negative SEE
+            if(isTactical)
+            {
+                if(scores[x] >= ECAPTURE)
+                    extension = 1;
+            }
+            else
+            {
+                if(SEE(pos_copy.board, moves[x].to / 8, moves[x].to % 8, 0, color) >= 0)
+                    extension = 1;
+            }
         }
 
         //late move reduction
@@ -544,7 +558,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if(new_depth >= 2
            && moves_made > 3
            && !isCheck
-           && !giveCheck
+           && !extension
            && !isTactical
            && !compareMove(&killers[ply][0], &moves[x])
            && !compareMove(&killers[ply][1], &moves[x]))
