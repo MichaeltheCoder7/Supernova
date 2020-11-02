@@ -705,7 +705,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     }
   
     //transposition table store:  
-    storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
+    storeTT(pos->key, valueToTT(alpha, ply), VALUENONE, depth, &bm, entryFlag);
     return bm;
 }
 

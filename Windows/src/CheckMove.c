@@ -29,7 +29,7 @@ int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
                 return 1;
             }                                           
         }
-    }                                                        
+    }                        
 
     return 0;
 }
@@ -54,10 +54,10 @@ int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
             if(new_x == 5)
             {
                 return 1;
-            }                                           
+            }                         
         }
-    }	
-                    
+    }
+
     return 0;
 }
 
@@ -76,10 +76,10 @@ int CheckMove_wkingside(BOARD *pos)
             {
                 return 1;
             }
-        }   
+        }
     }
 
-    return 0; 
+    return 0;
 }
 
 //castling for white king
@@ -95,12 +95,12 @@ int CheckMove_wqueenside(BOARD *pos)
             //check if king is in check and the two other spots are threatened
             if(!ifCheck(pos, -1) && !isThreatened(pos->board, 7, 2, -1) && !isThreatened(pos->board, 7, 3, -1))
             {
-                return 1;      
+                return 1;
             }
-        } 
+        }
     }
- 
-    return 0; 
+
+    return 0;
 }
 
 //castling for black king
@@ -118,10 +118,10 @@ int CheckMove_bkingside(BOARD *pos)
             {
                 return 1;
             }
-        }          
+        }
     }
 
-    return 0; 
+    return 0;
 }
 
 //castling for black king
@@ -139,8 +139,8 @@ int CheckMove_bqueenside(BOARD *pos)
             {
                 return 1;
             }
-        } 
+        }
     }
 
-    return 0; 
+    return 0;
 }
