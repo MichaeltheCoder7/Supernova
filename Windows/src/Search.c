@@ -635,7 +635,6 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     int value = -INFINITE;
     int length;
     int entryFlag = UPPERBOUND;
-    bool alpha_raised = false;
     int isTactical, giveCheck;
     BOARD pos_copy;
     MOVE bm;
@@ -667,7 +666,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         
         giveCheck = ifCheck(&pos_copy, -color);
 
-        if(!alpha_raised)
+        if(value == -INFINITE)
         {
             value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
         }
@@ -698,7 +697,6 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
                 entryFlag = LOWERBOUND;
                 break; //beta cut-off
             }
-            alpha_raised = true;
             alpha = value;
             entryFlag = EXACT;
         }
