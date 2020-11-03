@@ -381,7 +381,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         return quiescence(pos, color, alpha, beta);
     }
     
-    //static null move pruning
+    //static null move / reverse futility pruning
     if(depth <= 7 && !is_PV && !isCheck && abs(beta) < 19000)
     {
         int margin = 96 * depth;
@@ -508,7 +508,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
         if(!is_PV && !isCheck && !giveCheck && depth <= 8 && !isTactical && best > -19000) //not mated
         {
-            //fultility pruning
+            //futility pruning
             if(futility)
             {
                 continue;
