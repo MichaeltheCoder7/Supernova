@@ -6,7 +6,7 @@
 #include "CheckMove.h"
 #include "Attack.h"
 
-/* 1 for legal move, 0 for illegal move*/
+//1 for legal move, 0 for illegal move
 //captures for white pawn
 int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 {
