@@ -18,7 +18,7 @@ static inline void swap(int* a, int* b)
 } 
 
 //swap two move structs
-static inline void swapMove(MOVE *move1, MOVE *move2) 
+static inline void swapMove(MOVE *move1, MOVE *move2)
 { 
     MOVE temp = *move1;
     *move1 = *move2;
@@ -26,7 +26,7 @@ static inline void swapMove(MOVE *move1, MOVE *move2)
 } 
 
 //insertion sort
-void movesort(MOVE moves[256], int sort[256], int length, int current) 
+void movesort(MOVE moves[256], int sort[256], int length, int current)
 {
     //find the move with the highest score
     int high = current;
@@ -264,7 +264,7 @@ int piece_value(char piece)
 }
 
 //capture ordering for qsearch
-int wCapQsearch_score(char piece, char op_piece, int new_x)
+int wCapQsearch_score(char piece, char op_piece)
 {
     int mvv = 0;
     int lva = 0;
@@ -273,9 +273,6 @@ int wCapQsearch_score(char piece, char op_piece, int new_x)
     {
         case 'P':
             lva = 5;
-            //capture + promotion
-            if(new_x == 0)
-                lva += 500;
             break;
         case 'N':
             lva = 4;
@@ -325,7 +322,7 @@ int wCapQsearch_score(char piece, char op_piece, int new_x)
     return mvv + lva;
 }
 
-int bCapQsearch_score(char piece, char op_piece, int new_x)
+int bCapQsearch_score(char piece, char op_piece)
 {
     int mvv = 0;
     int lva = 0;
@@ -334,9 +331,6 @@ int bCapQsearch_score(char piece, char op_piece, int new_x)
     {
         case 'p':
             lva = 5;
-            //capture + promotion
-            if(new_x == 7)
-                lva += 500;
             break;
         case 'n':
             lva = 4;

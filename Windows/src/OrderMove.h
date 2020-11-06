@@ -20,9 +20,9 @@ int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, 
 
 int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color);
 
-int wCapQsearch_score(char piece, char op_piece, int new_x);
+int wCapQsearch_score(char piece, char op_piece);
 
-int bCapQsearch_score(char piece, char op_piece, int new_x);
+int bCapQsearch_score(char piece, char op_piece);
 
 int piece_value(char piece);
 

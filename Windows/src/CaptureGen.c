@@ -36,7 +36,10 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 { 
                     all_moves[index].from = origin;
                     all_moves[index].to = 8*(index_x+1)+index_y-1;
-                    sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y - 1], index_x + 1);
+                    sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y - 1]);
+                    //capture + promotion
+                    if(index_x == 6)
+                        sort[index] += 500;
                     index++;
                 }
                 //promotion
@@ -51,7 +54,10 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 { 
                     all_moves[index].from = origin;
                     all_moves[index].to = 8*(index_x+1)+index_y+1;
-                    sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y + 1], index_x + 1);
+                    sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y + 1]);
+                    //capture + promotion
+                    if(index_x == 6)
+                        sort[index] += 500;
                     index++;
                 }
             }
@@ -73,7 +79,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('n', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('n', pos->board[x][y]);
                         index++;
                     }
                 }
@@ -94,7 +100,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 {  
                     all_moves[index].from = origin;
                     all_moves[index].to = 8*x+y;
-                    sort[index] = bCapQsearch_score('k', pos->board[x][y], 1);
+                    sort[index] = bCapQsearch_score('k', pos->board[x][y]);
                     index++;
                 }
             }
@@ -112,7 +118,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y], 1);
+                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -128,7 +134,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j], 1);
+                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -144,7 +150,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j], 1);
+                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -160,7 +166,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y], 1);
+                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -188,7 +194,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('b', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -209,7 +215,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('b', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -230,7 +236,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('b', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -251,7 +257,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('b', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('b', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -279,7 +285,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -295,7 +301,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = bCapQsearch_score('q', pos->board[j][index_y], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -316,7 +322,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -332,7 +338,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = bCapQsearch_score('q', pos->board[index_x][j], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -348,7 +354,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = bCapQsearch_score('q', pos->board[index_x][j], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -369,7 +375,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -385,7 +391,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = bCapQsearch_score('q', pos->board[j][index_y], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -406,7 +412,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = bCapQsearch_score('q', pos->board[x][y], 1);
+                        sort[index] = bCapQsearch_score('q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -430,7 +436,10 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 { 
                     all_moves[index].from = origin;
                     all_moves[index].to = 8*(index_x-1)+index_y-1;
-                    sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y - 1], index_x - 1);
+                    sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y - 1]);
+                    //capture + promotion
+                    if(index_x == 1)
+                        sort[index] += 500;
                     index++;
                 }
                 //promotion
@@ -445,7 +454,10 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 { 
                     all_moves[index].from = origin;
                     all_moves[index].to = 8*(index_x-1)+index_y+1;
-                    sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y + 1], index_x - 1);
+                    sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y + 1]);
+                    //capture + promotion
+                    if(index_x == 1)
+                        sort[index] += 500;
                     index++;
                 }
             }
@@ -467,7 +479,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('N', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('N', pos->board[x][y]);
                         index++;
                     }
                 }
@@ -488,7 +500,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 {  
                     all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                    sort[index] = wCapQsearch_score('K', pos->board[x][y], 1);
+                    sort[index] = wCapQsearch_score('K', pos->board[x][y]);
                     index++;
                 }
             }
@@ -506,7 +518,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y], 1);
+                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -522,7 +534,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j], 1);
+                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -538,7 +550,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j], 1);
+                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -554,7 +566,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y], 1);
+                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -582,7 +594,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('B', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -603,7 +615,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('B', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -624,7 +636,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('B', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -645,7 +657,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('B', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('B', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -673,7 +685,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -689,7 +701,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = wCapQsearch_score('Q', pos->board[j][index_y], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -710,7 +722,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -726,7 +738,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = wCapQsearch_score('Q', pos->board[index_x][j], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -742,7 +754,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
-                        sort[index] = wCapQsearch_score('Q', pos->board[index_x][j], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[index_x][j]);
                         index++;
                     }
                     if(pos->board[index_x][j] != ' ')
@@ -763,7 +775,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
@@ -779,7 +791,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
-                        sort[index] = wCapQsearch_score('Q', pos->board[j][index_y], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[j][index_y]);
                         index++;
                     }
                     if(pos->board[j][index_y] != ' ')
@@ -800,7 +812,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*x+y;
-                        sort[index] = wCapQsearch_score('Q', pos->board[x][y], 1);
+                        sort[index] = wCapQsearch_score('Q', pos->board[x][y]);
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
