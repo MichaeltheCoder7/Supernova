@@ -1,8 +1,8 @@
 # Makefile
 
 # Variables
-CFLAGS = gcc -ansi -std=c99 -c -O3
-FLAGS = gcc -ansi -std=c99 -O3
+CFLAGS = gcc -ansi -std=c99 -c -flto -Ofast
+FLAGS = gcc -ansi -std=c99 -flto -Ofast
 CDEPS = ./bin/Main.o ./bin/Board.o ./bin/Move.o ./bin/CheckMove.o ./bin/MoveGen.o ./bin/CaptureGen.o ./bin/SEE.o \
 ./bin/OrderMove.o ./bin/Attack.o ./bin/Mobility.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
 

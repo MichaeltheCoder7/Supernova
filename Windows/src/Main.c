@@ -12,7 +12,7 @@
 #include "Search.h"
 #include "Transposition.h"
 
-#define VERSION "gcc_optimization"
+#define VERSION "2.2"
 
 //global variables
 //specify color for engine
