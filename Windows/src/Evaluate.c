@@ -576,7 +576,7 @@ static inline bool badBishop_black(char board[8][8], int x, int y)
 }
 
 //penalty for semi-open files around king
-int wking_file(char board[8][8], int y)
+static inline int wking_file(char board[8][8], int y)
 {
     int result = 0;
     switch(y)
@@ -620,7 +620,7 @@ int wking_file(char board[8][8], int y)
     return result;
 }
 
-int bking_file(char board[8][8], int y)
+static inline int bking_file(char board[8][8], int y)
 {
     int result = 0;
     switch(y)

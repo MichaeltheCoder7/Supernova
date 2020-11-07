@@ -735,7 +735,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     MOVE bm;
     MOVE hash_move;
     bm.from = NOMOVE;
-    hash_move.from = NOMOVE;
+    clear_move(&hash_move);
 
     nodes++;
     
@@ -851,12 +851,12 @@ static inline void getPVline(BOARD *pos, MOVE *bestmove, int depth)
 }
 
 //get nodes per second
-static inline int get_nps(int nodes, double secs)
+static inline int get_nps(int node_count, double secs)
 {
     if(secs == 0)
         return 0;
     
-    return (int)(nodes / secs);
+    return (int)(node_count / secs);
 }
 
 //check if the destinations of these two moves are the same

@@ -34,7 +34,7 @@ white pieces
 */
 
 //starting board
-char board[8][8] = {
+char chess_board[8][8] = {
 
             {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
             {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -159,7 +159,7 @@ int position_to_y(char position[3])
 //initialize board struct to starting position
 void init_board(BOARD *pos)
 {
-    memcpy(pos->board, board, sizeof(pos->board));
+    memcpy(pos->board, chess_board, sizeof(pos->board));
     //set the castling flags
     pos->ksb = 1;
     pos->qsb = 1;

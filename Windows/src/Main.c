@@ -12,7 +12,7 @@
 #include "Search.h"
 #include "Transposition.h"
 
-#define VERSION "2.2"
+#define VERSION "gcc_optimization"
 
 //global variables
 //specify color for engine
@@ -20,13 +20,13 @@
 //-1: white
 int engine_color;
 int outofbook;
-BOARD pos;
+BOARD pos_info;
 char op_move[6] = "";
 bool newgame;
 
-void * engine(void * param)
+void * engine()
 {
-    search(&pos, engine_color, op_move);
+    search(&pos_info, engine_color, op_move);
 
     pthread_exit(NULL);
     return 0;
@@ -65,9 +65,9 @@ void configure_hash(char *input)
         hash_size = 1;
     else if(hash_size > 4096)
         hash_size = 4096;
-    HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
+    HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
-    EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
+    EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
     Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
     clearTT();
     clearEvalTT();
@@ -78,12 +78,12 @@ void handle_newgame()
 {
     if(tt == NULL) //default tt if not set
     {
-        HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
+        HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * 24);
         tt = malloc(HASHSIZE * sizeof(struct DataItem));
     }
     if(Evaltt == NULL) //default tt if not set
     {
-        EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
+        EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * 8);
         Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
     }
     //generate random zobrist numbers
@@ -289,15 +289,15 @@ void handle_position(char *input)
     if((position = strstr(input, "startpos")))
     {
         //set the board struct to initial state
-        init_board(&pos);
-        history_log[0] = pos.key; //get the initial hash key
+        init_board(&pos_info);
+        history_log[0] = pos_info.key; //get the initial hash key
         history_index = 0;
         engine_color = -1; //white
     }
     //parse fen notation
     else if((position = strstr(input, "fen")))
     {
-        parse_fen(position, &pos);
+        parse_fen(position, &pos_info);
     }
 
     //parse moves
@@ -314,13 +314,13 @@ void handle_position(char *input)
                 //convert move string to move struct
                 smove = string_to_move(move);
                 //set the board at the start of the game
-                own_piece = pos.board[smove.from / 8][smove.from % 8];
-                op_piece = pos.board[smove.to / 8][smove.to % 8];
-                makeMove(&pos, &smove);
+                own_piece = pos_info.board[smove.from / 8][smove.from % 8];
+                op_piece = pos_info.board[smove.to / 8][smove.to % 8];
+                makeMove(&pos_info, &smove);
                 
                 //store board into move history
                 history_index++;
-                history_log[history_index] = pos.key;
+                history_log[history_index] = pos_info.key;
             }
         }
         //get opponent's move

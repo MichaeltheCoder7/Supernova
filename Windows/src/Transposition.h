@@ -10,13 +10,13 @@
 
 unsigned long long table[8][8][12];
 unsigned long long turn;
-unsigned long long kswcr; 
+unsigned long long kswcr;
 unsigned long long qswcr;
 unsigned long long ksbcr;
 unsigned long long qsbcr;
-unsigned long long ep[8]; 
-unsigned long HASHSIZE;
-unsigned long EVALHASHSIZE;
+unsigned long long ep[8];
+long HASHSIZE;
+long EVALHASHSIZE;
 
 struct DataItem 
 {
