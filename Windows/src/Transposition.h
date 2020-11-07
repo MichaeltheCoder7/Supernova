@@ -5,7 +5,7 @@
 #include "Board.h"
 #include "Move.h"
 
-#define PAWNHASHSIZE 667013 //10MB
+#define PAWNHASHSIZE 667013 //~10MB
 #define VALUENONE -20100
 
 unsigned long long table[8][8][12];

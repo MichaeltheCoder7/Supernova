@@ -1,11 +1,11 @@
-#ifndef MOVE__H
-#define MOVE__H
+#ifndef MOVE_H
+#define MOVE_H
 
 #include "Board.h"
 
 #define NOMOVE 100
 
-typedef struct{
+typedef struct {
 
     unsigned char from;
     unsigned char to;

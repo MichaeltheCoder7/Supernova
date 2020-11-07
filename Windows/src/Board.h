@@ -1,9 +1,9 @@
-#ifndef BOARD__H
-#define BOARD__H
+#ifndef BOARD_H
+#define BOARD_H
 
 #include <stdbool.h>
 
-enum{ wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
+enum { wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 
 enum positions {
 
@@ -17,7 +17,7 @@ enum positions {
     a1, b1, c1, d1, e1, f1, g1, h1
 };
 
-typedef struct{
+typedef struct {
 
     unsigned long long key;
     unsigned long long pawn_key;
