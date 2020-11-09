@@ -2,7 +2,7 @@
 
 # Variables
 CFLAGS = gcc -std=c99 -c -fcommon -flto -Ofast
-FLAGS = gcc -std=c99 -lpthread -fcommon -flto -Ofast
+FLAGS = gcc -std=c99 -lpthread -static -fcommon -flto -Ofast
 CDEPS = ./bin/Main.o ./bin/Board.o ./bin/Move.o ./bin/CheckMove.o ./bin/MoveGen.o ./bin/CaptureGen.o ./bin/SEE.o \
 ./bin/OrderMove.o ./bin/Attack.o ./bin/Mobility.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
 
