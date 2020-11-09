@@ -34,7 +34,7 @@ white pieces
 */
 
 //starting board
-char chess_board[8][8] = {
+const char chess_board[8][8] = {
 
             {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
             {'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'},
@@ -48,7 +48,7 @@ char chess_board[8][8] = {
             };
 
 //starting piece list
-int piece_list[12][10] = {
+const int piece_list[12][10] = {
 
             { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, //wP
             { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wN
@@ -65,9 +65,9 @@ int piece_list[12][10] = {
 
             };
 
-int piece_count[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
+const int piece_count[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
 
-int index_board[64] = {
+const int index_board[64] = {
 
             0,   0,   0,   0,   0,   1,   1,   1,
             0,   1,   2,   3,   4,   5,   6,   7,
@@ -179,7 +179,7 @@ void init_board(BOARD *pos)
 
 void clear_board(char board[8][8])
 {
-    char board_reset[8][8] = {
+    const char board_reset[8][8] = {
 						
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},

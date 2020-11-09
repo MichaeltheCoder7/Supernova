@@ -1,10 +1,10 @@
 #ifndef MOBILITY_H
 #define MOBILITY_H
 
-int wattack_count;
-int battack_count;
-int wattack_weight;
-int battack_weight;
+extern int wattack_count;
+extern int battack_count;
+extern int wattack_weight;
+extern int battack_weight;
 
 int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
 

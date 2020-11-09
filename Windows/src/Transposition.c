@@ -11,6 +11,19 @@
 
 #define EMPTY -1
 
+unsigned long long table[8][8][12];
+unsigned long long turn;
+unsigned long long kswcr;
+unsigned long long qswcr;
+unsigned long long ksbcr;
+unsigned long long qsbcr;
+unsigned long long ep[8];
+long HASHSIZE;
+long EVALHASHSIZE;
+struct DataItem* tt;
+struct Eval* Evaltt;
+struct Pawn Pawntt[PAWNHASHSIZE];
+
 int piece_code(char piece)
 { 
     switch(piece)

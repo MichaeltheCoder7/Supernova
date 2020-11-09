@@ -23,11 +23,29 @@
 #define ASWINDOW    50
 #define INFINITE    20000
 
-//global variables:
+//local global variables:
 int nodes;
 struct timeval starting_time;
 char BestMove[6];
 MOVE searched_move;
+
+//global variables in header
+unsigned long long history_log[800];
+int history_index;
+bool stop;
+char pv_table[MAXDEPTH][6];
+MOVE killers[MAXDEPTH][2];
+double search_time;
+int history[2][64][64];
+bool ponderhit;
+double ponder_time;
+bool extra_time;
+bool analyze;
+int search_depth;
+bool time_management;
+bool node_mode;
+int search_nodes;
+bool stop_search;
 
 //save killer moves
 static inline void saveKiller(MOVE move, int ply)

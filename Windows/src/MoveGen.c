@@ -10,10 +10,10 @@
 #include "Board.h"
 #include "Move.h"
 
-int knight_moves_x[8] = { -2, -2, -1, -1,  1,  1,  2,  2 };
-int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
-int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
-int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
+const int knight_moves_x[8] = { -2, -2, -1, -1,  1,  1,  2,  2 };
+const int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
+const int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
+const int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 //generate all pseudo-legal moves
 //generate scores for each move

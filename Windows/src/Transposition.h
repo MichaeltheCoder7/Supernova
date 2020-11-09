@@ -8,15 +8,15 @@
 #define PAWNHASHSIZE 667013 //~10MB
 #define VALUENONE -20100
 
-unsigned long long table[8][8][12];
-unsigned long long turn;
-unsigned long long kswcr;
-unsigned long long qswcr;
-unsigned long long ksbcr;
-unsigned long long qsbcr;
-unsigned long long ep[8];
-long HASHSIZE;
-long EVALHASHSIZE;
+extern unsigned long long table[8][8][12];
+extern unsigned long long turn;
+extern unsigned long long kswcr;
+extern unsigned long long qswcr;
+extern unsigned long long ksbcr;
+extern unsigned long long qsbcr;
+extern unsigned long long ep[8];
+extern long HASHSIZE;
+extern long EVALHASHSIZE;
 
 struct DataItem 
 {
@@ -44,11 +44,9 @@ struct Pawn
    bool valid;
 };
 
-struct DataItem* tt;
-
-struct Eval* Evaltt;
-
-struct Pawn Pawntt[PAWNHASHSIZE];
+extern struct DataItem* tt;
+extern struct Eval* Evaltt;
+extern struct Pawn Pawntt[PAWNHASHSIZE];
 
 int piece_code(char piece);
 
