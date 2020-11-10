@@ -1,29 +1,21 @@
 # Makefile
+CC = gcc
+SRC = ./src/*.c
+LIBS = -lpthread
+EXE = ./bin/Supernova_2.2.exe
+RFLAGS = -std=c99 $(LIBS) -static -flto -Ofast
+DFLAGS = -std=c99 $(LIBS) -static -g -Wall -Wextra -Wshadow
 
-# Variables
-DFLAGS = -Wall -Wextra -Wshadow
-CFLAGS = gcc -std=c99 -c -flto -Ofast
-FLAGS = gcc -std=c99 -lpthread -static -flto -Ofast
-CDEPS = ./bin/Main.o ./bin/Board.o ./bin/Move.o ./bin/CheckMove.o ./bin/MoveGen.o ./bin/CaptureGen.o ./bin/SEE.o \
-./bin/OrderMove.o ./bin/Attack.o ./bin/Mobility.o ./bin/Evaluate.o ./bin/Transposition.o ./bin/Search.o
+######################### generate the executable #####################
+release:
+	$(CC) $(RFLAGS) $(SRC) -o $(EXE)
 
-# Default target
-all: ./bin/Supernova_2.2.exe
-
-test:
-	./bin/Supernova_2.2.exe
-
-######################### Generate object files #######################
-# Target for object files
-./bin/%.o: ./src/%.c
-	$(CFLAGS) $^ -o $@
-
-######################### Generate the executable #####################
-# Target for Supernova
-./bin/Supernova_2.2.exe: $(CDEPS)
-	$(FLAGS) $^ -o $@
+debug:
+	$(CC) $(DFLAGS) $(SRC) -o $(EXE)
 
 ###############################  others  ##############################
-# Target for clean
+test:
+	$(EXE)
+
 clean:
-	rm -rf ./bin/*.o ./bin/Supernova_2.2.exe
+	rm -rf $(EXE)
