@@ -5,8 +5,14 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <windows.h>
 #include <assert.h>
+
+#ifdef LINUX
+#include <unistd.h>
+#else
+#include <windows.h>
+#endif
+
 #include "Board.h"
 #include "Move.h"
 #include "Search.h"
@@ -466,7 +472,7 @@ void handle_go(char *input)
 
     if(error)
     {
-        printf("info string Pthread error occured: %d\n", error);
+        printf("info string Pthread error occured: %d.\n", error);
         exit(0);
     }
 }
@@ -534,7 +540,14 @@ void uci_loop()
         else if(!strncmp("quit", string, 4))
         {
             stop = true;
+            
+            #ifdef LINUX
+            sleep(0.3);
+            #else
             Sleep(300); //wait till all threads are done
+            #endif
+            
+            //free tt
             if(tt != NULL)
             {
                 free(tt);
@@ -553,7 +566,8 @@ void uci_loop()
 //uci gui
 int main(void)
 {
-    tt = NULL; //set hash table pointer to null
+    //initialize global variables
+    tt = NULL;
     Evaltt = NULL;
     HASHSIZE = EVALHASHSIZE = 0;
     engine_color = 0;
