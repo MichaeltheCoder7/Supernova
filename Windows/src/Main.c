@@ -368,7 +368,7 @@ void handle_go(char *input)
     //in case tt is not set
     if(tt == NULL || Evaltt == NULL)
     {
-        printf("info string Error! Transposition table not set!\n");
+        printf("info string Error! Hash table size not set!\n");
         return;
     }
 
