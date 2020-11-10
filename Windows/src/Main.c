@@ -257,8 +257,8 @@ void handle_position(char *input)
     char own_piece = ' ';
     char op_piece = ' ';
     //parse the positon input
-    char *position;
-    char *move_str;
+    char *position = NULL;
+    char *move_str = NULL;
     const char s[2] = " ";
     memset(op_move, 0, sizeof(op_move));
     memset(history_log, -1, sizeof(history_log)); //clear history table
@@ -344,44 +344,97 @@ void handle_position(char *input)
 
 void handle_go(char *input)
 {
-    char option[10] = "";
-    char buffer[40] = "";
-    char white_time[20] = "";
-    char black_time[20] = "";
-    char white_inc[20] = "";
-    char black_inc[20] = "";
-    char movestogo[20] = "";
-    double wt;
-    double bt;
+    pthread_attr_t tattr;
+    pthread_t thread;
+    int error;
+    char *pointer = NULL;
+    double wt = 0, bt = 0;
     double winc = 0, binc = 0;
     int moves_left = 30;
     search_depth = -1;
+    search_time = __DBL_MAX__;
     ponder_time = __DBL_MAX__;
     extra_time = true;
     analyze = false;
     node_mode = false;
     time_management = false;
-    sscanf(input, "go %s %s", option, buffer); //get the go command
-    if(!strncmp("wtime", option, 5))
-    {	
-        //get remaining time on the clock
-        sscanf(input, "go wtime %s btime %s winc %s binc %s movestogo %s", white_time, black_time, white_inc, black_inc, movestogo);
-        wt = (double)atoi(white_time) / 1000; //convert to sec
-        bt = (double)atoi(black_time) / 1000;
-        if(strncmp("", white_inc, 19))
+
+    //in case tt is not set
+    if(tt == NULL || Evaltt == NULL)
+    {
+        printf("info string Error! Transposition table not set!\n");
+        return;
+    }
+
+    //get remaining time
+    if((pointer = strstr(input, "wtime")))
+    {
+        wt = (double)atoi(pointer + 6) / 1000;
+    }
+
+    if((pointer = strstr(input, "btime")))
+    {
+        bt = (double)atoi(pointer + 6) / 1000;
+    }
+
+    //get increment
+    if((pointer = strstr(input, "winc")))
+    {
+        winc = (double)atoi(pointer + 5) / 1000;
+    }
+
+    if((pointer = strstr(input, "binc")))
+    {
+        binc = (double)atoi(pointer + 5) / 1000;
+    }
+
+    //get moves left
+    if((pointer = strstr(input, "movestogo")))
+    {
+        //assume one more move to prevent running out of time
+        moves_left = atoi(pointer + 10) + 1;
+    }
+
+    //mode
+    if((pointer = strstr(input, "ponder")))
+    {
+        if(engine_color == -1)
         {
-            winc = (double)atoi(white_inc) / 1000;
+            ponder_time = wt / moves_left + 0.9 * winc;
+            if((2 * ponder_time) >= wt) //prevent losing on time
+                extra_time = false;
         }
-        if(strncmp("", black_inc, 19))
+        else if(engine_color == 1)
         {
-            binc = (double)atoi(black_inc) / 1000;
+            ponder_time = bt / moves_left + 0.9 * binc;
+            if((2 * ponder_time) >= bt) //prevent losing on time
+                extra_time = false;
         }
-        if(strncmp("", movestogo, 19))
-        {
-            //assume one more move to prevent running out of time
-            moves_left = atoi(movestogo) + 1; 
-        }
-        //sudden death time control
+    }
+    else if((pointer = strstr(input, "movetime")))
+    {
+        search_time = (double)atoi(pointer + 9) / 1000;
+        extra_time = false;
+    }
+    else if((pointer = strstr(input, "depth")))
+    {
+        search_depth = atoi(pointer + 6);
+        //prevent depth > MAXDETPTH
+        if(search_depth > MAXDEPTH)
+            search_depth = MAXDEPTH;
+    }
+    else if((pointer = strstr(input, "nodes")))
+    {
+        search_nodes = atoi(pointer + 6);
+        node_mode = true;
+    }
+    else if((pointer = strstr(input, "infinite")))
+    {
+        analyze = true;
+    }
+    else
+    {
+        //blits / tournament time control
         //time = time left / moves to go + 0.9 * increment
         //if moves to go not given, assume 30 moves
         if(engine_color == -1)
@@ -396,89 +449,24 @@ void handle_go(char *input)
             if((2 * search_time) >= bt) //prevent losing on time
                 extra_time = false;
         }
-        if(outofbook < 5) //think longer when out of book
+        if(search_time > 0 && outofbook < 5) //think longer when out of book
         {
             search_time *= 1.2;
             outofbook++;
         }
         time_management = true;
     }
-    else if(!strncmp("ponder", option, 6))
-    {
-        search_time = __DBL_MAX__;
-        sscanf(input, "go ponder wtime %s btime %s winc %s binc %s movestogo %s", white_time, black_time, white_inc, black_inc, movestogo);
-        wt = (double)atoi(white_time) / 1000;
-        bt = (double)atoi(black_time) / 1000;
-        if(strncmp("", white_inc, 19))
-        {
-            winc = (double)atoi(white_inc) / 1000;
-        }
-        if(strncmp("", black_inc, 19))
-        {
-            binc = (double)atoi(black_inc) / 1000;
-        }
-        if(strncmp("", movestogo, 19))
-        {
-            moves_left = atoi(movestogo) + 1;
-        }
-        if(engine_color == -1)
-        {
-            ponder_time = wt / moves_left + 0.9 * winc;
-            if((2 * ponder_time) >= wt) //prevent losing on time
-                extra_time = false;
-        }
-        else if(engine_color == 1)
-        {
-            ponder_time = bt / moves_left + 0.9 * binc;
-            if((2 * ponder_time) >= bt) //prevent losing on time
-                extra_time = false;
-        }
-    }
-    else if(!strncmp("movetime", option, 8))
-    {
-        search_time = (double)atoi(buffer) / 1000;
-        extra_time = false;
-    }
-    else if(!strncmp("depth", option, 5))
-    {
-        search_time = __DBL_MAX__;
-        search_depth = atoi(buffer);
-        //prevent depth > MAXDETPTH
-        if(search_depth > MAXDEPTH)
-            search_depth = MAXDEPTH;
-    }
-    else if(!strncmp("nodes", option, 5))
-    {
-        search_time = __DBL_MAX__;
-        search_nodes = atoi(buffer);
-        node_mode = true;
-    }
-    else if(!strncmp("infinite", option, 8))
-    {
-        search_time = __DBL_MAX__;
-        analyze = true;
-    }
-    else
-    {
-        printf("info string Error! Unknown command!\n");
-        search_time = 0;
-        search_depth = 0;
-    }
 
     stop = false; //set stop to false
     ponderhit = false;
     //start engine thread
-    pthread_attr_t tattr;
-    pthread_t thread;
-    int error;
-
     pthread_attr_init(&tattr);
     pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
     error = pthread_create(&thread, &tattr, engine, NULL);
 
     if(error)
     {
-        printf("An error occured: %d\n", error);
+        printf("info string Pthread error occured: %d\n", error);
         exit(0);
     }
 }
@@ -567,7 +555,11 @@ int main(void)
 {
     tt = NULL; //set hash table pointer to null
     Evaltt = NULL;
+    HASHSIZE = EVALHASHSIZE = 0;
+    engine_color = 0;
+    outofbook = 0;
     newgame = false;
     uci_loop();
+    
     return 0;
 }
