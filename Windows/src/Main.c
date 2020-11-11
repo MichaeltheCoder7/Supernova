@@ -34,7 +34,6 @@ void * engine()
 {
     search(&pos_info, engine_color, op_move);
 
-    pthread_exit(NULL);
     return 0;
 }
 
@@ -546,7 +545,7 @@ void uci_loop()
             #ifdef LINUX
             sleep(1);
             #else
-            Sleep(300); //wait till all threads are done
+            Sleep(1000); //wait till all threads are done
             #endif
             
             //free tt
