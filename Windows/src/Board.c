@@ -83,6 +83,7 @@ const int index_board[64] = {
 void displayboard(char board[8][8])
 {
     int j = 8; //row numbers
+
     printf("\n    a   b   c   d   e   f   g   h\n");
     //nested loops to print the board
     for(int i = 0; i < 8; i++){
@@ -203,6 +204,7 @@ void set_piecelists(BOARD *pos)
     pos->piece_count[wR] = pos->piece_count[wQ] = 0;
     pos->piece_count[bP] = pos->piece_count[bN] = pos->piece_count[bB] = 0;
     pos->piece_count[bR] = pos->piece_count[bQ] = 0;
+
     for(int x = 0; x < 8; x++)
     {
         for(int y = 0; y < 8; y++)

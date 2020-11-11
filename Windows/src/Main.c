@@ -112,6 +112,7 @@ void parse_fen(char *position, BOARD *pos)
     int x = 0, y = 0;
     clear_board(pos->board);
     position+=4;
+    
     //loop through fen
     while(*position && x < 8)
     {
@@ -482,6 +483,7 @@ void uci_loop()
     char string[4000];
     setbuf(stdin, NULL);
     setbuf(stdout, NULL);
+
     //infinite loop for uci gui
     while(true)
     {
@@ -542,7 +544,7 @@ void uci_loop()
             stop = true;
             
             #ifdef LINUX
-            sleep(0.3);
+            sleep(1);
             #else
             Sleep(300); //wait till all threads are done
             #endif

@@ -99,6 +99,7 @@ unsigned long long getHash(BOARD *pos, int color)
 {
     unsigned long long h = 0;
     int chess_piece;
+
     for(int x = 0; x < 8; x++)
     {
         for(int y = 0; y < 8; y++)
@@ -182,6 +183,7 @@ struct DataItem *probeTT(unsigned long long key)
 {
     //get the hash 
     int hashIndex = key % (HASHSIZE - 1);
+
     if(tt[hashIndex].flag != EMPTY && tt[hashIndex].key == key)
     {    
         tt[hashIndex].age = false;
@@ -256,6 +258,7 @@ struct Eval *probeEvalTT(unsigned long long key)
 {
     //get the hash 
     int hashIndex = key % EVALHASHSIZE;
+
     if(Evaltt[hashIndex].valid == true && Evaltt[hashIndex].key == key)
     {    
         return &Evaltt[hashIndex];
@@ -290,6 +293,7 @@ void clearEvalTT()
 unsigned long long getPawnHash(char board[8][8])
 {
     unsigned long long h = 0;
+
     for(int x = 0; x < 8; x++)
     {
         for(int y = 0; y < 8; y++)
@@ -321,6 +325,7 @@ struct Pawn *probePawnTT(unsigned long long key)
 {
     //get the hash 
     int hashIndex = key % PAWNHASHSIZE;
+    
     if(Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
     {    
         return &Pawntt[hashIndex];

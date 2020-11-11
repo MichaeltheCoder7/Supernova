@@ -15,6 +15,7 @@
 static inline int wpawn_controlled(char board[8][8], int x, int y)
 {
     int squares = 0;
+
     if(x < 6)
     {
         switch(y)
@@ -51,6 +52,7 @@ static inline int wpawn_controlled(char board[8][8], int x, int y)
 static inline int bpawn_controlled(char board[8][8], int x, int y)
 {
     int squares = 0;
+
     if(x > 1)
     {
         switch(y)
@@ -579,6 +581,7 @@ static inline bool badBishop_black(char board[8][8], int x, int y)
 static inline int wking_file(char board[8][8], int y)
 {
     int result = 0;
+
     switch(y)
     {
         case 0:
@@ -623,6 +626,7 @@ static inline int wking_file(char board[8][8], int y)
 static inline int bking_file(char board[8][8], int y)
 {
     int result = 0;
+    
     switch(y)
     {
         case 0:

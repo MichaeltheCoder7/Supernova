@@ -105,6 +105,7 @@ static inline void saveHistory(MOVE move, int depth, int color)
     int a = (color==1)?1:0;
     int b = move.from;
     int c = move.to;
+    
     history[a][b][c] += depth*depth;
     //prevent overflow
     if(history[a][b][c] > 80000000)
@@ -838,6 +839,7 @@ static inline void getPVline(BOARD *pos, MOVE *bestmove, int depth)
     MOVE smove;
     BOARD pos_copy;
     char move[6];
+    
     //make a copy
     pos_copy = *pos; 
     smove = *bestmove;
