@@ -545,7 +545,7 @@ void uci_loop()
             #ifdef LINUX
             sleep(1);
             #else
-            Sleep(1000); //wait till all threads are done
+            Sleep(300); //wait till all threads are done
             #endif
             
             //free tt
