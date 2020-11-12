@@ -6,11 +6,11 @@
 #include "Attack.h"
 #include "Board.h"
 
-//check if check
+//check if a side is in check
 //return 1 if yes
 //return 0 if no
-//color = 1: check if black king is in check
-//color = -1: check if white king is in check
+//color = 1: black king
+//color = -1: white king
 int ifCheck(BOARD *pos, int color)
 {
     int king_x = -1;
@@ -409,8 +409,8 @@ int ifCheck(BOARD *pos, int color)
 //x and y are the indexes of the position
 //return 1 if yes
 //return 0 if no
-//color = 1: check if a position is threatened by white pieces
-//color = -1: check if a position is threatened by black pieces
+//color = 1: threatened by white pieces
+//color = -1: threatened by black pieces
 int isThreatened(char board[8][8], int x, int y, int color)
 {
     switch(color)

@@ -538,7 +538,7 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         color = -color;
         attacker_index = get_smallest_attacker(board_copy, new_x, new_y, color);
-        
+
         //stop when king is captured
         if(king_attack && attacker_index != -1)
         {
@@ -547,6 +547,7 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
         }
 
         gain[d] = piece_value(piece) - gain[d-1];
+        
         //prunning that won't change the sign of the result
         if(((-gain[d-1] >= gain[d])? -gain[d-1]:gain[d]) < 0)
         {
@@ -582,18 +583,22 @@ int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int tar
     {
         d++;
         gain[d] = piece_value(board_copy[x][y]) - gain[d-1];
+        
         if(toupper(board_copy[x][y]) == 'K')
             king_attack = true; 
+        
         //prunning
         if(((-gain[d-1] >= gain[d])? -gain[d-1]:gain[d]) < 0)
         {
             if(!king_attack)
                 break;
         }      
+        
         //make the capture
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         attacker_index = get_smallest_attacker(board_copy, new_x, new_y, color);
         color = -color;
+        
         //stop when king is captured
         if(king_attack && attacker_index != -1)
         {
@@ -602,6 +607,7 @@ int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int tar
                 return -20000;
             break;
         }
+        
         //convert index to 2D
         x = attacker_index / 8;
         y = attacker_index % 8;

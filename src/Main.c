@@ -54,12 +54,12 @@ void configure_hash(char *input)
     char hash_value[10] = "";
     int hash_size;
 
-    if(tt != NULL) //free previously allocated tt if any
+    if(tt != NULL) //free previously allocated main tt if any
     {
         free(tt);
         tt = NULL;
     }
-    if(Evaltt != NULL) //free previously allocated tt if any
+    if(Evaltt != NULL) //free previously allocated eval tt if any
     {
         free(Evaltt);
         Evaltt = NULL;
@@ -81,12 +81,12 @@ void configure_hash(char *input)
 //some GUI might not support this command
 void handle_newgame()
 {
-    if(tt == NULL) //default tt if not set
+    if(tt == NULL) //default main tt if not set
     {
         HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * 24);
         tt = malloc(HASHSIZE * sizeof(struct DataItem));
     }
-    if(Evaltt == NULL) //default tt if not set
+    if(Evaltt == NULL) //default eval tt if not set
     {
         EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * 8);
         Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
@@ -272,13 +272,13 @@ void handle_position(char *input)
     //in case GUI doesn't send ucinewgame command
     if(!newgame)
     {
-        if(tt == NULL) //default tt if not set
+        if(tt == NULL) //default main tt if not set
         {
             HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
             tt = malloc(HASHSIZE * sizeof(struct DataItem));
             clearTT();
         }
-        if(Evaltt == NULL) //default tt if not set
+        if(Evaltt == NULL) //default eval tt if not set
         {
             EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
             Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
@@ -291,7 +291,7 @@ void handle_position(char *input)
         newgame = true;
     }
 
-    //parse start position
+    //parse starting position
     if((position = strstr(input, "startpos")))
     {
         //set the board struct to initial state
@@ -329,7 +329,7 @@ void handle_position(char *input)
                 history_log[history_index] = pos_info.key;
             }
         }
-        //get opponent's move
+        //get opponent's move for time management
         //only when it's a capture
         if(op_piece != ' ')
         {
@@ -365,7 +365,7 @@ void handle_go(char *input)
     node_mode = false;
     time_management = false;
 
-    //in case tt is not set
+    //in case tt size is not set
     if(tt == NULL || Evaltt == NULL)
     {
         printf("info string Error! Hash table size not set!\n");
