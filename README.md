@@ -96,8 +96,10 @@ Details
 
 Author
 ------
-**Minkai Yang**
-* Email: mikeyang7@yahoo.com
+**Minkai Yang**  
+
+Email: mikeyang7@yahoo.com  
+Free free to email me if you have any problems with Supernova.
 
 License
 -------
