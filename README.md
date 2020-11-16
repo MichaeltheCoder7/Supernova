@@ -1,10 +1,10 @@
 # Supernova
 
-Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova 2.1.4 is rated around 2322 Elo on [CCRL](http://ccrl.chessdom.com/ccrl/404/), and Supernova 2.2 is 166 Elo stronger than 2.1.4 in self-play.
+Supernova is an open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova 2.1.4 is rated around 2322 Elo on [CCRL](http://ccrl.chessdom.com/ccrl/404/), and Supernova 2.2 is 166 Elo stronger than 2.1.4 in self-play.
 
 Installation
 ------------
-To download Supernova, you can download the Windows and Linux binaries in the bin directory or directly from the latest release. Alternatively, if the binaries are not compatible with your CPU, you can download all source files, go to the Supernova directory, and compile natively using gcc, then the binary should appear in the bin directory. Note that gcc version 9 or above is preferable, and compling might fail due to low version of gcc. It's recommended to compile the Linux version on your own since the gcc version that was used is outdated.
+To download Supernova, you can download the Windows and Linux binaries in the bin directory or directly from the latest release. Alternatively, if the binaries are not compatible with your CPU, you can download all source files, go to the Supernova directory, and compile natively using gcc, then the binary should appear in the bin directory. Note that gcc version 9 or above is preferable, and compiling might fail due to the low version of gcc. It's recommended to compile the Linux version on your own since the gcc version that was used is outdated.
 
 Windows:
 ```
@@ -23,9 +23,9 @@ GUI
 To use the engine with a GUI, you need to add it to the GUI first. 
 For example, if you are using Arena as GUI, instructions are given below.
 
-1. On the task bar, add the engine via Engines -> Install New Engine. 
+1. On the taskbar, add the engine via Engines -> Install New Engine. 
 2. Find and select the correct executable.
-3. Select UCI as the type of the engine. 
+3. Select UCI as the type of engine. 
 (Arena might mark it as auto-detect so you can change it to UCI later via Engines -> Manage -> Details -> select Supernova -> General -> choose UCI as type -> Apply.)
 4. Start the engine.
 
@@ -54,8 +54,8 @@ Details
 * Piece Lists
 
 **Move Generation**  
-* All Pseudo-Legal Moves of Chess (including castling, en passant, queen promotion and under promotions)
-* Capture and Queen Promotion Generator for Qsearch
+* All Pseudo-Legal Moves of Chess (including castling, en passant, queen promotion, and under promotions)
+* Capture and Queen Promotion Generator for Quiescence Search
 
 **Search** 
 * Transposition Table
