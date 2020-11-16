@@ -1011,8 +1011,8 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         {
             break;
         }
-        //easy move if the best move is a recapture and has not changed at depth 12
-        if(time_management && eazy_move && current_depth == 12)
+        //easy move if the best move is a recapture and has not changed after depth 12
+        if(time_management && eazy_move && current_depth >= 12 && secs >= (search_time / 16))
         {
             if(isRecapture(BestMove, op_move))
                 break;

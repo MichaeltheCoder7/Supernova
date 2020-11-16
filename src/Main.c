@@ -330,8 +330,8 @@ void handle_position(char *input)
             }
         }
         //get opponent's move for time management
-        //only when it's a capture
-        if(op_piece != ' ')
+        //only when it's a capture, including en passant
+        if(op_piece != ' ' || (toupper(own_piece) == 'P' && abs(smove.to % 8 - smove.from % 8) == 1))
         {
             strncpy(op_move, move, 6);
             op_move[5] = '\0';
