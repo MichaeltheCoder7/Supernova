@@ -1,22 +1,21 @@
 # Supernova
 
-Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova 2.1.4 is rated 2344 Elo on [CCRL](http://ccrl.chessdom.com/ccrl/404/).
+Supernova is an open source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova 2.1.4 is rated around 2322 Elo on [CCRL](http://ccrl.chessdom.com/ccrl/404/), and Supernova 2.2 is 166 Elo stronger than 2.1.4 in self-play.
 
 Installation
 ------------
-To download Supernova, you can download the Windows and Linux executables in the bin directory or directly from the latest release. Alternatively, you can download all source files and Makefile and then run make outside the bin directory, then the executable should appear in the bin directory. It's recommended to compile the Linux version on your own since the gcc version that was used for compling is quite old.
+To download Supernova, you can download the Windows and Linux executables in the bin directory or directly from the latest release. Alternatively, you can download all source files, go to the Supernova directory, and compile natively using gcc, then the executable should appear in the bin directory. Note that gcc version 9 or above is preferable, and compling might fail due to low version of gcc. It's recommended to compile the Linux version on your own since the gcc version that was used is outdated.
 
 Windows:
 ```
-cd Windows
-make
+gcc -std=c99 -lpthread -static -flto -Ofast ./src/*.c -o ./bin/Supernova_2.2.exe
 ```
 
 Linux:
 ```
-cd Linux
-make
+gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.2_linux
 ```
+
 [**Releases**](https://github.com/MichaeltheCoder7/Supernova/releases)  
 
 GUI
@@ -63,10 +62,13 @@ Details
 * Iterative Deepening with Aspiration Window
 * Principal Variation Search
 * Razoring
-* Static Null Move Pruning
+* Static Null Move / Reverse Futility Pruning
 * Null Move Pruning
 * Futility Pruning
+* Probcut
+* Late Move Pruning
 * Late Move Reduction
+* Internal Iterative Deepening
 * Check Extension
 * Passed Pawn Extension
 * Move Ordering
