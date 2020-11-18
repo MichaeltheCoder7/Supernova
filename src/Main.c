@@ -78,7 +78,7 @@ void configure_hash(char *input)
     clearEvalTT();
 }
 
-//some GUI might not support this command
+//some GUIs might not support this command
 void handle_newgame()
 {
     if(tt == NULL) //default main tt if not set
@@ -269,7 +269,7 @@ void handle_position(char *input)
     memset(op_move, 0, sizeof(op_move));
     memset(history_log, -1, sizeof(history_log)); //clear history table
 
-    //in case GUI doesn't send ucinewgame command
+    //in case the GUI doesn't send ucinewgame command
     if(!newgame)
     {
         if(tt == NULL) //default main tt if not set
@@ -319,12 +319,12 @@ void handle_position(char *input)
                 move[5] = '\0';
                 //convert move string to move struct
                 smove = string_to_move(move);
-                //set the board at the start of the game
+                //make move on the board
                 own_piece = pos_info.board[smove.from / 8][smove.from % 8];
                 op_piece = pos_info.board[smove.to / 8][smove.to % 8];
                 makeMove(&pos_info, &smove);
                 
-                //store board into move history
+                //store board hash key into move history
                 history_index++;
                 history_log[history_index] = pos_info.key;
             }
@@ -336,7 +336,7 @@ void handle_position(char *input)
             strncpy(op_move, move, 6);
             op_move[5] = '\0';
         }
-        //check what color does the gui wants the engine to be
+        //assign color to the engine based on the command from GUI
         if(islower(own_piece))
         {
             engine_color = -1; //white
@@ -440,9 +440,9 @@ void handle_go(char *input)
     }
     else
     {
-        //blits / tournament time control
-        //time = time left / moves to go + 0.9 * increment
-        //if moves to go not given, assume 30 moves
+        //blitz / tournament time control
+        //time = time left / moves left + 0.9 * increment
+        //if moves left not given, assume 30 moves
         if(engine_color == -1)
         {
             search_time = wt / moves_left + 0.9 * winc;
@@ -483,7 +483,7 @@ void uci_loop()
     setbuf(stdin, NULL);
     setbuf(stdout, NULL);
 
-    //infinite loop for uci gui
+    //infinite loop for UCI GUI
     while(true)
     {
         memset(&string[0], 0, sizeof(string)); //flush the string
@@ -548,7 +548,7 @@ void uci_loop()
             Sleep(300); //wait till all threads are done
             #endif
             
-            //free tt
+            //free tts
             if(tt != NULL)
             {
                 free(tt);
@@ -564,7 +564,7 @@ void uci_loop()
     }
 }
 
-//uci gui
+//UCI GUI
 int main(void)
 {
     //initialize global variables

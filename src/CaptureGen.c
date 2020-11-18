@@ -11,7 +11,7 @@
 #include "Board.h"
 #include "Move.h"
 
-//generate caputures and queen promotion
+//generate captures and queen promotion
 //generate scores for each move
 int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
 {

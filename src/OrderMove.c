@@ -80,7 +80,7 @@ void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move,
     }
 }
 
-//order caputres with mvv-lva and SEE
+//order captures with mvv-lva and SEE
 int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;

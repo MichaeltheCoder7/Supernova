@@ -199,7 +199,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     int new_x, new_y;
     BOARD pos_copy;
 
-    //prefetch hash table
+    //prefetch eval hash table
     __builtin_prefetch(&Evaltt[pos->key % EVALHASHSIZE]);
 
     //check if time is up
@@ -241,7 +241,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         pos_copy = *pos;
         isprom = makeMove_qsearch(&pos_copy, &moves[x]);
             
-        //check if check is ignored
+        //check if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -381,7 +381,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                 }
             }
         }
-        //get the pv move
+        //get the hash move
         if(entry->flag != UPPERBOUND)
             hash_move = entry->bestmove;
         //get static eval from tt
@@ -457,7 +457,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             //make a copy of the board
             pos_copy = *pos;
             isTactical = makeMove(&pos_copy, &moves[x]);
-            //check if check is ignored
+            //check if check condition is ignored
             if(ifCheck(&pos_copy, color))
             {
                 continue;
@@ -517,7 +517,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
 
-        //check if check is ignored
+        //check if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -693,7 +693,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
         
-        //check if check is ignored
+        //check if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -782,7 +782,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
         
-        //check if check is ignored
+        //check if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -826,7 +826,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         }
     }
   
-    searched_move = bm; //save the best move
+    searched_move = bm; //save the best move to play
     //transposition table store:  
     storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
     return alpha;
@@ -985,7 +985,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         strncpy(BestMove, move, 6);
         BestMove[5] = '\0';
 
-        //send info to gui
+        //send info to GUI
         if(val > 19000)
         {
             printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1, nodes, (int)(secs*1000),
@@ -1018,7 +1018,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
                 break;
         }
     }
-    //send move to gui
+    //send move to GUI
     if(!strncmp(BestMove, "", 5))
     {
         printf("bestmove 0000\n");

@@ -13,7 +13,7 @@ int battack_count;
 int wattack_weight;
 int battack_weight;
 
-//check if this square is defended by any pawns
+//check if this square is defended by pawns
 static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 {
     if(x < 6)

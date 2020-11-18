@@ -138,7 +138,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                 {
                     x = index_x + knight_moves_x[j];
                     y = index_y + knight_moves_y[j];
-                    if(x & 8 || y & 8) //skips when out of board
+                    if(x & 8 || y & 8) //skip when out of board
                     {
                         continue;
                     }

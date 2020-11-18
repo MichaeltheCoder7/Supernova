@@ -133,7 +133,7 @@ unsigned long long getHash(BOARD *pos, int color)
     {
         h ^= qsbcr;
     }
-    //encode enpassant
+    //encode en passant
     switch(pos->ep_file)
     {
         case 0:
@@ -256,7 +256,6 @@ void clearTT()
 
 struct Eval *probeEvalTT(unsigned long long key)
 {
-    //get the hash 
     int hashIndex = key % EVALHASHSIZE;
 
     if(Evaltt[hashIndex].valid == true && Evaltt[hashIndex].key == key)
@@ -271,7 +270,6 @@ struct Eval *probeEvalTT(unsigned long long key)
 
 void storeEvalTT(unsigned long long key, int evaluation)
 {
-    //get the hash 
     int hashIndex = key % EVALHASHSIZE;
 
     Evaltt[hashIndex].key = key;
@@ -323,7 +321,6 @@ unsigned long long getPawnHash(char board[8][8])
 
 struct Pawn *probePawnTT(unsigned long long key)
 {
-    //get the hash 
     int hashIndex = key % PAWNHASHSIZE;
     
     if(Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
@@ -339,7 +336,6 @@ struct Pawn *probePawnTT(unsigned long long key)
 
 void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
 {
-    //get the hash 
     int hashIndex = key % PAWNHASHSIZE;
 
     Pawntt[hashIndex].key = key;

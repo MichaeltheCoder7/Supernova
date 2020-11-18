@@ -208,7 +208,7 @@ int makeMove(BOARD *pos, MOVE *move)
         pos->halfmove_counter = 0;
     }
 
-    //encode enpassant
+    //encode en passant
     switch(pos->ep_file)
     {
         case 0:
@@ -540,7 +540,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     pos->index_board[new_64] = index;
     pos->piece_list[my_piece][index] = new_64;
 
-    //encode enpassant
+    //encode en passant
     switch(pos->ep_file)
     {
         case 0:
@@ -665,14 +665,14 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     return 0;
 }
 
-//for null move prunning
+//for null move pruning
 //return en passant file
 int make_nullmove(BOARD *pos)
 {
     int temp_ep = pos->ep_file;
     pos->key ^= turn;
 
-    //encode enpassant
+    //encode en passant
     switch(temp_ep)
     {
         case 0:
@@ -712,7 +712,7 @@ void undo_nullmove(BOARD *pos, int ep_file)
     pos->ep_file = ep_file;
     pos->key ^= turn;
 
-    //encode enpassant
+    //encode en passant
     switch(ep_file)
     {
         case 0:

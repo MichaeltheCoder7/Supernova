@@ -85,7 +85,7 @@ void displayboard(char board[8][8])
     int j = 8; //row numbers
 
     printf("\n    a   b   c   d   e   f   g   h\n");
-    //nested loops to print the board
+    //print the board
     for(int i = 0; i < 8; i++){
         printf("  +---+---+---+---+---+---+---+---+\n");
         printf(" %d", j);
@@ -154,7 +154,7 @@ int position_to_y(char position[3])
             return 7;
     }
 
-    return -1; //when nothing is matched
+    return -1;
 }
 
 //initialize board struct to starting position

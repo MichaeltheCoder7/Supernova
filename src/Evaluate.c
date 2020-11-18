@@ -725,7 +725,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                     wpawn_mg += PHALANX;
                     wpawn_eg += PHALANX;
                 }
-                //king_proximity
+                //king proximity
                 wpawn_eg -= (abs(x - white_king_x) + abs(y - white_king_y) - 7)*3;
                 wpawn_eg += (abs(x - black_king_x) + abs(y - black_king_y) - 7)*3;
             }
@@ -783,7 +783,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                     bpawn_mg += PHALANX;
                     bpawn_eg += PHALANX;
                 }
-                //king_proximity
+                //king proximity
                 bpawn_eg -= (abs(x - black_king_x) + abs(y - black_king_y) - 7)*3;
                 bpawn_eg += (abs(x - white_king_x) + abs(y - white_king_y) - 7)*3;
             }
@@ -957,7 +957,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         //open files next to king penalty
         wpawn_mg -= wking_file(board, white_king_y);
         bpawn_mg -= bking_file(board, black_king_y);
-        //for kings' position bonus midgame
+        //for king position bonus midgame
         wpawn_mg += white_king_midgame[white_king_x][white_king_y];
         bpawn_mg += black_king_midgame[black_king_x][black_king_y];
         //king position bonus endgame
@@ -1411,23 +1411,27 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         midgame_white += bqueen_tropism*2;
         endgame_white += bqueen_tropism*4;
     }
+    
     //game phase based on non-pawn materials
     int phase = N_count + n_count + B_count + b_count + R_count * 2 + r_count * 2 + Q_count * 4 + q_count * 4;
     //tempo
     if(phase > 4)
         tempo = color * TEMPO;
+    
     //sum up scores from black's perspective
     points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (325 + knight_val[p_count]) + b_count * 335 + q_count * 975
             + ((b_count >= 2)? 1 : 0) * BISHOPPAIR - ((n_count >= 2)? 1 : 0) * KNIGHTPAIR - ((r_count >= 2)? 1 : 0) * ROOKPAIR + other_bonus_black
             - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (325 + knight_val[P_count]) - B_count * 335 - Q_count * 975
             - ((B_count >= 2)? 1 : 0) * BISHOPPAIR + ((N_count >= 2)? 1 : 0) * KNIGHTPAIR + ((R_count >= 2)? 1 : 0) * ROOKPAIR - other_bonus_white
             + tempo;
+    
     //adjust phase score based on materials
     if(phase > 24)
         phase = 24;
     int mg_weight = phase;
     int eg_weight = 24 - mg_weight;
     points += (((midgame_black - midgame_white + pawn_mg) * mg_weight + (endgame_black - endgame_white + pawn_eg) * eg_weight) / 24);
+    
     //king attack score
     //disabled when the number of attackers is less than 2 or there is no queen
     if(wattack_count < 2 || !Q_count)
@@ -1436,6 +1440,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         battack_weight = 0;
     points += SafetyTable[battack_weight];
     points -= SafetyTable[wattack_weight];
+    
     //material draw
     //score as 0 for insufficient bishops and knights
     //score half of the points for insufficient rooks

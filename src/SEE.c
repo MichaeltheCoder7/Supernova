@@ -548,7 +548,7 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 
         gain[d] = piece_value(piece) - gain[d-1];
         
-        //prunning that won't change the sign of the result
+        //pruning that won't change the sign of the result
         if(((-gain[d-1] >= gain[d])? -gain[d-1]:gain[d]) < 0)
         {
             gain[d] = -gain[d-1];
@@ -587,7 +587,7 @@ int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int tar
         if(toupper(board_copy[x][y]) == 'K')
             king_attack = true; 
         
-        //prunning
+        //pruning
         if(((-gain[d-1] >= gain[d])? -gain[d-1]:gain[d]) < 0)
         {
             if(!king_attack)
