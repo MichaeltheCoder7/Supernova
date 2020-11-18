@@ -16,7 +16,7 @@ Linux:
 gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.2_linux
 ```
 
-Note that gcc version 9 or above is preferable, and compiling might fail due to the low version of gcc. It's recommended to compile the Linux version on your own since the gcc version that was used is outdated.
+Note that gcc version 9 or above is preferable, and compiling might fail for gcc versions below 5. It's recommended to compile the Linux version on your own since the gcc version that was used is outdated.
 
 [**Releases**](https://github.com/MichaeltheCoder7/Supernova/releases)  
 
