@@ -7,6 +7,9 @@
 
 #define MAXDEPTH 100
 
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+
 extern unsigned long long history_log[800];
 extern int history_index;
 extern bool stop;

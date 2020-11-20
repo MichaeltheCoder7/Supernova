@@ -18,7 +18,7 @@
 #include "Search.h"
 #include "Transposition.h"
 
-#define VERSION "2.2"
+#define VERSION "2.3"
 
 //global variables
 //specify color for engine

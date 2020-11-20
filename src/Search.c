@@ -583,9 +583,17 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
            && !compareMove(&killers[ply][1], &moves[x]))
         {
             reduction_depth = 1;
-            if(moves_made > 6 && new_depth >= 3) //do not drop to qsearch
+            if(moves_made > 6)
                 reduction_depth += 1;
             
+            //if(new_depth >= 8)
+                //reduction_depth += 1;
+            
+            //increase reductions for bad history moves
+            if(scores[x] == 0)
+                reduction_depth += 1;
+
+            reduction_depth = MIN(new_depth - 1, reduction_depth); //do not drop to qsearch
             new_depth -= reduction_depth;
         }
 
