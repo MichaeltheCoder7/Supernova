@@ -586,9 +586,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             if(moves_made > 6)
                 reduction_depth += 1;
             
-            //if(new_depth >= 8)
-                //reduction_depth += 1;
-            
             //increase reductions for bad history moves
             if(scores[x] == 0)
                 reduction_depth += 1;
