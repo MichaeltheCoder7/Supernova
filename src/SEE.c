@@ -508,7 +508,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
 }
 
 //static exchange evaluation for quiescence search
-int SEE(char board[8][8], int new_x, int new_y, int target, int color)
+inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 {
     int attacker_index = get_smallest_attacker(board, new_x, new_y, color);
     //exit if no attackers found
@@ -567,7 +567,7 @@ int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 }
 
 //static exchange evaluation for move ordering
-int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int target, int color)
+inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int target, int color)
 {
     char board_copy[8][8];
     int x = att_x;

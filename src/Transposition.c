@@ -24,7 +24,7 @@ struct DataItem* tt;
 struct Eval* Evaltt;
 struct Pawn Pawntt[PAWNHASHSIZE];
 
-int piece_code(char piece)
+inline int piece_code(char piece)
 { 
     switch(piece)
     {
@@ -60,7 +60,7 @@ int piece_code(char piece)
 } 
 
 //return a 64 bit random number
-unsigned long long llrand() 
+inline unsigned long long llrand() 
 {
     unsigned long long r = 0;
 
@@ -72,7 +72,7 @@ unsigned long long llrand()
 }
 
 //initialize zobrist hashing:
-void init_zobrist()
+inline void init_zobrist()
 {
     //fill a table of random numbers
     for(int i = 0; i < 8; i++)
@@ -167,19 +167,19 @@ unsigned long long getHash(BOARD *pos, int color)
     return h;
 }
 
-int valueFromTT(int value, int ply)
+inline int valueFromTT(int value, int ply)
 {
     return (value > 19000)? value - ply : (value < -19000)? value + ply : value;
 }
 
-int valueToTT(int value, int ply)
+inline int valueToTT(int value, int ply)
 {
     return (value > 19000)? value + ply : (value < -19000)? value - ply : value;
 }
 
 //transposition/hash table:
 //+1 index for collision
-struct DataItem *probeTT(unsigned long long key)
+inline struct DataItem *probeTT(unsigned long long key)
 {
     //get the hash 
     int hashIndex = key % (HASHSIZE - 1);
@@ -200,7 +200,7 @@ struct DataItem *probeTT(unsigned long long key)
     }
 }
 
-void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
+inline void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
 {
     if(stop_search) //don't save when time up
         return;
@@ -231,7 +231,7 @@ void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MO
 }
 
 //set age in tt
-void setAge()
+inline void setAge()
 {
     for(int x = 0; x < HASHSIZE; x++)
     {
@@ -240,7 +240,7 @@ void setAge()
 }
 
 //clear the hash table
-void clearTT()
+inline void clearTT()
 {
     for(int x = 0; x < HASHSIZE; x++)
     {
@@ -254,7 +254,7 @@ void clearTT()
     }
 }
 
-struct Eval *probeEvalTT(unsigned long long key)
+inline struct Eval *probeEvalTT(unsigned long long key)
 {
     int hashIndex = key % EVALHASHSIZE;
 
@@ -268,7 +268,7 @@ struct Eval *probeEvalTT(unsigned long long key)
     }
 }
 
-void storeEvalTT(unsigned long long key, int evaluation)
+inline void storeEvalTT(unsigned long long key, int evaluation)
 {
     int hashIndex = key % EVALHASHSIZE;
 
@@ -277,7 +277,7 @@ void storeEvalTT(unsigned long long key, int evaluation)
     Evaltt[hashIndex].valid = true;
 }
 
-void clearEvalTT()
+inline void clearEvalTT()
 {
     for(int x = 0; x < EVALHASHSIZE; x++)
     {
@@ -288,7 +288,7 @@ void clearEvalTT()
 }
 
 //include king positions
-unsigned long long getPawnHash(char board[8][8])
+inline unsigned long long getPawnHash(char board[8][8])
 {
     unsigned long long h = 0;
 
@@ -319,7 +319,7 @@ unsigned long long getPawnHash(char board[8][8])
     return h;
 }
 
-struct Pawn *probePawnTT(unsigned long long key)
+inline struct Pawn *probePawnTT(unsigned long long key)
 {
     int hashIndex = key % PAWNHASHSIZE;
     
@@ -334,7 +334,7 @@ struct Pawn *probePawnTT(unsigned long long key)
 
 }
 
-void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
+inline void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
 {
     int hashIndex = key % PAWNHASHSIZE;
 
@@ -344,7 +344,7 @@ void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
     Pawntt[hashIndex].valid = true;
 }
 
-void clearPawnTT()
+inline void clearPawnTT()
 {
     for(int x = 0; x < PAWNHASHSIZE; x++)
     {

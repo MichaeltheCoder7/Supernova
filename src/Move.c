@@ -28,7 +28,7 @@ void print_move(MOVE move)
     printf("%s\n", move_string);
 }
 
-void clear_move(MOVE *move)
+inline void clear_move(MOVE *move)
 {
     move->from = NOMOVE;
     move->to = NOMOVE;
@@ -36,7 +36,7 @@ void clear_move(MOVE *move)
 }
 
 //return 1 if moves are the same, 0 otherwise
-int compareMove(MOVE *move1, MOVE *move2)
+inline int compareMove(MOVE *move1, MOVE *move2)
 {
     if(move1->from == move2->from && move1->to == move2->to && move1->promotion == move2->promotion)
     {
@@ -47,7 +47,7 @@ int compareMove(MOVE *move1, MOVE *move2)
 }
 
 //convert a move string to move struct
-MOVE string_to_move(char move[6])
+inline MOVE string_to_move(char move[6])
 {
     char cp[3];
     char np[3];
@@ -73,7 +73,7 @@ MOVE string_to_move(char move[6])
 }
 
 //convert a move struct to move string
-void move_to_string(MOVE *smove, char move[6])
+inline void move_to_string(MOVE *smove, char move[6])
 {
     memset(move, 0, 6);
     if(smove->from == NOMOVE)
@@ -667,7 +667,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
 
 //for null move pruning
 //return en passant file
-int make_nullmove(BOARD *pos)
+inline int make_nullmove(BOARD *pos)
 {
     int temp_ep = pos->ep_file;
     pos->key ^= turn;
@@ -707,7 +707,7 @@ int make_nullmove(BOARD *pos)
     return temp_ep;
 }
 
-void undo_nullmove(BOARD *pos, int ep_file)
+inline void undo_nullmove(BOARD *pos, int ep_file)
 {
     pos->ep_file = ep_file;
     pos->key ^= turn;
@@ -745,7 +745,7 @@ void undo_nullmove(BOARD *pos, int ep_file)
 }
 
 //for static exchange evaluation
-void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
+inline void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
 {
     char piece = board[cur_x][cur_y];
     char op_piece = board[new_x][new_y];

@@ -8,7 +8,7 @@
 
 //1 for legal move, 0 for illegal move
 //captures for white pawn
-int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
+inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 {
     //capturing
     if(pos->board[new_x][new_y] != ' ')
@@ -35,7 +35,7 @@ int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 }
 
 //captures for black pawn
-int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
+inline int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
 {
     //capturing
     if(pos->board[new_x][new_y] != ' ')
@@ -62,7 +62,7 @@ int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
 }
 
 //castling for white king
-int CheckMove_wkingside(BOARD *pos)
+inline int CheckMove_wkingside(BOARD *pos)
 {
     //king side
     //check if king and rook have been moved
@@ -83,7 +83,7 @@ int CheckMove_wkingside(BOARD *pos)
 }
 
 //castling for white king
-int CheckMove_wqueenside(BOARD *pos)
+inline int CheckMove_wqueenside(BOARD *pos)
 {
     //queen side
     //check if king and rook have been moved
@@ -104,7 +104,7 @@ int CheckMove_wqueenside(BOARD *pos)
 }
 
 //castling for black king
-int CheckMove_bkingside(BOARD *pos)
+inline int CheckMove_bkingside(BOARD *pos)
 {
     //king side
     //check if king and rook have been moved
@@ -125,7 +125,7 @@ int CheckMove_bkingside(BOARD *pos)
 }
 
 //castling for black king
-int CheckMove_bqueenside(BOARD *pos)
+inline int CheckMove_bqueenside(BOARD *pos)
 {
     //queen side
     //check if king and rook have been moved

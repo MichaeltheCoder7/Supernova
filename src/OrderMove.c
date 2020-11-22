@@ -26,7 +26,7 @@ static inline void swapMove(MOVE *move1, MOVE *move2)
 } 
 
 //insertion sort
-void movesort(MOVE moves[256], int sort[256], int length, int current)
+inline void movesort(MOVE moves[256], int sort[256], int length, int current)
 {
     //find the move with the highest score
     int high = current;
@@ -42,7 +42,7 @@ void movesort(MOVE moves[256], int sort[256], int length, int current)
 }
 
 //return 1 if hash move exists
-int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
+inline int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
 {
     if(hash_move->from == NOMOVE)
     {
@@ -65,7 +65,7 @@ int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
     return 0;
 }
 
-void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move)
+inline void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move)
 {
     for(int x = 0; x < length; x++)
     {
@@ -81,7 +81,7 @@ void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move,
 }
 
 //order captures with mvv-lva and SEE
-int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
+inline int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
     int lva = 0;
@@ -146,7 +146,7 @@ int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, 
         return mvv + lva + LCAPTURE;
 }
 
-int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
+inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
     int lva = 0;
@@ -212,7 +212,7 @@ int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, 
 }
 
 //quiet move ordering based on killer moves and history heuristic
-int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
+inline int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
 {
     if(compareMove(&killers[ply][0], move))
     {
@@ -228,7 +228,7 @@ int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
     }
 }
 
-int piece_value(char piece)
+inline int piece_value(char piece)
 {
     switch(piece)
     {
@@ -264,7 +264,7 @@ int piece_value(char piece)
 }
 
 //capture ordering for qsearch
-int wCapQsearch_score(char piece, char op_piece)
+inline int wCapQsearch_score(char piece, char op_piece)
 {
     int mvv = 0;
     int lva = 0;
@@ -322,7 +322,7 @@ int wCapQsearch_score(char piece, char op_piece)
     return mvv + lva;
 }
 
-int bCapQsearch_score(char piece, char op_piece)
+inline int bCapQsearch_score(char piece, char op_piece)
 {
     int mvv = 0;
     int lva = 0;

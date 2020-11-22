@@ -102,7 +102,7 @@ static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
 //exclude own blocked pawns and own pawns on rank 2 and 3
 //exclude own king
 //also consider attack on enemy king
-int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -135,7 +135,7 @@ int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int
     return 4 * (move_count - 4);
 }
 
-int bknight_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -168,7 +168,7 @@ int bknight_mobility(char board[8][8], int index_x, int index_y, int wkingx, int
     return 4 * (move_count - 4);
 }
 
-int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -275,7 +275,7 @@ int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkingx, int
     return 3 * (move_count - 7);
 }
 
-int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -382,7 +382,7 @@ int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int
     return 3 * (move_count - 7);
 }
 
-int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -469,7 +469,7 @@ int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int b
     return 2 * (move_count - 7);
 }
 
-int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -556,7 +556,7 @@ int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int w
     return 2 * (move_count - 7);
 }
 
-int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -731,7 +731,7 @@ int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int 
     return 1 * (move_count - 14);
 }
 
-int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
