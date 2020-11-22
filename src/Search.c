@@ -202,7 +202,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     //prefetch eval hash table
     __builtin_prefetch(&Evaltt[pos->key % EVALHASHSIZE]);
 
-    //check if time is up
+    //exit if time is up
     timeUp();
     if(stop_search)
         return 0;
@@ -241,7 +241,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         pos_copy = *pos;
         isprom = makeMove_qsearch(&pos_copy, &moves[x]);
             
-        //check if check condition is ignored
+        //skip if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -315,7 +315,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     //prefetch hash table
     __builtin_prefetch(&tt[pos->key % (HASHSIZE - 1)]);
 
-    //check if time is up
+    //exit if time is up
     timeUp();
     if(stop_search)
         return 0;
@@ -457,7 +457,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             //make a copy of the board
             pos_copy = *pos;
             isTactical = makeMove(&pos_copy, &moves[x]);
-            //check if check condition is ignored
+            //skip if check condition is ignored
             if(ifCheck(&pos_copy, color))
             {
                 continue;
@@ -467,7 +467,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             new_y = moves[x].to % 8;
             cap_piece_value = piece_value(pos->board[new_x][new_y]);
             moved_piece_value = piece_value(pos_copy.board[new_x][new_y]);
-            //SEE pruning
+            //skip moves with SEE < 0
             if(moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isTactical != 2)
             {
                 if(SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
@@ -517,7 +517,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
 
-        //check if check condition is ignored
+        //skip if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -678,7 +678,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     MOVE bm;
     bm.from = NOMOVE;
 
-    //check if time is up
+    //exit if time is up
     timeUp();
     if(stop_search)
         return bm;
@@ -698,7 +698,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
         
-        //check if check condition is ignored
+        //skip if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -719,7 +719,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
             }
         }
         
-        //check if time is up
+        //exit if time is up
         if(stop_search)
             return bm;
         
@@ -787,7 +787,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
         
-        //check if check condition is ignored
+        //skip if check condition is ignored
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -808,7 +808,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
             }
         }
         
-        //check if time is up
+        //exit if time is up
         if(stop_search)
             break;
         
