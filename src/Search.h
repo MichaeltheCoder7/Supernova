@@ -13,7 +13,6 @@
 extern unsigned long long history_log[800];
 extern int history_index;
 extern bool stop;
-extern char pv_table[MAXDEPTH][6];
 extern MOVE killers[MAXDEPTH][2];
 extern double search_time;
 extern int history[2][64][64];

@@ -28,12 +28,12 @@ int nodes;
 struct timeval starting_time;
 char BestMove[6];
 MOVE searched_move;
+char pv_table[MAXDEPTH][6];
 
 //global variables in header
 unsigned long long history_log[800];
 int history_index;
 bool stop;
-char pv_table[MAXDEPTH][6];
 MOVE killers[MAXDEPTH][2];
 double search_time;
 int history[2][64][64];
