@@ -4,6 +4,7 @@ SRC = ./src/*.c
 LIBS = -lpthread
 WEXE = ./bin/Supernova_2.3.exe
 LEXE = ./bin/Supernova_2.3_linux
+TEXE = ./bin/Supernova_test.exe
 WFLAGS = -std=c99 $(LIBS) -static -flto -Ofast
 LFLAGS = -std=c99 $(LIBS) -O3 -DLINUX
 DFLAGS = -std=c99 $(LIBS) -static -g -Wall -Wextra -Wshadow
@@ -15,15 +16,21 @@ windows:
 linux:
 	$(CC) $(LFLAGS) $(SRC) -o $(LEXE)
 
+test:
+	$(CC) $(WFLAGS) $(SRC) -o $(TEXE)
+
 debug:
 	$(CC) $(DFLAGS) $(SRC) -o $(WEXE)
 
 ###############################  others  ##############################
-test:
+run:
 	$(WEXE)
 
-test_linux:
+run_linux:
 	$(LEXE)
 
+run_test:
+	$(TEXE)
+
 clean:
-	rm -rf $(WEXE) $(LEXE)
+	rm -rf $(WEXE) $(LEXE) $(TEXE)
