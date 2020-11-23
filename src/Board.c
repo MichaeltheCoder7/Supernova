@@ -106,7 +106,7 @@ void displayboard(char board[8][8])
 }
 
 //get the x index from a position on the board
-int position_to_x(char position[3])
+inline int position_to_x(char position[3])
 {
     switch(position[1])
     {
@@ -132,7 +132,7 @@ int position_to_x(char position[3])
 }
 
 //get the y index from a position on the board
-int position_to_y(char position[3])
+inline int position_to_y(char position[3])
 {
     switch(position[0])
     {
@@ -158,7 +158,7 @@ int position_to_y(char position[3])
 }
 
 //initialize board struct to starting position
-void init_board(BOARD *pos)
+inline void init_board(BOARD *pos)
 {
     memcpy(pos->board, chess_board, sizeof(pos->board));
     //set the castling flags
@@ -178,7 +178,7 @@ void init_board(BOARD *pos)
     pos->pawn_push = false;
 }
 
-void clear_board(char board[8][8])
+inline void clear_board(char board[8][8])
 {
     const char board_reset[8][8] = {
 						

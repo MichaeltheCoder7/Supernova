@@ -95,7 +95,7 @@ inline void init_zobrist()
 }
 
 //use zobrist hashing to encode chess board
-unsigned long long getHash(BOARD *pos, int color)
+inline unsigned long long getHash(BOARD *pos, int color)
 {
     unsigned long long h = 0;
     int chess_piece;
