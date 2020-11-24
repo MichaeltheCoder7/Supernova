@@ -8,12 +8,12 @@ To download Supernova, you can download the Windows and Linux binaries in the bi
 
 Windows:
 ```
-gcc -std=c99 -lpthread -static -flto -Ofast ./src/*.c -o ./bin/Supernova_2.2.1.exe
+gcc -std=c99 -lpthread -static -flto -Ofast ./src/*.c -o ./bin/Supernova_2.21.exe
 ```
 
 Linux:
 ```
-gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.2.1_linux
+gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.21_linux
 ```
 
 Note that GCC version 10 or above is preferable, and compiling might fail for GCC versions below 5. It's recommended to compile the Linux version on your own since the GCC version that was used is outdated.
