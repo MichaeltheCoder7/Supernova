@@ -1,6 +1,6 @@
 # Supernova
 
-Supernova is an open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova 2.1.4 is rated around 2322 Elo on [CCRL](http://ccrl.chessdom.com/ccrl/404/), and Supernova 2.2 is 166 Elo stronger than 2.1.4 in self-play.
+Supernova is an open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova 2.1.4 is rated around 2322 Elo on [CCRL](http://ccrl.chessdom.com/ccrl/404/), and Supernova 2.2.1 is 186 Elo stronger than 2.1.4 in self-play.
 
 Installation
 ------------
@@ -8,12 +8,12 @@ To download Supernova, you can download the Windows and Linux binaries in the bi
 
 Windows:
 ```
-gcc -std=c99 -lpthread -static -flto -Ofast ./src/*.c -o ./bin/Supernova_2.2.exe
+gcc -std=c99 -lpthread -static -flto -Ofast ./src/*.c -o ./bin/Supernova_2.2.1.exe
 ```
 
 Linux:
 ```
-gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.2_linux
+gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.2.1_linux
 ```
 
 Note that GCC version 10 or above is preferable, and compiling might fail for GCC versions below 5. It's recommended to compile the Linux version on your own since the GCC version that was used is outdated.
