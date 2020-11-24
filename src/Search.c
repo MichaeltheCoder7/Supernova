@@ -23,7 +23,7 @@
 #define ASWINDOW    50
 #define INFINITE    20000
 
-//local global variables:
+//global variables:
 int nodes;
 struct timeval starting_time;
 char BestMove[6];
@@ -137,7 +137,7 @@ static inline bool check_repetition(unsigned long long key, int counter, int ply
 {
     //store the current position key into the history table
     history_log[history_index+ply] = key;
-    //check positions till an capture or a pawn move
+    //check positions till a capture or a pawn move
     for(int x = history_index+ply - 2; x >= history_index+ply-counter; x -= 2)
     {
         if(key == history_log[x])
@@ -164,7 +164,7 @@ static inline int contempt(BOARD *pos, int ply)
     return 25;
 }
 
-//check if the side to move has non-pawn material
+//check if the side to move has any non-pawn materials
 static inline bool nonPawnMaterial(BOARD *pos, int color)
 {
     //black

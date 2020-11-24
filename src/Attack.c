@@ -406,7 +406,7 @@ int ifCheck(BOARD *pos, int color)
 }
 
 //check if a piece in a given position is threatened
-//x and y are the indexes of the position
+//x and y are the indices of the position
 //return 1 if yes
 //return 0 if no
 //color = 1: threatened by white pieces

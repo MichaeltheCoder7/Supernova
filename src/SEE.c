@@ -10,7 +10,7 @@
 
 //1: white attackers
 //-1: black attackers
-//x and y are the coordinates of the board
+//x and y are the indices of the board
 //return index 0 - 63 of the smallest attacker on the board
 //return -1 if not attacked
 static int get_smallest_attacker(char board[8][8], int x, int y, int color)
@@ -526,7 +526,7 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
     do
     {
         d++;
-        //convert index to 2D
+        //convert indices to 2D
         x = attacker_index / 8;
         y = attacker_index % 8;
         
@@ -608,7 +608,7 @@ inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, 
             break;
         }
         
-        //convert index to 2D
+        //convert indices to 2D
         x = attacker_index / 8;
         y = attacker_index % 8;
         
