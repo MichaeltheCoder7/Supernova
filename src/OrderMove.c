@@ -31,7 +31,7 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
     //find the move with the highest score
     int high = current;
 
-    for(int i = current+1; i < length ; i++)
+    for(int i = current+1; i < length; i++)
     {
         if(sort[i] > sort[high])
             high = i;
