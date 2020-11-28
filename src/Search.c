@@ -12,6 +12,7 @@
 #include "Move.h"
 #include "MoveGen.h"
 #include "CaptureGen.h"
+#include "CheckMove.h"
 #include "OrderMove.h"
 #include "Evaluate.h"
 #include "Transposition.h"
@@ -121,7 +122,8 @@ static inline void timeUp()
     {
         struct timeval ending_time;
         gettimeofday(&ending_time, NULL);
-        double secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
+        double secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000
+                      + (double)(ending_time.tv_sec - starting_time.tv_sec);
         if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
         {
             stop_search = true;
@@ -190,7 +192,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
 //quiescence search with captures and queen promotion
 static int quiescence(BOARD *pos, int color, int alpha, int beta)
 {
-    int value;
+    int value = -INFINITE;
     int length;
     int isprom;
     char moved_piece, piece;
@@ -227,8 +229,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         alpha = standing_pat;
     }
     
-    value = -INFINITE;
-    //get children of node
+    //generate captures and queen promotion
     MOVE moves[256];
     int scores[256];
     length = captureGen(pos, moves, scores, color);
@@ -502,14 +503,27 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         hash_move = internalID(pos, depth - depth / 4 - 1, ply, color, alpha, beta);
     }
     
-    //get children of node
+    //initialize for move generation
+    length = 256;
     MOVE moves[256];
     int scores[256];
-    length = moveGen(pos, moves, scores, ply, color);
-    int move_exist = orderHashMove(moves, scores, length, &hash_move);
+    bool move_exist = false;
+    //try hash move first
+    if(hash_move.from != NOMOVE && isPseudoLegal(pos, &hash_move, color))
+    {
+        moves[0] = hash_move;
+        scores[0] = HASHMOVE;
+        move_exist = true;
+    }
 
     for(int x = 0; x < length; x++)
     {
+        //generate moves after hash move or if hash move doesn't exist
+        if((!move_exist && x == 0) || (move_exist && x == 1))
+        {
+            length = moveGen(pos, moves, scores, ply, color);
+            skipHashMove(moves, scores, length, &hash_move);
+        }
         //find the move with highest score
         if(x != 0 || !move_exist)
             movesort(moves, scores, length, x);
@@ -685,7 +699,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     
     nodes++;
 
-    //get children of node
+    //generate moves
     MOVE moves[256];
     int scores[256];
     length = moveGen(pos, moves, scores, ply, color);
@@ -770,7 +784,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         hash_move = entry->bestmove;
     }
 
-    //get children of node
+    //generate moves
     MOVE moves[256];
     int scores[256];
     //get the best move from last iteration if any
@@ -918,7 +932,8 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         
         //check time
         gettimeofday(&ending_time, NULL);
-        secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000 + (double)(ending_time.tv_sec - starting_time.tv_sec);
+        secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000
+               + (double)(ending_time.tv_sec - starting_time.tv_sec);
         if(secs >= search_time || stop == true || (ponderhit && secs >= ponder_time))
         {
             stop_search = true;
@@ -993,17 +1008,18 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         //send info to GUI
         if(val > 19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1, nodes, (int)(secs*1000),
-                   get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1,
+                   nodes, (int)(secs*1000), get_nps(nodes, secs));
         }
         else if(val < -19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1, nodes, (int)(secs*1000),
-                   get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1,
+                   nodes, (int)(secs*1000), get_nps(nodes, secs));
         }
         else
         {
-            printf("info depth %d score cp %d nodes %d time %d nps %d pv", current_depth, val, nodes, (int)(secs*1000), get_nps(nodes, secs));
+            printf("info depth %d score cp %d nodes %d time %d nps %d pv", current_depth, val, nodes, (int)(secs*1000),
+                   get_nps(nodes, secs));
         }
 
         for(int i = 0; i < current_depth; i++)

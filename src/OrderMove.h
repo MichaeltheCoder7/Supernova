@@ -28,7 +28,7 @@ int piece_value(char piece);
 
 void movesort(MOVE moves[256], int sort[256], int length, int current);
 
-int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move);
+void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move);
 
 void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move);
 

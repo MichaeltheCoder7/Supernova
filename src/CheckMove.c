@@ -3,32 +3,87 @@
 #include <string.h>
 #include <ctype.h>
 #include "Board.h"
+#include "Move.h"
 #include "CheckMove.h"
 #include "Attack.h"
+
+//exclude kings
+inline int isWhitePiece(char piece)
+{
+    switch(piece)
+    {
+        case 'P':
+        case 'N':
+        case 'B':
+        case 'R':
+        case 'Q':
+            return 1;
+    }
+
+    return 0;
+}
+
+inline int isBlackPiece(char piece)
+{
+    switch(piece)
+    {
+        case 'p':
+        case 'n':
+        case 'b':
+        case 'r':
+        case 'q':
+            return 1;     
+    }
+
+    return 0;
+}
+
+inline int isWhitePiece_withKing(char piece)
+{
+    switch(piece)
+    {
+        case 'P':
+        case 'N':
+        case 'B':
+        case 'R':
+        case 'Q':
+        case 'K':
+            return 1;
+    }
+
+    return 0;
+}
+
+inline int isBlackPiece_withKing(char piece)
+{
+    switch(piece)
+    {
+        case 'p':
+        case 'n':
+        case 'b':
+        case 'r':
+        case 'q':
+        case 'k':
+            return 1;     
+    }
+
+    return 0;
+}
 
 //1 for legal move, 0 for illegal move
 //captures for white pawn
 inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 {
-    //capturing
-    if(pos->board[new_x][new_y] != ' ')
+    if(pos->board[new_x][new_y] == ' ')
     {
-        if(pos->board[new_x][new_y] == 'p' || pos->board[new_x][new_y] == 'r' || pos->board[new_x][new_y] == 'n' || pos->board[new_x][new_y] == 'b' ||
-           pos->board[new_x][new_y] == 'q')
+        if(pos->ep_file == new_y + 1 && new_x == 2) //en passant
         {
             return 1;
         }
     }
-    else
+    else if(isBlackPiece(pos->board[new_x][new_y])) //capture
     {
-        //en passant
-        if(pos->ep_file == new_y + 1)
-        {
-            if(new_x == 2)
-            {
-                return 1;
-            }                                           
-        }
+        return 1;
     }                        
 
     return 0;
@@ -37,34 +92,24 @@ inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 //captures for black pawn
 inline int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
 {
-    //capturing
-    if(pos->board[new_x][new_y] != ' ')
+    if(pos->board[new_x][new_y] == ' ')
     {
-        if(pos->board[new_x][new_y] == 'P' || pos->board[new_x][new_y] == 'R' || pos->board[new_x][new_y] == 'N' || pos->board[new_x][new_y] == 'B' ||
-           pos->board[new_x][new_y] == 'Q')
+        if(pos->ep_file == new_y + 1 && new_x == 5) //en passant
         {
             return 1;
         }
     }
-    else
+    else if(isWhitePiece(pos->board[new_x][new_y])) //capture
     {
-        //en passant
-        if(pos->ep_file == new_y + 1)
-        {
-            if(new_x == 5)
-            {
-                return 1;
-            }                         
-        }
+        return 1;
     }
 
     return 0;
 }
 
-//castling for white king
+//king side castling for white king
 inline int CheckMove_wkingside(BOARD *pos)
 {
-    //king side
     //check if king and rook have been moved
     if(pos->ksw)
     {
@@ -82,10 +127,9 @@ inline int CheckMove_wkingside(BOARD *pos)
     return 0;
 }
 
-//castling for white king
+//queen side castling for white king
 inline int CheckMove_wqueenside(BOARD *pos)
 {
-    //queen side
     //check if king and rook have been moved
     if(pos->qsw)
     {
@@ -103,10 +147,9 @@ inline int CheckMove_wqueenside(BOARD *pos)
     return 0;
 }
 
-//castling for black king
+//king side castling for black king
 inline int CheckMove_bkingside(BOARD *pos)
 {
-    //king side
     //check if king and rook have been moved
     if(pos->ksb)
     {
@@ -124,10 +167,9 @@ inline int CheckMove_bkingside(BOARD *pos)
     return 0;
 }
 
-//castling for black king
+//queen side castling for black king
 inline int CheckMove_bqueenside(BOARD *pos)
 {
-    //queen side
     //check if king and rook have been moved
     if(pos->qsb)
     {
@@ -140,6 +182,381 @@ inline int CheckMove_bqueenside(BOARD *pos)
                 return 1;
             }
         }
+    }
+
+    return 0;
+}
+
+//for sliders, check if a square in the route is occupied
+static inline int isOccupied_rook(char board[8][8], int index_x, int index_y, int new_x, int new_y)
+{
+    if(index_x == new_x)
+    {
+        //left
+        if(index_y > new_y)
+        {
+            for(int i = index_y - 1; i > new_y; i--)
+            {
+                if(board[index_x][i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //right
+        else if(index_y < new_y)
+        {
+            for(int i = index_y + 1; i < new_y; i++)
+            {
+                if(board[index_x][i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    else if(index_y == new_y)
+    {
+        //up
+        if(index_x > new_x)
+        {
+            for(int i = index_x - 1; i > new_x; i--)
+            {
+                if(board[i][index_y] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //down
+        else if(index_x < new_x)
+        {
+            for(int i = index_x + 1; i < new_x; i++)
+            {
+                if(board[i][index_y] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+	
+	return 0;
+}
+
+static inline int isOccupied_bishop(char board[8][8], int index_x, int index_y, int new_x, int new_y)
+{
+    if(index_x > new_x)
+    {
+        //up left
+        if(index_y > new_y)
+        {
+            for(int i = index_x - new_x - 1; i > 0; i--)
+            {     
+                if(board[index_x - i][index_y - i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //up right
+        else if(index_y < new_y)
+        {
+            for(int i = index_x - new_x - 1; i > 0; i--)
+            {
+                if(board[index_x - i][index_y + i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    else if(index_x < new_x)
+    {
+        //down left
+        if(index_y > new_y)
+        {
+            for(int i = new_x - index_x - 1; i > 0; i--)
+            {
+                if(board[index_x + i][index_y - i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //down right
+        else if(index_y < new_y)
+        {
+            for(int i = new_x - index_x - 1; i > 0; i--)
+            {
+                if(board[index_x + i][index_y + i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+	
+	return 0;
+}
+
+static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, int new_x, int new_y)
+{
+    if(index_x > new_x)
+    {
+        //up left
+        if(index_y > new_y)
+        {
+            for(int i = index_x - new_x - 1; i > 0; i--)
+            {     
+                if(board[index_x - i][index_y - i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //up right
+        else if(index_y < new_y)
+        {
+            for(int i = index_x - new_x - 1; i > 0; i--)
+            {
+                if(board[index_x - i][index_y + i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //up
+        else if(index_y == new_y)
+        {
+            for(int i = index_x - 1; i > new_x; i--)
+            {
+                if(board[i][index_y] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    else if(index_x < new_x)
+    {
+        //down left
+        if(index_y > new_y)
+        {
+            for(int i = new_x - index_x - 1; i > 0; i--)
+            {
+                if(board[index_x + i][index_y - i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //down right
+        else if(index_y < new_y)
+        {
+            for(int i = new_x - index_x - 1; i > 0; i--)
+            {
+                if(board[index_x + i][index_y + i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //down
+        else if(index_y == new_y)
+        {
+            for(int i = index_x + 1; i < new_x; i++)
+            {
+                if(board[i][index_y] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+    else if(index_x == new_x)
+    {
+        //left
+        if(index_y > new_y)
+        {
+            for(int i = index_y - 1; i > new_y; i--)
+            {
+                if(board[index_x][i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+        //right
+        else if(index_y < new_y)
+        {
+            for(int i = index_y + 1; i < new_y; i++)
+            {
+                if(board[index_x][i] != ' ')
+                {
+                    return 1;
+                }
+            }
+        }
+    }
+	
+	return 0;
+}
+
+//check if this move is pseudo-legal
+int isPseudoLegal(BOARD *pos, MOVE *move, int color)
+{
+    int cur_64 = move->from;
+    int new_64 = move->to;
+    int cur_x = cur_64 / 8;
+    int cur_y = cur_64 % 8;
+    int new_x = new_64 / 8;
+    int new_y = new_64 % 8;
+    char piece = pos->board[cur_x][cur_y];
+    char op_piece = pos->board[new_x][new_y];
+
+    //quick check
+    //illegal if move a piece that is not ours or attack our pieces or attack enemy king
+    if(color == 1) //black
+    {
+        if(!isBlackPiece_withKing(piece) || isBlackPiece_withKing(op_piece) || op_piece == 'K')
+            return 0;
+    }
+    else //white
+    {
+        if(!isWhitePiece_withKing(piece) || isWhitePiece_withKing(op_piece) || op_piece == 'k')
+            return 0;
+    }
+
+    switch(piece)
+    {
+        case 'P':
+            if(cur_y == new_y)
+            {
+                if(cur_x == 6 && new_x == 4)
+                {
+                    if(pos->board[5][cur_y] == ' ' && pos->board[4][cur_y] == ' ')
+                        return 1;
+                }
+                else if(cur_x - new_x == 1)
+                {
+                    if(op_piece == ' ')
+                        return 1;
+                }
+            }
+            else if((new_x == cur_x - 1 && new_y == cur_y + 1) || (new_x == cur_x - 1 && new_y == cur_y - 1))
+            {
+                //en passant
+                if(op_piece == ' ')
+                {
+                    if(pos->ep_file == new_y + 1 && new_x == 2)
+                        return 1;
+                }
+                else //capture
+                {
+                    return 1;
+                }
+            }
+            break;
+        case 'p':
+            if(cur_y == new_y)
+            {
+                if(cur_x == 1 && new_x == 3)
+                {
+                    if(pos->board[2][cur_y] == ' ' && pos->board[3][cur_y] == ' ')
+                        return 1;
+                }
+                else if(new_x - cur_x == 1)
+                {
+                    if(op_piece == ' ')
+                        return 1;
+                }
+            }
+            else if((new_x == cur_x + 1 && new_y == cur_y + 1) || (new_x == cur_x + 1 && new_y == cur_y - 1))
+            {
+                //en passant
+                if(op_piece == ' ')
+                {
+                    if(pos->ep_file == new_y + 1 && new_x == 5)
+                        return 1;
+                }
+                else //capture
+                {
+                    return 1;
+                }
+            }
+            break;
+        case 'N':
+        case 'n':
+            if((new_x == cur_x - 2 && new_y == cur_y + 1) || (new_x == cur_x - 2 && new_y == cur_y - 1)
+               || (new_x == cur_x - 1 && new_y == cur_y + 2) || (new_x == cur_x - 1 && new_y == cur_y - 2)
+               || (new_x == cur_x + 2 && new_y == cur_y + 1) || (new_x == cur_x + 2 && new_y == cur_y - 1)
+               || (new_x == cur_x + 1 && new_y == cur_y + 2) || (new_x == cur_x + 1 && new_y == cur_y - 2))
+            {
+                return 1;
+            }
+            break;
+        case 'R':
+        case 'r':
+            if((cur_x == new_x && cur_y != new_y) || (cur_x != new_x && cur_y == new_y))
+            {
+                if(!isOccupied_rook(pos->board, cur_x, cur_y, new_x, new_y))
+                    return 1;
+            }
+            break;
+        case 'B':
+        case 'b':
+            if(abs(cur_x - new_x) == abs(cur_y - new_y))
+            {
+                if(!isOccupied_bishop(pos->board, cur_x, cur_y, new_x, new_y))
+                    return 1;
+            }
+            break;
+        case 'Q':
+        case 'q':
+            if((abs(cur_x - new_x) == abs(cur_y - new_y)) || (cur_x == new_x && cur_y != new_y)
+               || (cur_x != new_x && cur_y == new_y))
+            {
+                if(!isOccupied_queen(pos->board, cur_x, cur_y, new_x, new_y))
+                    return 1;
+            }
+            break;
+        case 'K':
+            //castling
+            if(cur_64 == e1 && new_64 == g1)
+            {
+                if(CheckMove_wkingside(pos))
+                    return 1;
+            }
+            else if(cur_64 == e1 && new_64 == c1)
+            {
+                if(CheckMove_wqueenside(pos))
+                    return 1;
+            }
+            else if((abs(cur_x - new_x) == 1 && abs(cur_y - new_y) == 1) || (abs(cur_x - new_x) == 1 && cur_y == new_y)
+                    || (cur_x == new_x && abs(cur_y - new_y) == 1)) //normal move
+            {
+                return 1;
+            }
+            break;
+        case 'k':
+            //castling
+            if(cur_64 == e8 && new_64 == g8)
+            {
+                if(CheckMove_bkingside(pos))
+                    return 1;
+            }
+            else if(cur_64 == e8 && new_64 == c8)
+            {
+                if(CheckMove_bqueenside(pos))
+                    return 1;
+            }
+            else if((abs(cur_x - new_x) == 1 && abs(cur_y - new_y) == 1) || (abs(cur_x - new_x) == 1 && cur_y == new_y)
+                    || (cur_x == new_x && abs(cur_y - new_y) == 1)) //normal move
+            {
+                return 1;
+            }
+            break;
     }
 
     return 0;

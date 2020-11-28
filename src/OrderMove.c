@@ -41,12 +41,12 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
     swapMove(&moves[current], &moves[high]);
 }
 
-//return 1 if hash move exists
-inline int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
+//find the hash move if it exists and put it at the beginning of the move list to skip it
+inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
 {
     if(hash_move->from == NOMOVE)
     {
-        return 0;
+        return;
     }
     else
     {
@@ -57,14 +57,13 @@ inline int orderHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_
                 sort[x] = HASHMOVE;
                 swap(&sort[0], &sort[x]);
                 swapMove(&moves[0], &moves[x]);
-                return 1;
+                return;
             }
         }
     }
-    
-    return 0;
 }
 
+//assign scores for the best move and hash move at root
 inline void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move)
 {
     for(int x = 0; x < length; x++)
