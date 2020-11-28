@@ -8,21 +8,26 @@ TEXE = ./bin/Supernova_test.exe
 WFLAGS = -std=c99 $(LIBS) -static -flto -Ofast
 LFLAGS = -std=c99 $(LIBS) -O3 -DLINUX
 DFLAGS = -std=c99 $(LIBS) -static -g -Wall -Wextra -Wshadow
+PSRC = $(filter-out ./src/Main.c, $(wildcard ./src/*.c ./tests/Perft.c))
 
-######################### generate the executable #####################
+######################## executables for release ######################
 windows:
 	$(CC) $(WFLAGS) $(SRC) -o $(WEXE)
 
 linux:
 	$(CC) $(LFLAGS) $(SRC) -o $(LEXE)
 
+######################## executables for testing #######################
 test:
 	$(CC) $(WFLAGS) $(SRC) -o $(TEXE)
 
 debug:
-	$(CC) $(DFLAGS) $(SRC) -o $(WEXE)
+	$(CC) $(DFLAGS) $(SRC) -o $(TEXE)
 
-###############################  others  ##############################
+perft:
+	$(CC) $(DFLAGS) $(PSRC) -o $(TEXE)
+
+############################### others #################################
 run:
 	$(WEXE)
 
