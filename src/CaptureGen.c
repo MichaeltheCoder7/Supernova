@@ -113,8 +113,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {  
-                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' ||
-                       pos->board[j][index_y] == 'Q')
+                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B'
+                       || pos->board[j][index_y] == 'Q')
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -129,8 +129,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //left
                 for(int j = index_y-1; j >= 0; j--)
                 {
-                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' ||
-                       pos->board[index_x][j] == 'Q')
+                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B'
+                       || pos->board[index_x][j] == 'Q')
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -145,8 +145,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //right
                 for(int j = index_y+1; j <= 7; j++)
                 {
-                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' ||
-                       pos->board[index_x][j] == 'Q')  
+                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B'
+                       || pos->board[index_x][j] == 'Q')  
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -161,8 +161,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //down
                 for(int j = index_x+1; j <= 7; j++)
                 {
-                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' ||
-                       pos->board[j][index_y] == 'Q') 
+                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B'
+                       || pos->board[j][index_y] == 'Q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -296,8 +296,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {
-                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' ||
-                       pos->board[j][index_y] == 'Q') 
+                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B'
+                       || pos->board[j][index_y] == 'Q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -333,8 +333,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //left
                 for(int j = index_y-1; j >= 0; j--)
                 {
-                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' ||
-                       pos->board[index_x][j] == 'Q')
+                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B'
+                       || pos->board[index_x][j] == 'Q')
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -349,8 +349,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //right
                 for(int j = index_y+1; j <= 7; j++)
                 {
-                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B' ||
-                       pos->board[index_x][j] == 'Q') 
+                    if(pos->board[index_x][j] == 'P' || pos->board[index_x][j] == 'R' || pos->board[index_x][j] == 'N' || pos->board[index_x][j] == 'B'
+                       || pos->board[index_x][j] == 'Q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -386,8 +386,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //down
                 for(int j = index_x+1; j <= 7; j++)
                 {
-                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B' ||
-                       pos->board[j][index_y] == 'Q') 
+                    if(pos->board[j][index_y] == 'P' || pos->board[j][index_y] == 'R' || pos->board[j][index_y] == 'N' || pos->board[j][index_y] == 'B'
+                       || pos->board[j][index_y] == 'Q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -513,8 +513,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {
-                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' ||
-                       pos->board[j][index_y] == 'q') 
+                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b'
+                       || pos->board[j][index_y] == 'q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -529,8 +529,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //left
                 for(int j = index_y-1; j >= 0; j--)
                 {
-                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' ||
-                       pos->board[index_x][j] == 'q') 
+                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b'
+                       || pos->board[index_x][j] == 'q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -545,8 +545,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //right
                 for(int j = index_y+1; j <= 7; j++)
                 {
-                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' ||
-                       pos->board[index_x][j] == 'q')  
+                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b'
+                       || pos->board[index_x][j] == 'q')  
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -561,8 +561,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //down
                 for(int j = index_x+1; j <= 7; j++)
                 {
-                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' ||
-                       pos->board[j][index_y] == 'q') 
+                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b'
+                       || pos->board[j][index_y] == 'q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -696,8 +696,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //up
                 for(int j = index_x-1; j >= 0; j--)
                 {
-                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' ||
-                       pos->board[j][index_y] == 'q')  
+                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b'
+                       || pos->board[j][index_y] == 'q')  
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
@@ -733,8 +733,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //left
                 for(int j = index_y-1; j >= 0; j--)
                 {
-                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' ||
-                       pos->board[index_x][j] == 'q')   
+                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b'
+                       || pos->board[index_x][j] == 'q')   
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -749,8 +749,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //right
                 for(int j = index_y+1; j <= 7; j++)
                 {
-                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b' ||
-                       pos->board[index_x][j] == 'q')   
+                    if(pos->board[index_x][j] == 'p' || pos->board[index_x][j] == 'r' || pos->board[index_x][j] == 'n' || pos->board[index_x][j] == 'b'
+                       || pos->board[index_x][j] == 'q')   
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*index_x+j;
@@ -786,8 +786,8 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 //down
                 for(int j = index_x+1; j <= 7; j++)
                 {
-                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b' ||
-                       pos->board[j][index_y] == 'q') 
+                    if(pos->board[j][index_y] == 'p' || pos->board[j][index_y] == 'r' || pos->board[j][index_y] == 'n' || pos->board[j][index_y] == 'b'
+                       || pos->board[j][index_y] == 'q') 
                     {  
                         all_moves[index].from = origin;
                         all_moves[index].to = 8*j+index_y;
