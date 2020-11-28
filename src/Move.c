@@ -170,7 +170,7 @@ int makeMove(BOARD *pos, MOVE *move)
     //zobrist key update
     pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
 
-    if(op_piece != ' ')//capture
+    if(op_piece != ' ') //capture
     {
         int enemy_piece = piece_code(op_piece);
         pos->key ^= table[new_x][new_y][enemy_piece];
@@ -280,7 +280,7 @@ int makeMove(BOARD *pos, MOVE *move)
         }
     }
 
-    pos->pawn_push = false; //detect pawn push to the 7th / 2nd rank
+    pos->pawn_push = false; //detect pawn push to the 7th/2nd rank
     switch(piece)
     {
         case 'P':
@@ -513,7 +513,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
 
     //zobrist key update
     pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
-    if(op_piece != ' ')//capture
+    if(op_piece != ' ') //capture
     {
         int enemy_piece = piece_code(op_piece);
         pos->key ^= table[new_x][new_y][enemy_piece];
