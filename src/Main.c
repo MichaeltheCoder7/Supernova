@@ -565,7 +565,7 @@ void uci_loop()
 }
 
 //UCI GUI
-int main(void)
+int main()
 {
     //initialize global variables
     tt = NULL;
