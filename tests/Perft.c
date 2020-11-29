@@ -137,6 +137,7 @@ static unsigned long long perft(BOARD *pos, int depth, int color)
         
         nodes += perft(&pos_copy, depth - 1, -color);
     }
+    
     return nodes;
 }
 
