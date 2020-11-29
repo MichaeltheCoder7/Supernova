@@ -10,6 +10,7 @@
 #include "../src/MoveGen.h"
 #include "../src/Attack.h"
 #include "../src/Transposition.h"
+#include "../src/CheckMove.h"
 
 //position 1
 //depth 5: 4865609 nodes

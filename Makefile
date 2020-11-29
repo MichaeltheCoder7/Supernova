@@ -25,7 +25,7 @@ debug:
 	$(CC) $(DFLAGS) $(SRC) -o $(TEXE)
 
 perft:
-	$(CC) $(DFLAGS) $(PSRC) -o $(TEXE)
+	$(CC) $(WFLAGS) $(PSRC) -o $(TEXE)
 
 ############################### others #################################
 run:
