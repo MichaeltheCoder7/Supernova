@@ -507,25 +507,25 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     length = 256;
     MOVE moves[256];
     int scores[256];
-    bool move_exist = false;
+    int start_moveGen = 0;
     //try hash move first
     if(hash_move.from != NOMOVE && isPseudoLegal(pos, &hash_move, color))
     {
         moves[0] = hash_move;
         scores[0] = HASHMOVE;
-        move_exist = true;
+        start_moveGen = 1;
     }
 
     for(int x = 0; x < length; x++)
     {
         //generate moves after hash move or if hash move doesn't exist
-        if((!move_exist && x == 0) || (move_exist && x == 1))
+        if(x == start_moveGen)
         {
             length = moveGen(pos, moves, scores, ply, color);
-            skipHashMove(moves, scores, length, &hash_move);
+            skipHashMove(moves, scores, length, &hash_move, x);
         }
         //find the move with highest score
-        if(x != 0 || !move_exist)
+        if(x >= start_moveGen)
             movesort(moves, scores, length, x);
         //make a copy of the board
         pos_copy = *pos;
@@ -791,12 +791,13 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     MOVE pv_move = string_to_move(BestMove);
 
     length = moveGen(pos, moves, scores, 0, color);
-    orderMove_root(moves, scores, length, &pv_move, &hash_move);
+    int sorted = orderMove_root(moves, scores, length, &pv_move, &hash_move);
 
     for(int x = 0; x < length; x++)
     {
         //find the move with highest score
-        movesort(moves, scores, length, x);
+        if(x >= sorted)
+            movesort(moves, scores, length, x);
         //make a copy of the board
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);

@@ -42,9 +42,9 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
 }
 
 //find the hash move if it exists and put it at the beginning of the move list to skip it
-inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move)
+inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move, int exist)
 {
-    if(hash_move->from == NOMOVE)
+    if(!exist)
     {
         return;
     }
@@ -63,20 +63,51 @@ inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_
     }
 }
 
-//assign scores for the best move and hash move at root
-inline void orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move)
+//assign scores and sort for the best move and hash move at root
+//return number of moves sorted
+inline int orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move)
 {
-    for(int x = 0; x < length; x++)
+    int move_count = 0;
+
+    if(best_move->from != NOMOVE)
     {
-        if(compareMove(&moves[x], best_move))
+        for(int x = 0; x < length; x++)
         {
-            sort[x] = BESTMOVE;
-        }
-        else if(compareMove(&moves[x], hash_move))
-        {
-            sort[x] = HASHMOVE;
+            if(compareMove(&moves[x], best_move))
+            {
+                sort[x] = BESTMOVE;
+                swap(&sort[0], &sort[x]);
+                swapMove(&moves[0], &moves[x]);
+                move_count++;
+                break;
+            }
         }
     }
+
+    if(hash_move->from != NOMOVE && !compareMove(hash_move, best_move))
+    {
+        for(int x = 0; x < length; x++)
+        {
+            if(compareMove(&moves[x], hash_move))
+            {
+                sort[x] = HASHMOVE;
+                if(move_count == 0)
+                {
+                    swap(&sort[0], &sort[x]);
+                    swapMove(&moves[0], &moves[x]);
+                }
+                else
+                {
+                    swap(&sort[1], &sort[x]);
+                    swapMove(&moves[1], &moves[x]);
+                }
+                move_count++;
+                break;
+            }
+        }
+    }
+
+    return move_count;
 }
 
 //order captures with mvv-lva and SEE
