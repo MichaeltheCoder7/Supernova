@@ -117,7 +117,7 @@ static unsigned long long perft(BOARD *pos, int depth, int color)
     if(depth == 0)
         return 1ULL;
     
-    //get children of node
+    //generate moves
     MOVE moves[256];
     int scores[256];
     length = moveGen(pos, moves, scores, 0, color);
@@ -129,7 +129,7 @@ static unsigned long long perft(BOARD *pos, int depth, int color)
         //make move
         makeMove(&pos_copy, &moves[x]);
         
-        //check if check is ignored
+        //skip if the king is left in check
         if(ifCheck(&pos_copy, color))
         {
             continue;

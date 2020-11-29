@@ -242,7 +242,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         pos_copy = *pos;
         isprom = makeMove_qsearch(&pos_copy, &moves[x]);
             
-        //skip if check condition is ignored
+        //skip if the king is left in check
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -458,7 +458,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             //make a copy of the board
             pos_copy = *pos;
             isTactical = makeMove(&pos_copy, &moves[x]);
-            //skip if check condition is ignored
+            //skip if the king is left in check
             if(ifCheck(&pos_copy, color))
             {
                 continue;
@@ -531,7 +531,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
 
-        //skip if check condition is ignored
+        //skip if the king is left in check
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -712,7 +712,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
         
-        //skip if check condition is ignored
+        //skip if the king is left in check
         if(ifCheck(&pos_copy, color))
         {
             continue;
@@ -802,7 +802,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
         
-        //skip if check condition is ignored
+        //skip if the king is left in check
         if(ifCheck(&pos_copy, color))
         {
             continue;
