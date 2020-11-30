@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-enum { wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
+enum pieces { wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 
 enum positions {
 
