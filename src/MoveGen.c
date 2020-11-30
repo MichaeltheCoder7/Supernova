@@ -160,158 +160,6 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //king
-            origin = pos->piece_list[bK][0];
-            index_x = origin / 8;
-            index_y = origin % 8;
-            //castling
-            if(origin == e8)
-            {
-                if(CheckMove_bkingside(pos))  
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = g8;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = CASTLING;
-                    index++;
-                }
-                if(CheckMove_bqueenside(pos))  
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = c8;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = CASTLING;
-                    index++;
-                }
-            }
-            for(int j = 0; j < 8; j++)
-            {
-                x = index_x + king_moves_x[j];
-                y = index_y + king_moves_y[j];
-                if(x & 8 || y & 8) //skip when out of board
-                {
-                    continue;
-                }
-                if(pos->board[x][y] == ' ') 
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = 8*x+y;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = quietMove_score(&all_moves[index], origin, x, y, ply, color);
-                    index++;
-                }
-                else if(isWhitePiece(pos->board[x][y]))
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = 8*x+y;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = bCapMove_score('k', pos->board[x][y], pos->board, index_x, index_y, x, y);
-                    index++;
-                }
-            }
-            //rook
-            for(int i = 0; i < pos->piece_count[bR]; i++)
-            {
-                origin = pos->piece_list[bR][i];
-                index_x = pos->piece_list[bR][i] / 8;
-                index_y = pos->piece_list[bR][i] % 8;
-                //up
-                for(int j = index_x-1; j >= 0; j--)
-                {  
-                    if(pos->board[j][index_y] == ' ')
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
-                        index++;
-                    }
-                    else if(isWhitePiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = bCapMove_score('r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //left
-                for(int j = index_y-1; j >= 0; j--)
-                {
-                    if(pos->board[index_x][j] == ' ')
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
-                        index++;
-                    }
-                    else if(isWhitePiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = bCapMove_score('r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //right
-                for(int j = index_y+1; j <= 7; j++)
-                {
-                    if(pos->board[index_x][j] == ' ')
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
-                        index++;
-                    }
-                    else if(isWhitePiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = bCapMove_score('r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //down
-                for(int j = index_x+1; j <= 7; j++)
-                {
-                    if(pos->board[j][index_y] == ' ')
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
-                        index++;
-                    }
-                    else if(isWhitePiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = bCapMove_score('r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
-                    }
-                }
-            }
             //bishop
             for(int i = 0; i < pos->piece_count[bB]; i++)
             {
@@ -434,6 +282,109 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
+                    {
+                        break;
+                    }
+                }
+            }
+            //rook
+            for(int i = 0; i < pos->piece_count[bR]; i++)
+            {
+                origin = pos->piece_list[bR][i];
+                index_x = pos->piece_list[bR][i] / 8;
+                index_y = pos->piece_list[bR][i] % 8;
+                //up
+                for(int j = index_x-1; j >= 0; j--)
+                {  
+                    if(pos->board[j][index_y] == ' ')
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
+                        index++;
+                    }
+                    else if(isWhitePiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score('r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //left
+                for(int j = index_y-1; j >= 0; j--)
+                {
+                    if(pos->board[index_x][j] == ' ')
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
+                        index++;
+                    }
+                    else if(isWhitePiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score('r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //right
+                for(int j = index_y+1; j <= 7; j++)
+                {
+                    if(pos->board[index_x][j] == ' ')
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
+                        index++;
+                    }
+                    else if(isWhitePiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score('r', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //down
+                for(int j = index_x+1; j <= 7; j++)
+                {
+                    if(pos->board[j][index_y] == ' ')
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
+                        index++;
+                    }
+                    else if(isWhitePiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = bCapMove_score('r', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
                     {
                         break;
                     }
@@ -662,6 +613,55 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+            //king
+            origin = pos->piece_list[bK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
+            //castling
+            if(origin == e8)
+            {
+                if(CheckMove_bkingside(pos))  
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = g8;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = CASTLING;
+                    index++;
+                }
+                if(CheckMove_bqueenside(pos))  
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = c8;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = CASTLING;
+                    index++;
+                }
+            }
+            for(int j = 0; j < 8; j++)
+            {
+                x = index_x + king_moves_x[j];
+                y = index_y + king_moves_y[j];
+                if(x & 8 || y & 8) //skip when out of board
+                {
+                    continue;
+                }
+                if(pos->board[x][y] == ' ') 
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = quietMove_score(&all_moves[index], origin, x, y, ply, color);
+                    index++;
+                }
+                else if(isWhitePiece(pos->board[x][y]))
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = bCapMove_score('k', pos->board[x][y], pos->board, index_x, index_y, x, y);
+                    index++;
+                }
+            }
             break;
         }
         //white pieces
@@ -673,7 +673,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                 origin = pos->piece_list[wP][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                for(y = index_y - 1; y < index_y + 2; y+=2)
+                for(y = index_y - 1; y < index_y + 2; y += 2)
                 {
                     if(y & 8) //skip when out of board
                     {
@@ -793,158 +793,6 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = wCapMove_score('N', pos->board[x][y], pos->board, index_x, index_y, x, y);
                         index++;
-                    }
-                }
-            }
-            //king
-            origin = pos->piece_list[wK][0];
-            index_x = origin / 8;
-            index_y = origin % 8;
-            //castling
-            if(origin == e1)
-            {
-                if(CheckMove_wkingside(pos))  
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = g1;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = CASTLING;
-                    index++;
-                }
-                if(CheckMove_wqueenside(pos))  
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = c1;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = CASTLING;
-                    index++;
-                }
-            }
-            for(int j = 0; j < 8; j++)
-            {
-                x = index_x + king_moves_x[j];
-                y = index_y + king_moves_y[j];
-                if(x & 8 || y & 8) //skip when out of board
-                {
-                    continue;
-                }
-                if(pos->board[x][y] == ' ')   
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = 8*x+y;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = quietMove_score(&all_moves[index], origin, x, y, ply, color);
-                    index++;
-                }
-                else if(isBlackPiece(pos->board[x][y]))
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = 8*x+y;
-                    all_moves[index].promotion = ' ';
-                    sort[index] = wCapMove_score('K', pos->board[x][y], pos->board, index_x, index_y, x, y);
-                    index++;
-                }
-            }
-            //rook
-            for(int i = 0; i < pos->piece_count[wR]; i++)
-            {
-                origin = pos->piece_list[wR][i];
-                index_x = origin / 8;
-                index_y = origin % 8;
-                //up
-                for(int j = index_x-1; j >= 0; j--)
-                {
-                    if(pos->board[j][index_y] == ' ') 
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
-                        index++;
-                    }
-                    else if(isBlackPiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = wCapMove_score('R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //left
-                for(int j = index_y-1; j >= 0; j--)
-                {
-                    if(pos->board[index_x][j] == ' ') 
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
-                        index++;
-                    }
-                    else if(isBlackPiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = wCapMove_score('R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //right
-                for(int j = index_y+1; j <= 7; j++)
-                {
-                    if(pos->board[index_x][j] == ' ') 
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
-                        index++;
-                    }
-                    else if(isBlackPiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = wCapMove_score('R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //down
-                for(int j = index_x+1; j <= 7; j++)
-                {
-                    if(pos->board[j][index_y] == ' ') 
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
-                        index++;
-                    }
-                    else if(isBlackPiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        all_moves[index].promotion = ' ';
-                        sort[index] = wCapMove_score('R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
                     }
                 }
             }
@@ -1070,6 +918,109 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
+                    {
+                        break;
+                    }
+                }
+            }
+            //rook
+            for(int i = 0; i < pos->piece_count[wR]; i++)
+            {
+                origin = pos->piece_list[wR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
+                //up
+                for(int j = index_x-1; j >= 0; j--)
+                {
+                    if(pos->board[j][index_y] == ' ') 
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
+                        index++;
+                    }
+                    else if(isBlackPiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score('R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //left
+                for(int j = index_y-1; j >= 0; j--)
+                {
+                    if(pos->board[index_x][j] == ' ') 
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
+                        index++;
+                    }
+                    else if(isBlackPiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score('R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //right
+                for(int j = index_y+1; j <= 7; j++)
+                {
+                    if(pos->board[index_x][j] == ' ') 
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, index_x, j, ply, color);
+                        index++;
+                    }
+                    else if(isBlackPiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score('R', pos->board[index_x][j], pos->board, index_x, index_y, index_x, j);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //down
+                for(int j = index_x+1; j <= 7; j++)
+                {
+                    if(pos->board[j][index_y] == ' ') 
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = quietMove_score(&all_moves[index], origin, j, index_y, ply, color);
+                        index++;
+                    }
+                    else if(isBlackPiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = wCapMove_score('R', pos->board[j][index_y], pos->board, index_x, index_y, j, index_y);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
                     {
                         break;
                     }
@@ -1296,6 +1247,55 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     {
                         break;
                     }
+                }
+            }
+            //king
+            origin = pos->piece_list[wK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
+            //castling
+            if(origin == e1)
+            {
+                if(CheckMove_wkingside(pos))  
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = g1;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = CASTLING;
+                    index++;
+                }
+                if(CheckMove_wqueenside(pos))  
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = c1;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = CASTLING;
+                    index++;
+                }
+            }
+            for(int j = 0; j < 8; j++)
+            {
+                x = index_x + king_moves_x[j];
+                y = index_y + king_moves_y[j];
+                if(x & 8 || y & 8) //skip when out of board
+                {
+                    continue;
+                }
+                if(pos->board[x][y] == ' ')   
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = quietMove_score(&all_moves[index], origin, x, y, ply, color);
+                    index++;
+                }
+                else if(isBlackPiece(pos->board[x][y]))
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    all_moves[index].promotion = ' ';
+                    sort[index] = wCapMove_score('K', pos->board[x][y], pos->board, index_x, index_y, x, y);
+                    index++;
                 }
             }
             break;

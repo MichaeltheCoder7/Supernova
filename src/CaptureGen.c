@@ -84,93 +84,6 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //king
-            origin = pos->piece_list[bK][0];
-            index_x = origin / 8;
-            index_y = origin % 8;
-            for(int j = 0; j < 8; j++)
-            {
-                x = index_x + king_moves_x[j];
-                y = index_y + king_moves_y[j];
-                if(x & 8 || y & 8) //skip when out of board
-                {
-                    continue;
-                }
-                if(isWhitePiece(pos->board[x][y]))  
-                {  
-                    all_moves[index].from = origin;
-                    all_moves[index].to = 8*x+y;
-                    sort[index] = bCapQsearch_score('k', pos->board[x][y]);
-                    index++;
-                }
-            }
-            //rook
-            for(int i = 0; i < pos->piece_count[bR]; i++)
-            {
-                origin = pos->piece_list[bR][i];
-                index_x = origin / 8;
-                index_y = origin % 8;
-                //up
-                for(int j = index_x-1; j >= 0; j--)
-                {  
-                    if(isWhitePiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y]);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //left
-                for(int j = index_y-1; j >= 0; j--)
-                {
-                    if(isWhitePiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j]);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //right
-                for(int j = index_y+1; j <= 7; j++)
-                {
-                    if(isWhitePiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j]);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //down
-                for(int j = index_x+1; j <= 7; j++)
-                {
-                    if(isWhitePiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y]);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
-                    }
-                }
-            }
             //bishop
             for(int i = 0; i < pos->piece_count[bB]; i++)
             {
@@ -257,6 +170,73 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
+                    {
+                        break;
+                    }
+                }
+            }
+            //rook
+            for(int i = 0; i < pos->piece_count[bR]; i++)
+            {
+                origin = pos->piece_list[bR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
+                //up
+                for(int j = index_x-1; j >= 0; j--)
+                {  
+                    if(isWhitePiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y]);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //left
+                for(int j = index_y-1; j >= 0; j--)
+                {
+                    if(isWhitePiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j]);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //right
+                for(int j = index_y+1; j <= 7; j++)
+                {
+                    if(isWhitePiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        sort[index] = bCapQsearch_score('r', pos->board[index_x][j]);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //down
+                for(int j = index_x+1; j <= 7; j++)
+                {
+                    if(isWhitePiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        sort[index] = bCapQsearch_score('r', pos->board[j][index_y]);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
                     {
                         break;
                     }
@@ -413,6 +393,26 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+            //king
+            origin = pos->piece_list[bK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
+            for(int j = 0; j < 8; j++)
+            {
+                x = index_x + king_moves_x[j];
+                y = index_y + king_moves_y[j];
+                if(x & 8 || y & 8) //skip when out of board
+                {
+                    continue;
+                }
+                if(isWhitePiece(pos->board[x][y]))  
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    sort[index] = bCapQsearch_score('k', pos->board[x][y]);
+                    index++;
+                }
+            }
             break;
         }
         //white pieces
@@ -473,93 +473,6 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         all_moves[index].to = 8*x+y;
                         sort[index] = wCapQsearch_score('N', pos->board[x][y]);
                         index++;
-                    }
-                }
-            }
-            //king
-            origin = pos->piece_list[wK][0];
-            index_x = origin / 8;
-            index_y = origin % 8;
-            for(int j = 0; j < 8; j++)
-            {
-                x = index_x + king_moves_x[j];
-                y = index_y + king_moves_y[j];
-                if(x & 8 || y & 8) //skip when out of board
-                {
-                    continue;
-                }
-                if(isBlackPiece(pos->board[x][y]))
-                {  
-                    all_moves[index].from = origin;
-                        all_moves[index].to = 8*x+y;
-                    sort[index] = wCapQsearch_score('K', pos->board[x][y]);
-                    index++;
-                }
-            }
-            //rook
-            for(int i = 0; i < pos->piece_count[wR]; i++)
-            {
-                origin = pos->piece_list[wR][i];
-                index_x = origin / 8;
-                index_y = origin % 8;
-                //up
-                for(int j = index_x-1; j >= 0; j--)
-                {
-                    if(isBlackPiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y]);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //left
-                for(int j = index_y-1; j >= 0; j--)
-                {
-                    if(isBlackPiece(pos->board[index_x][j])) 
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j]);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //right
-                for(int j = index_y+1; j <= 7; j++)
-                {
-                    if(isBlackPiece(pos->board[index_x][j]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*index_x+j;
-                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j]);
-                        index++;
-                    }
-                    if(pos->board[index_x][j] != ' ')
-                    {
-                        break;
-                    }
-                }
-                //down
-                for(int j = index_x+1; j <= 7; j++)
-                {
-                    if(isBlackPiece(pos->board[j][index_y]))
-                    {  
-                        all_moves[index].from = origin;
-                        all_moves[index].to = 8*j+index_y;
-                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y]);
-                        index++;
-                    }
-                    if(pos->board[j][index_y] != ' ')
-                    {
-                        break;
                     }
                 }
             }
@@ -649,6 +562,73 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         index++;
                     }
                     if(pos->board[x][y] != ' ')
+                    {
+                        break;
+                    }
+                }
+            }
+            //rook
+            for(int i = 0; i < pos->piece_count[wR]; i++)
+            {
+                origin = pos->piece_list[wR][i];
+                index_x = origin / 8;
+                index_y = origin % 8;
+                //up
+                for(int j = index_x-1; j >= 0; j--)
+                {
+                    if(isBlackPiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y]);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //left
+                for(int j = index_y-1; j >= 0; j--)
+                {
+                    if(isBlackPiece(pos->board[index_x][j])) 
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j]);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //right
+                for(int j = index_y+1; j <= 7; j++)
+                {
+                    if(isBlackPiece(pos->board[index_x][j]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*index_x+j;
+                        sort[index] = wCapQsearch_score('R', pos->board[index_x][j]);
+                        index++;
+                    }
+                    if(pos->board[index_x][j] != ' ')
+                    {
+                        break;
+                    }
+                }
+                //down
+                for(int j = index_x+1; j <= 7; j++)
+                {
+                    if(isBlackPiece(pos->board[j][index_y]))
+                    {  
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8*j+index_y;
+                        sort[index] = wCapQsearch_score('R', pos->board[j][index_y]);
+                        index++;
+                    }
+                    if(pos->board[j][index_y] != ' ')
                     {
                         break;
                     }
@@ -803,6 +783,26 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     {
                         break;
                     }
+                }
+            }
+            //king
+            origin = pos->piece_list[wK][0];
+            index_x = origin / 8;
+            index_y = origin % 8;
+            for(int j = 0; j < 8; j++)
+            {
+                x = index_x + king_moves_x[j];
+                y = index_y + king_moves_y[j];
+                if(x & 8 || y & 8) //skip when out of board
+                {
+                    continue;
+                }
+                if(isBlackPiece(pos->board[x][y]))
+                {  
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 8*x+y;
+                    sort[index] = wCapQsearch_score('K', pos->board[x][y]);
+                    index++;
                 }
             }
             break;
