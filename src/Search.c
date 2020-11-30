@@ -458,11 +458,13 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             //make a copy of the board
             pos_copy = *pos;
             isTactical = makeMove(&pos_copy, &moves[x]);
+            
             //skip if the king is left in check
             if(ifCheck(&pos_copy, color))
             {
                 continue;
             }
+
             //get piece value
             new_x = moves[x].to / 8;
             new_y = moves[x].to % 8;
