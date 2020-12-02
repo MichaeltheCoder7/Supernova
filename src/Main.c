@@ -30,7 +30,7 @@ BOARD pos_info;
 char op_move[6] = "";
 bool newgame;
 
-void * engine()
+void *engine()
 {
     search(&pos_info, engine_color, op_move);
 
@@ -54,21 +54,21 @@ void configure_hash(char *input)
     char hash_value[10] = "";
     int hash_size;
 
-    if(tt != NULL) //free previously allocated main tt if any
+    if (tt != NULL) //free previously allocated main tt if any
     {
         free(tt);
         tt = NULL;
     }
-    if(Evaltt != NULL) //free previously allocated eval tt if any
+    if (Evaltt != NULL) //free previously allocated eval tt if any
     {
         free(Evaltt);
         Evaltt = NULL;
     }
     sscanf(input, "setoption name Hash value %s\n", hash_value); //get the hash size
     hash_size = atoi(hash_value);
-    if(hash_size < 1)
+    if (hash_size < 1)
         hash_size = 1;
-    else if(hash_size > 4096)
+    else if (hash_size > 4096)
         hash_size = 4096;
     HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
@@ -81,12 +81,12 @@ void configure_hash(char *input)
 //some GUIs might not support this command
 void handle_newgame()
 {
-    if(tt == NULL) //default main tt if not set
+    if (tt == NULL) //default main tt if not set
     {
         HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * 24);
         tt = malloc(HASHSIZE * sizeof(struct DataItem));
     }
-    if(Evaltt == NULL) //default eval tt if not set
+    if (Evaltt == NULL) //default eval tt if not set
     {
         EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * 8);
         Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
@@ -110,12 +110,12 @@ void parse_fen(char *position, BOARD *pos)
     int piece_count = 0;
     int x = 0, y = 0;
     clear_board(pos->board);
-    position+=4;
-    
+    position += 4;
+
     //loop through fen
-    while(*position && x < 8)
+    while (*position && x < 8)
     {
-        switch(*position)
+        switch (*position)
         {
             case 'p':
                 pos->board[x][y] = 'p';
@@ -204,19 +204,19 @@ void parse_fen(char *position, BOARD *pos)
     //save number of pieces
     pos->piece_num = piece_count;
     //side to move
-    if(*position == 'w')
+    if (*position == 'w')
         engine_color = -1;
-    else if(*position == 'b')
+    else if (*position == 'b')
         engine_color = 1;
     //castling rights
-    position+=2;
+    position += 2;
     pos->ksb = 0;
     pos->qsb = 0;
     pos->ksw = 0;
     pos->qsw = 0;
-    for(int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
-        switch(*position)
+        switch (*position)
         {
             case 'K':
                 pos->ksw = 1;
@@ -234,19 +234,19 @@ void parse_fen(char *position, BOARD *pos)
                 break;
         }
         position++;
-        if(*position == ' ')
+        if (*position == ' ')
             break;
     }
     //en passant
     position++;
     pos->ep_file = 0;
-    if(*position != '-')
+    if (*position != '-')
     {
         pos->ep_file = *position - 96;
         position++;
     }
     //half move counter
-    position+=2;
+    position += 2;
     sscanf(position, "%s %s", halfmove, fullmove);
     pos->halfmove_counter = atoi(halfmove);
     history_index = pos->halfmove_counter;
@@ -270,15 +270,15 @@ void handle_position(char *input)
     memset(history_log, -1, sizeof(history_log)); //clear history table
 
     //in case the GUI doesn't send ucinewgame command
-    if(!newgame)
+    if (!newgame)
     {
-        if(tt == NULL) //default main tt if not set
+        if (tt == NULL) //default main tt if not set
         {
             HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
             tt = malloc(HASHSIZE * sizeof(struct DataItem));
             clearTT();
         }
-        if(Evaltt == NULL) //default eval tt if not set
+        if (Evaltt == NULL) //default eval tt if not set
         {
             EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
             Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
@@ -292,7 +292,7 @@ void handle_position(char *input)
     }
 
     //parse starting position
-    if((position = strstr(input, "startpos")))
+    if ((position = strstr(input, "startpos")))
     {
         //set the board struct to initial state
         init_board(&pos_info);
@@ -301,19 +301,19 @@ void handle_position(char *input)
         engine_color = -1; //white
     }
     //parse fen notation
-    else if((position = strstr(input, "fen")))
+    else if ((position = strstr(input, "fen")))
     {
         parse_fen(position, &pos_info);
     }
 
     //parse moves
-    if((position = strstr(input, "moves")))
+    if ((position = strstr(input, "moves")))
     {
         move_str = strtok(position, s);
-        while(move_str != NULL) 
+        while (move_str != NULL)
         {
             move_str = strtok(NULL, s);
-            if(move_str != NULL)
+            if (move_str != NULL)
             {
                 memcpy(move, move_str, 6);
                 move[5] = '\0';
@@ -323,7 +323,7 @@ void handle_position(char *input)
                 own_piece = pos_info.board[smove.from / 8][smove.from % 8];
                 op_piece = pos_info.board[smove.to / 8][smove.to % 8];
                 makeMove(&pos_info, &smove);
-                
+
                 //store board hash key into move history
                 history_index++;
                 history_log[history_index] = pos_info.key;
@@ -331,13 +331,13 @@ void handle_position(char *input)
         }
         //get opponent's move for time management
         //only when it's a capture, including en passant
-        if(op_piece != ' ' || (toupper(own_piece) == 'P' && abs(smove.to % 8 - smove.from % 8) == 1))
+        if (op_piece != ' ' || (toupper(own_piece) == 'P' && abs(smove.to % 8 - smove.from % 8) == 1))
         {
             strncpy(op_move, move, 6);
             op_move[5] = '\0';
         }
         //assign color to the engine based on the command from GUI
-        if(islower(own_piece))
+        if (islower(own_piece))
         {
             engine_color = -1; //white
         }
@@ -366,75 +366,75 @@ void handle_go(char *input)
     time_management = false;
 
     //in case tt size is not set
-    if(tt == NULL || Evaltt == NULL)
+    if (tt == NULL || Evaltt == NULL)
     {
         printf("info string Error! Hash table size not set!\n");
         return;
     }
 
     //get remaining time
-    if((pointer = strstr(input, "wtime")))
+    if ((pointer = strstr(input, "wtime")))
     {
         wt = (double)atoi(pointer + 6) / 1000;
     }
 
-    if((pointer = strstr(input, "btime")))
+    if ((pointer = strstr(input, "btime")))
     {
         bt = (double)atoi(pointer + 6) / 1000;
     }
 
     //get increment
-    if((pointer = strstr(input, "winc")))
+    if ((pointer = strstr(input, "winc")))
     {
         winc = (double)atoi(pointer + 5) / 1000;
     }
 
-    if((pointer = strstr(input, "binc")))
+    if ((pointer = strstr(input, "binc")))
     {
         binc = (double)atoi(pointer + 5) / 1000;
     }
 
     //get moves left
-    if((pointer = strstr(input, "movestogo")))
+    if ((pointer = strstr(input, "movestogo")))
     {
         //assume one more move to prevent running out of time
         moves_left = atoi(pointer + 10) + 1;
     }
 
     //mode
-    if((pointer = strstr(input, "ponder")))
+    if ((pointer = strstr(input, "ponder")))
     {
-        if(engine_color == -1)
+        if (engine_color == -1)
         {
             ponder_time = wt / moves_left + 0.9 * winc;
-            if((2 * ponder_time) >= wt) //prevent losing on time
+            if ((2 * ponder_time) >= wt) //prevent losing on time
                 extra_time = false;
         }
-        else if(engine_color == 1)
+        else if (engine_color == 1)
         {
             ponder_time = bt / moves_left + 0.9 * binc;
-            if((2 * ponder_time) >= bt) //prevent losing on time
+            if ((2 * ponder_time) >= bt) //prevent losing on time
                 extra_time = false;
         }
     }
-    else if((pointer = strstr(input, "movetime")))
+    else if ((pointer = strstr(input, "movetime")))
     {
         search_time = (double)atoi(pointer + 9) / 1000;
         extra_time = false;
     }
-    else if((pointer = strstr(input, "depth")))
+    else if ((pointer = strstr(input, "depth")))
     {
         search_depth = atoi(pointer + 6);
         //prevent depth > MAXDETPTH
-        if(search_depth > MAXDEPTH)
+        if (search_depth > MAXDEPTH)
             search_depth = MAXDEPTH;
     }
-    else if((pointer = strstr(input, "nodes")))
+    else if ((pointer = strstr(input, "nodes")))
     {
         search_nodes = atoi(pointer + 6);
         node_mode = true;
     }
-    else if((pointer = strstr(input, "infinite")))
+    else if ((pointer = strstr(input, "infinite")))
     {
         analyze = true;
     }
@@ -443,19 +443,19 @@ void handle_go(char *input)
         //blitz / tournament time control
         //time = time left / moves left + 0.9 * increment
         //if moves left not given, assume 30 moves
-        if(engine_color == -1)
+        if (engine_color == -1)
         {
             search_time = wt / moves_left + 0.9 * winc;
-            if((2 * search_time) >= wt) //prevent losing on time
+            if ((2 * search_time) >= wt) //prevent losing on time
                 extra_time = false;
         }
-        else if(engine_color == 1)
+        else if (engine_color == 1)
         {
             search_time = bt / moves_left + 0.9 * binc;
-            if((2 * search_time) >= bt) //prevent losing on time
+            if ((2 * search_time) >= bt) //prevent losing on time
                 extra_time = false;
         }
-        if(search_time > 0 && outofbook < 5) //think longer when out of book
+        if (search_time > 0 && outofbook < 5) //think longer when out of book
         {
             search_time *= 1.2;
             outofbook++;
@@ -470,7 +470,7 @@ void handle_go(char *input)
     pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
     error = pthread_create(&thread, &tattr, engine, NULL);
 
-    if(error)
+    if (error)
     {
         printf("info string Pthread error occured: %d.\n", error);
         exit(0);
@@ -484,53 +484,53 @@ void uci_loop()
     setbuf(stdout, NULL);
 
     //infinite loop for UCI GUI
-    while(true)
+    while (true)
     {
         memset(&string[0], 0, sizeof(string)); //flush the string
         fflush(stdout); //flush the stdout
-        if(!fgets(string, 4000, stdin))
+        if (!fgets(string, 4000, stdin))
         {
             continue;
         }
         //skip new line
-        if(string[0] == '\n')
+        if (string[0] == '\n')
         {
             continue;
         }
         //listen for command
-        if(!strncmp("isready", string, 7))
+        if (!strncmp("isready", string, 7))
         {
             printf("readyok\n");
         }
-        else if(!strncmp("ucinewgame", string, 10))
+        else if (!strncmp("ucinewgame", string, 10))
         {
             handle_newgame();
         }
-        else if(!strncmp("position", string, 8))
+        else if (!strncmp("position", string, 8))
         {
             handle_position(string);
         }
-        else if(!strncmp("go", string, 2))
+        else if (!strncmp("go", string, 2))
         {
             handle_go(string);
         }
-        else if(!strncmp("uci", string, 3))
+        else if (!strncmp("uci", string, 3))
         {
             handle_uci();
         }
-        else if(!strncmp("stop", string, 4))
+        else if (!strncmp("stop", string, 4))
         {
             stop = true;
         }
-        else if(!strncmp("ponderhit", string, 9))
+        else if (!strncmp("ponderhit", string, 9))
         {
             ponderhit = true;
         }
-        else if(!strncmp("setoption name Hash", string, 19))
+        else if (!strncmp("setoption name Hash", string, 19))
         {
             configure_hash(string);
         }
-        else if(!strncmp("setoption name Clear Hash", string, 25))
+        else if (!strncmp("setoption name Clear Hash", string, 25))
         {
             //clear hash tables 
             clearTT();
@@ -538,23 +538,23 @@ void uci_loop()
             clearPawnTT();
             memset(history, 0, sizeof(history)); //clear history heuristic table
         }
-        else if(!strncmp("quit", string, 4))
+        else if (!strncmp("quit", string, 4))
         {
             stop = true;
-            
+
             #ifdef LINUX
             sleep(1);
             #else
             Sleep(300); //wait till all threads are done
             #endif
-            
+
             //free tts
-            if(tt != NULL)
+            if (tt != NULL)
             {
                 free(tt);
                 tt = NULL;
             }
-            if(Evaltt != NULL)
+            if (Evaltt != NULL)
             {
                 free(Evaltt);
                 Evaltt = NULL;
@@ -575,6 +575,6 @@ int main()
     outofbook = 0;
     newgame = false;
     uci_loop();
-    
+
     return 0;
 }

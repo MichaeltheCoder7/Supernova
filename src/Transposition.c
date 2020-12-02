@@ -20,47 +20,47 @@ unsigned long long qsbcr;
 unsigned long long ep[8];
 long HASHSIZE;
 long EVALHASHSIZE;
-struct DataItem* tt;
-struct Eval* Evaltt;
+struct DataItem *tt;
+struct Eval *Evaltt;
 struct Pawn Pawntt[PAWNHASHSIZE];
 
 inline int piece_code(char piece)
-{ 
-    switch(piece)
+{
+    switch (piece)
     {
         case 'P':
-            return 0; 
+            return 0;
         case 'N':
-            return 1; 
+            return 1;
         case 'B':
-            return 2; 
+            return 2;
         case 'R':
-            return 3; 
-        case 'Q': 
-            return 4; 
-        case 'K': 
-            return 5; 
-        case 'p': 
-            return 6; 
-        case 'n': 
-            return 7; 
-        case 'b': 
-            return 8; 
-        case 'r': 
-            return 9; 
-        case 'q': 
-            return 10; 
+            return 3;
+        case 'Q':
+            return 4;
+        case 'K':
+            return 5;
+        case 'p':
+            return 6;
+        case 'n':
+            return 7;
+        case 'b':
+            return 8;
+        case 'r':
+            return 9;
+        case 'q':
+            return 10;
         case 'k':
-            return 11; 
+            return 11;
         default:
             break;
     }
 
     return -1;
-} 
+}
 
 //return a 64 bit random number
-inline unsigned long long llrand() 
+inline unsigned long long llrand()
 {
     unsigned long long r = 0;
 
@@ -75,16 +75,16 @@ inline unsigned long long llrand()
 inline void init_zobrist()
 {
     //fill a table of random numbers
-    for(int i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++)
     {
-        for(int j = 0; j < 8; j++)
+        for (int j = 0; j < 8; j++)
         {
-            for(int k = 0; k < 12; k++)
-            table[i][j][k] = llrand();
+            for (int k = 0; k < 12; k++)
+                table[i][j][k] = llrand();
         }
     }
     turn = llrand();
-    for(int i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++)
     {
         ep[i] = llrand();
     }
@@ -100,11 +100,11 @@ inline unsigned long long getHash(BOARD *pos, int color)
     unsigned long long h = 0;
     int chess_piece;
 
-    for(int x = 0; x < 8; x++)
+    for (int x = 0; x < 8; x++)
     {
-        for(int y = 0; y < 8; y++)
+        for (int y = 0; y < 8; y++)
         {
-            if(pos->board[x][y] != ' ')
+            if (pos->board[x][y] != ' ')
             {
                 chess_piece = piece_code(pos->board[x][y]);
                 h ^= table[x][y][chess_piece];
@@ -112,29 +112,29 @@ inline unsigned long long getHash(BOARD *pos, int color)
         }
     }
     //encode turn
-    if(color == 1)
+    if (color == 1)
     {
         h ^= turn;
     }
     //encode castling rights
-    if(pos->ksw)
+    if (pos->ksw)
     {
         h ^= kswcr;
     }
-    if(pos->qsw)
+    if (pos->qsw)
     {
         h ^= qswcr;
     }
-    if(pos->ksb)
+    if (pos->ksb)
     {
         h ^= ksbcr;
     }
-    if(pos->qsb)
+    if (pos->qsb)
     {
         h ^= qsbcr;
     }
     //encode en passant
-    switch(pos->ep_file)
+    switch (pos->ep_file)
     {
         case 0:
             break;
@@ -161,7 +161,7 @@ inline unsigned long long getHash(BOARD *pos, int color)
             break;
         case 8:
             pos->key ^= ep[7];
-            break;  
+            break;
     }
 
     return h;
@@ -169,12 +169,12 @@ inline unsigned long long getHash(BOARD *pos, int color)
 
 inline int valueFromTT(int value, int ply)
 {
-    return (value > 19000)? value - ply : (value < -19000)? value + ply : value;
+    return (value > 19000) ? value - ply : (value < -19000) ? value + ply : value;
 }
 
 inline int valueToTT(int value, int ply)
 {
-    return (value > 19000)? value + ply : (value < -19000)? value - ply : value;
+    return (value > 19000) ? value + ply : (value < -19000) ? value - ply : value;
 }
 
 //transposition/hash table:
@@ -184,13 +184,13 @@ inline struct DataItem *probeTT(unsigned long long key)
     //get the hash 
     int hashIndex = key % (HASHSIZE - 1);
 
-    if(tt[hashIndex].flag != EMPTY && tt[hashIndex].key == key)
-    {    
+    if (tt[hashIndex].flag != EMPTY && tt[hashIndex].key == key)
+    {
         tt[hashIndex].age = false;
         return &tt[hashIndex];
     }
-    else if(tt[hashIndex + 1].flag != EMPTY && tt[hashIndex + 1].key == key)
-    {    
+    else if (tt[hashIndex + 1].flag != EMPTY && tt[hashIndex + 1].key == key)
+    {
         tt[hashIndex + 1].age = false;
         return &tt[hashIndex + 1];
     }
@@ -202,13 +202,13 @@ inline struct DataItem *probeTT(unsigned long long key)
 
 inline void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
 {
-    if(stop_search) //don't save when time up
+    if (stop_search) //don't save when time up
         return;
 
     //get the hash 
     int hashIndex = key % (HASHSIZE - 1);
 
-    if(tt[hashIndex].flag == EMPTY || (tt[hashIndex].key == key && tt[hashIndex].depth <= depth) || tt[hashIndex].age == true)
+    if (tt[hashIndex].flag == EMPTY || (tt[hashIndex].key == key && tt[hashIndex].depth <= depth) || tt[hashIndex].age == true)
     {
         tt[hashIndex].key = key;
         tt[hashIndex].evaluation = evaluation;
@@ -218,7 +218,7 @@ inline void storeTT(unsigned long long key, int evaluation, int statEval, int de
         tt[hashIndex].bestmove = *bestmove;
         tt[hashIndex].age = false;
     }
-    else if(tt[hashIndex].key != key && (tt[hashIndex + 1].depth <= depth || tt[hashIndex + 1].age == true))
+    else if (tt[hashIndex].key != key && (tt[hashIndex + 1].depth <= depth || tt[hashIndex + 1].age == true))
     {
         tt[hashIndex + 1].key = key;
         tt[hashIndex + 1].evaluation = evaluation;
@@ -233,7 +233,7 @@ inline void storeTT(unsigned long long key, int evaluation, int statEval, int de
 //set age in tt
 inline void setAge()
 {
-    for(int x = 0; x < HASHSIZE; x++)
+    for (int x = 0; x < HASHSIZE; x++)
     {
         tt[x].age = true;
     }
@@ -242,7 +242,7 @@ inline void setAge()
 //clear the hash table
 inline void clearTT()
 {
-    for(int x = 0; x < HASHSIZE; x++)
+    for (int x = 0; x < HASHSIZE; x++)
     {
         tt[x].key = 0;
         tt[x].depth = 0;
@@ -258,8 +258,8 @@ inline struct Eval *probeEvalTT(unsigned long long key)
 {
     int hashIndex = key % EVALHASHSIZE;
 
-    if(Evaltt[hashIndex].valid == true && Evaltt[hashIndex].key == key)
-    {    
+    if (Evaltt[hashIndex].valid == true && Evaltt[hashIndex].key == key)
+    {
         return &Evaltt[hashIndex];
     }
     else
@@ -279,7 +279,7 @@ inline void storeEvalTT(unsigned long long key, int evaluation)
 
 inline void clearEvalTT()
 {
-    for(int x = 0; x < EVALHASHSIZE; x++)
+    for (int x = 0; x < EVALHASHSIZE; x++)
     {
         Evaltt[x].key = 0;
         Evaltt[x].evaluation = 0;
@@ -292,11 +292,11 @@ inline unsigned long long getPawnHash(char board[8][8])
 {
     unsigned long long h = 0;
 
-    for(int x = 0; x < 8; x++)
+    for (int x = 0; x < 8; x++)
     {
-        for(int y = 0; y < 8; y++)
+        for (int y = 0; y < 8; y++)
         {
-            switch(board[x][y])
+            switch (board[x][y])
             {
                 case 'P':
                     h ^= table[x][y][wP];
@@ -322,9 +322,9 @@ inline unsigned long long getPawnHash(char board[8][8])
 inline struct Pawn *probePawnTT(unsigned long long key)
 {
     int hashIndex = key % PAWNHASHSIZE;
-    
-    if(Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
-    {    
+
+    if (Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
+    {
         return &Pawntt[hashIndex];
     }
     else
@@ -346,7 +346,7 @@ inline void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
 
 inline void clearPawnTT()
 {
-    for(int x = 0; x < PAWNHASHSIZE; x++)
+    for (int x = 0; x < PAWNHASHSIZE; x++)
     {
         Pawntt[x].key = 0;
         Pawntt[x].eval_mg = 0;

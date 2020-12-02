@@ -18,40 +18,40 @@ extern unsigned long long ep[8];
 extern long HASHSIZE;
 extern long EVALHASHSIZE;
 
-struct DataItem 
+struct DataItem
 {
-   unsigned long long key;
-   int evaluation;
-   short statEval;
-   char depth;
-   MOVE bestmove;
-   char flag;
-   bool age;
+    unsigned long long key;
+    int evaluation;
+    short statEval;
+    char depth;
+    MOVE bestmove;
+    char flag;
+    bool age;
 };
 
-struct Eval 
+struct Eval
 {
-   unsigned long long key;   
-   int evaluation;
-   bool valid;
+    unsigned long long key;
+    int evaluation;
+    bool valid;
 };
 
 struct Pawn
 {
-   unsigned long long key;
-   short eval_mg;
-   short eval_eg;
-   bool valid;
+    unsigned long long key;
+    short eval_mg;
+    short eval_eg;
+    bool valid;
 };
 
-extern struct DataItem* tt;
-extern struct Eval* Evaltt;
+extern struct DataItem *tt;
+extern struct Eval *Evaltt;
 extern struct Pawn Pawntt[PAWNHASHSIZE];
 
 int piece_code(char piece);
 
 unsigned long long llrand();
- 
+
 void init_zobrist();
 
 unsigned long long getHash(BOARD *pos, int color);

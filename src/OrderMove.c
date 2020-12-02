@@ -10,20 +10,20 @@
 #include "Move.h"
 
 //swap two ints
-static inline void swap(int* a, int* b)
-{ 
+static inline void swap(int *a, int *b)
+{
     int t = *a;
     *a = *b;
     *b = t;
-} 
+}
 
 //swap two move structs
 static inline void swapMove(MOVE *move1, MOVE *move2)
-{ 
+{
     MOVE temp = *move1;
     *move1 = *move2;
     *move2 = temp;
-} 
+}
 
 //insertion sort
 inline void movesort(MOVE moves[256], int sort[256], int length, int current)
@@ -31,9 +31,9 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
     //find the move with the highest score
     int high = current;
 
-    for(int i = current+1; i < length; i++)
+    for (int i = current + 1; i < length; i++)
     {
-        if(sort[i] > sort[high])
+        if (sort[i] > sort[high])
             high = i;
     }
 
@@ -44,15 +44,15 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
 //find the hash move if it exists and put it at the beginning of the move list to skip it
 inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move, int exist)
 {
-    if(!exist)
+    if (!exist)
     {
         return;
     }
     else
     {
-        for(int x = 0; x < length; x++)
+        for (int x = 0; x < length; x++)
         {
-            if(compareMove(&moves[x], hash_move))
+            if (compareMove(&moves[x], hash_move))
             {
                 sort[x] = HASHMOVE;
                 swap(&sort[0], &sort[x]);
@@ -69,11 +69,11 @@ inline int orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best
 {
     int move_count = 0;
 
-    if(best_move->from != NOMOVE)
+    if (best_move->from != NOMOVE)
     {
-        for(int x = 0; x < length; x++)
+        for (int x = 0; x < length; x++)
         {
-            if(compareMove(&moves[x], best_move))
+            if (compareMove(&moves[x], best_move))
             {
                 sort[x] = BESTMOVE;
                 swap(&sort[0], &sort[x]);
@@ -84,14 +84,14 @@ inline int orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best
         }
     }
 
-    if(hash_move->from != NOMOVE && !compareMove(hash_move, best_move))
+    if (hash_move->from != NOMOVE && !compareMove(hash_move, best_move))
     {
-        for(int x = 0; x < length; x++)
+        for (int x = 0; x < length; x++)
         {
-            if(compareMove(&moves[x], hash_move))
+            if (compareMove(&moves[x], hash_move))
             {
                 sort[x] = HASHMOVE;
-                if(move_count == 0)
+                if (move_count == 0)
                 {
                     swap(&sort[0], &sort[x]);
                     swapMove(&moves[0], &moves[x]);
@@ -116,7 +116,7 @@ inline int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
     int mvv = 0;
     int lva = 0;
 
-    switch(piece)
+    switch (piece)
     {
         case 'P':
             lva = 5;
@@ -138,7 +138,7 @@ inline int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
             break;
     }
 
-    switch(op_piece)
+    switch (op_piece)
     {
         case 'p':
             mvv = 100;
@@ -161,16 +161,16 @@ inline int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
     }
 
     int target = piece_value(op_piece);
-    if(target > piece_value(piece))
+    if (target > piece_value(piece))
     {
         return mvv + lva + WCAPTURE;
     }
 
     int value = SEE_MO(board, x1, y1, x2, y2, target, -1);
-    
-    if(value > 0)
+
+    if (value > 0)
         return mvv + lva + WCAPTURE;
-    else if(value == 0)
+    else if (value == 0)
         return mvv + lva + ECAPTURE;
     else
         return mvv + lva + LCAPTURE;
@@ -181,7 +181,7 @@ inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
     int mvv = 0;
     int lva = 0;
 
-    switch(piece)
+    switch (piece)
     {
         case 'p':
             lva = 5;
@@ -203,7 +203,7 @@ inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
             break;
     }
 
-    switch(op_piece)
+    switch (op_piece)
     {
         case 'P':
             mvv = 100;
@@ -224,18 +224,18 @@ inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
             mvv = 100;
             break;
     }
-    
+
     int target = piece_value(op_piece);
-    if(target > piece_value(piece))
+    if (target > piece_value(piece))
     {
         return mvv + lva + WCAPTURE;
     }
 
     int value = SEE_MO(board, x1, y1, x2, y2, target, 1);
-    
-    if(value > 0)
+
+    if (value > 0)
         return mvv + lva + WCAPTURE;
-    else if(value == 0)
+    else if (value == 0)
         return mvv + lva + ECAPTURE;
     else
         return mvv + lva + LCAPTURE;
@@ -244,23 +244,23 @@ inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
 //quiet move ordering based on killer moves and history heuristic
 inline int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
 {
-    if(compareMove(&killers[ply][0], move))
+    if (compareMove(&killers[ply][0], move))
     {
         return KILLER1;
     }
-    else if(compareMove(&killers[ply][1], move))
+    else if (compareMove(&killers[ply][1], move))
     {
         return KILLER2;
     }
     else
     {
-        return history[(color==1)?1:0][origin][8*x+y];
+        return history[(color == 1) ? 1 : 0][origin][8 * x + y];
     }
 }
 
 inline int piece_value(char piece)
 {
-    switch(piece)
+    switch (piece)
     {
         case 'P':
             return 100;
@@ -299,7 +299,7 @@ inline int wCapQsearch_score(char piece, char op_piece)
     int mvv = 0;
     int lva = 0;
 
-    switch(piece)
+    switch (piece)
     {
         case 'P':
             lva = 5;
@@ -321,7 +321,7 @@ inline int wCapQsearch_score(char piece, char op_piece)
             break;
     }
 
-    switch(op_piece)
+    switch (op_piece)
     {
         case 'p':
             mvv = 100;
@@ -344,7 +344,7 @@ inline int wCapQsearch_score(char piece, char op_piece)
     }
 
     //check if lower takes higher or equal
-    if(piece_value(op_piece) >= piece_value(piece))
+    if (piece_value(op_piece) >= piece_value(piece))
     {
         mvv += 600;
     }
@@ -357,7 +357,7 @@ inline int bCapQsearch_score(char piece, char op_piece)
     int mvv = 0;
     int lva = 0;
 
-    switch(piece)
+    switch (piece)
     {
         case 'p':
             lva = 5;
@@ -379,7 +379,7 @@ inline int bCapQsearch_score(char piece, char op_piece)
             break;
     }
 
-    switch(op_piece)
+    switch (op_piece)
     {
         case 'P':
             mvv = 100;
@@ -402,7 +402,7 @@ inline int bCapQsearch_score(char piece, char op_piece)
     }
 
     //check if lower takes higher or equal
-    if(piece_value(op_piece) >= piece_value(piece))
+    if (piece_value(op_piece) >= piece_value(piece))
     {
         mvv += 600;
     }

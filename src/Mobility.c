@@ -16,24 +16,24 @@ int battack_weight;
 //check if this square is defended by pawns
 static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 {
-    if(x < 6)
+    if (x < 6)
     {
-        switch(y)
+        switch (y)
         {
             case 0:
-                if(board[x+1][y+1] == 'P')
+                if (board[x + 1][y + 1] == 'P')
                 {
                     return true;
                 }
                 break;
             case 7:
-                if(board[x+1][y-1] == 'P')
+                if (board[x + 1][y - 1] == 'P')
                 {
                     return true;
                 }
                 break;
             default:
-                if(board[x+1][y-1] == 'P' || board[x+1][y+1] == 'P')
+                if (board[x + 1][y - 1] == 'P' || board[x + 1][y + 1] == 'P')
                 {
                     return true;
                 }
@@ -46,24 +46,24 @@ static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 
 static inline bool defended_by_bpawn(char board[8][8], int x, int y)
 {
-    if(x > 1)
+    if (x > 1)
     {
-        switch(y)
+        switch (y)
         {
             case 0:
-                if(board[x-1][y+1] == 'p')
+                if (board[x - 1][y + 1] == 'p')
                 {
                     return true;
                 }
                 break;
             case 7:
-                if(board[x-1][y-1] == 'p')
+                if (board[x - 1][y - 1] == 'p')
                 {
                     return true;
                 }
                 break;
             default:
-                if(board[x-1][y-1] == 'p' || board[x-1][y+1] == 'p')
+                if (board[x - 1][y - 1] == 'p' || board[x - 1][y + 1] == 'p')
                 {
                     return true;
                 }
@@ -78,7 +78,7 @@ static inline bool defended_by_bpawn(char board[8][8], int x, int y)
 //including king ring, king's position, and 3 forward positions
 static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
 {
-    if(y >= wkingy-1 && y <= wkingy+1 && x >= wkingx-2 && x <= wkingx+1)
+    if (y >= wkingy - 1 && y <= wkingy + 1 && x >= wkingx - 2 && x <= wkingx + 1)
     {
         return true;
     }
@@ -88,7 +88,7 @@ static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
 
 static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
 {
-    if(y >= bkingy-1 && y <= bkingy+1 && x >= bkingx-1 && x <= bkingx+2)
+    if (y >= bkingy - 1 && y <= bkingy + 1 && x >= bkingx - 1 && x <= bkingx + 2)
     {
         return true;
     }
@@ -108,30 +108,30 @@ inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkin
     int move_count = 0;
     int x, y;
 
-    for(int j = 0; j < 8; j++)
+    for (int j = 0; j < 8; j++)
     {
         x = index_x + knight_moves_x[j];
         y = index_y + knight_moves_y[j];
-        if(x & 8 || y & 8) //out of board
+        if (x & 8 || y & 8) //out of board
         {
             continue;
         }
-        if(board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
-        {  
-            if(!defended_by_bpawn(board, x, y))
+        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
+            if (!defended_by_bpawn(board, x, y))
                 move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
     }
-    if(attack)
+    if (attack)
     {
         wattack_count++;
         wattack_weight += 2 * attack;
     }
-    
+
     return 4 * (move_count - 4);
 }
 
@@ -141,25 +141,25 @@ inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkin
     int move_count = 0;
     int x, y;
 
-    for(int j = 0; j < 8; j++)
+    for (int j = 0; j < 8; j++)
     {
         x = index_x + knight_moves_x[j];
         y = index_y + knight_moves_y[j];
-        if(x & 8 || y & 8) //out of board
+        if (x & 8 || y & 8) //out of board
         {
             continue;
         }
-        if(board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
-            if(!defended_by_wpawn(board, x, y))
+        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
+            if (!defended_by_wpawn(board, x, y))
                 move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
     }
-    if(attack)
+    if (attack)
     {
         battack_count++;
         battack_weight += 2 * attack;
@@ -175,98 +175,98 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
     int x, y;
 
     //up left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y - j;
-        if(x < 0 || y < 0)
+        if (x < 0 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
-        {  
-            if(!defended_by_bpawn(board, x, y))
+        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
+            if (!defended_by_bpawn(board, x, y))
                 move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //up right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y + j;
-        if(x < 0 || y > 7)
+        if (x < 0 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
-        {  
-            if(!defended_by_bpawn(board, x, y))
+        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
+            if (!defended_by_bpawn(board, x, y))
                 move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y - j;
-        if(x > 7 || y < 0)
+        if (x > 7 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
-        {  
-            if(!defended_by_bpawn(board, x, y))
+        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
+            if (!defended_by_bpawn(board, x, y))
                 move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y + j;
-        if(x > 7 || y > 7)
+        if (x > 7 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
-        {  
-            if(!defended_by_bpawn(board, x, y))
+        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
+            if (!defended_by_bpawn(board, x, y))
                 move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
-    if(attack)
+    if (attack)
     {
         wattack_count++;
         wattack_weight += 2 * attack;
@@ -282,98 +282,98 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
     int x, y;
 
     //up left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y - j;
-        if(x < 0 || y < 0)
+        if (x < 0 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
-            if(!defended_by_wpawn(board, x, y))
+        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
+            if (!defended_by_wpawn(board, x, y))
                 move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //up right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y + j;
-        if(x < 0 || y > 7)
+        if (x < 0 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
-            if(!defended_by_wpawn(board, x, y))
+        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
+            if (!defended_by_wpawn(board, x, y))
                 move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y - j;
-        if(x > 7 || y < 0)
+        if (x > 7 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
-            if(!defended_by_wpawn(board, x, y))
+        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
+            if (!defended_by_wpawn(board, x, y))
                 move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y + j;
-        if(x > 7 || y > 7)
+        if (x > 7 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
-            if(!defended_by_wpawn(board, x, y))
+        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
+            if (!defended_by_wpawn(board, x, y))
                 move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
-    if(attack)
+    if (attack)
     {
         battack_count++;
         battack_weight += 2 * attack;
@@ -389,78 +389,78 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     int x, y;
 
     //up
-    for(int j = index_x-1; j >= 0; j--)
+    for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //left
-    for(int j = index_y-1; j >= 0; j--)
+    for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //right
-    for(int j = index_y+1; j <= 7; j++)
+    for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))   
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down
-    for(int j = index_x+1; j <= 7; j++)
+    for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
-    if(attack)
+    if (attack)
     {
         wattack_count++;
         wattack_weight += 3 * attack;
@@ -476,78 +476,78 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     int x, y;
 
     //up
-    for(int j = index_x-1; j >= 0; j--)
-    {  
+    for (int j = index_x - 1; j >= 0; j--)
+    {
         x = j;
         y = index_y;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //left
-    for(int j = index_y-1; j >= 0; j--)
+    for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //right
-    for(int j = index_y+1; j <= 7; j++)
+    for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down
-    for(int j = index_x+1; j <= 7; j++)
+    for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
-    if(attack)
+    if (attack)
     {
         battack_count++;
         battack_weight += 3 * attack;
@@ -561,168 +561,168 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     int attack = 0;
     int move_count = 0;
     int x, y;
-    
+
     //up left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y - j;
-        if(x < 0 || y < 0)
+        if (x < 0 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //up
-    for(int j = index_x-1; j >= 0; j--)
+    for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //up right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y + j;
-        if(x < 0 || y > 7)
+        if (x < 0 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //left
-    for(int j = index_y-1; j >= 0; j--)
+    for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //right
-    for(int j = index_y+1; j <= 7; j++)
+    for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))   
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y - j;
-        if(x > 7 || y < 0)
+        if (x > 7 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down
-    for(int j = index_x+1; j <= 7; j++)
+    for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y + j;
-        if(x > 7 || y > 7)
+        if (x > 7 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' '))) 
-        {  
+        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(bking_zone(bkingx, bkingy, x, y))
+        if (bking_zone(bkingx, bkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
-    if(attack)
+    if (attack)
     {
         wattack_count++;
         wattack_weight += 4 * attack;
@@ -738,166 +738,166 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
     int x, y;
 
     //up left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y - j;
-        if(x < 0 || y < 0)
+        if (x < 0 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //up
-    for(int j = index_x-1; j >= 0; j--)
+    for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //up right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
         y = index_y + j;
-        if(x < 0 || y > 7)
+        if (x < 0 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //left
-    for(int j = index_y-1; j >= 0; j--)
+    for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //right
-    for(int j = index_y+1; j <= 7; j++)
+    for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
         y = j;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down left
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y - j;
-        if(x > 7 || y < 0)
+        if (x > 7 || y < 0)
         {
             break;
         }
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down
-    for(int j = index_x+1; j <= 7; j++)
+    for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
         y = index_y;
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
     //down right
-    for(int j = 1; j <= 7; j++)
+    for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
         y = index_y + j;
-        if(x > 7 || y > 7)
+        if (x > 7 || y > 7)
         {
             break;
         }
-        if(board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
-        {  
+        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        {
             move_count++;
         }
-        if(wking_zone(wkingx, wkingy, x, y))
+        if (wking_zone(wkingx, wkingy, x, y))
         {
             attack++;
         }
-        if(board[x][y] != ' ')
+        if (board[x][y] != ' ')
         {
             break;
         }
     }
-    if(attack)
+    if (attack)
     {
         battack_count++;
         battack_weight += 4 * attack;

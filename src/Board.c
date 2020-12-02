@@ -45,7 +45,7 @@ const char chess_board[8][8] = {
             {'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'},
             {'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'},
 
-            };
+};
 
 //starting piece list
 const int piece_list[12][10] = {
@@ -63,7 +63,7 @@ const int piece_list[12][10] = {
             { d8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bQ
             { e8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bK
 
-            };
+};
 
 const int piece_count[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
 
@@ -78,7 +78,7 @@ const int index_board[64] = {
             0,   1,   2,   3,   4,   5,   6,   7,
             0,   0,   0,   0,   0,   1,   1,   1
 
-            };
+};
 
 void displayboard(char board[8][8])
 {
@@ -86,14 +86,14 @@ void displayboard(char board[8][8])
 
     printf("\n    a   b   c   d   e   f   g   h\n");
     //print the board
-    for(int i = 0; i < 8; i++){
+    for (int i = 0; i < 8; i++) {
         printf("  +---+---+---+---+---+---+---+---+\n");
         printf(" %d", j);
-        for(int k = 0; k < 8; k++){
-            if(k == 7){
+        for (int k = 0; k < 8; k++) {
+            if (k == 7) {
                 printf("| %c |", board[i][k]);
             }
-            else{
+            else {
                 printf("| %c ", board[i][k]);
             }
         }
@@ -108,7 +108,7 @@ void displayboard(char board[8][8])
 //get the x index from a position on the board
 inline int position_to_x(char position[3])
 {
-    switch(position[1])
+    switch (position[1])
     {
         case '8':
             return 0;
@@ -127,14 +127,14 @@ inline int position_to_x(char position[3])
         case '1':
             return 7;
     }
-    
+
     return -1; //when nothing is matched
 }
 
 //get the y index from a position on the board
 inline int position_to_y(char position[3])
 {
-    switch(position[0])
+    switch (position[0])
     {
         case 'a':
             return 0;
@@ -181,7 +181,7 @@ inline void init_board(BOARD *pos)
 inline void clear_board(char board[8][8])
 {
     const char board_reset[8][8] = {
-						
+
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -191,8 +191,8 @@ inline void clear_board(char board[8][8])
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
                 {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
 
-                };
-    
+    };
+
     memcpy(board, board_reset, sizeof(board_reset));
 }
 
@@ -205,12 +205,12 @@ void set_piecelists(BOARD *pos)
     pos->piece_count[bP] = pos->piece_count[bN] = pos->piece_count[bB] = 0;
     pos->piece_count[bR] = pos->piece_count[bQ] = 0;
 
-    for(int x = 0; x < 8; x++)
+    for (int x = 0; x < 8; x++)
     {
-        for(int y = 0; y < 8; y++)
+        for (int y = 0; y < 8; y++)
         {
-            i = 8*x+y;
-            switch(pos->board[x][y])
+            i = 8 * x + y;
+            switch (pos->board[x][y])
             {
                 case 'P':
                     pos->piece_list[wP][pos->piece_count[wP]] = i;
