@@ -2,8 +2,8 @@
 CC = gcc
 SRC = ./src/*.c
 LIBS = -lpthread
-WEXE = ./bin/Supernova_2.3.exe
-LEXE = ./bin/Supernova_2.3_linux
+WEXE = ./bin/Supernova_dev.exe
+LEXE = ./bin/Supernova_dev_linux
 TEXE = ./bin/Supernova_test.exe
 WFLAGS = -std=c99 $(LIBS) -static -flto -Ofast
 LFLAGS = -std=c99 $(LIBS) -O3 -DLINUX
