@@ -1,4 +1,4 @@
-#ifndef EVALUATE_H 
+#ifndef EVALUATE_H
 #define EVALUATE_H
 
 #include "Board.h"

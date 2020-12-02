@@ -1,4 +1,4 @@
-#ifndef EVALHELPERS_H 
+#ifndef EVALHELPERS_H
 #define EVALHELPERS_H
 
 #include <stdbool.h>

@@ -1,4 +1,4 @@
-#ifndef CAPTUREGEN_H 
+#ifndef CAPTUREGEN_H
 #define CAPTUREGEN_H
 
 #include "Board.h"
