@@ -9,7 +9,7 @@
 #include "Search.h"
 #include "Move.h"
 
-//swap two ints
+// swap two ints
 static inline void swap(int *a, int *b)
 {
     int t = *a;
@@ -17,7 +17,7 @@ static inline void swap(int *a, int *b)
     *b = t;
 }
 
-//swap two move structs
+// swap two move structs
 static inline void swapMove(MOVE *move1, MOVE *move2)
 {
     MOVE temp = *move1;
@@ -25,10 +25,10 @@ static inline void swapMove(MOVE *move1, MOVE *move2)
     *move2 = temp;
 }
 
-//insertion sort
+// insertion sort
 inline void movesort(MOVE moves[256], int sort[256], int length, int current)
 {
-    //find the move with the highest score
+    // find the move with the highest score
     int high = current;
 
     for (int i = current + 1; i < length; i++)
@@ -41,7 +41,7 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
     swapMove(&moves[current], &moves[high]);
 }
 
-//find the hash move if it exists and put it at the beginning of the move list to skip it
+// find the hash move if it exists and put it at the beginning of the move list to skip it
 inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move, int exist)
 {
     if (!exist)
@@ -63,8 +63,8 @@ inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_
     }
 }
 
-//assign scores and sort for the best move and hash move at root
-//return number of moves sorted
+// assign scores and sort for the best move and hash move at root
+// return number of moves sorted
 inline int orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best_move, MOVE *hash_move)
 {
     int move_count = 0;
@@ -110,7 +110,7 @@ inline int orderMove_root(MOVE moves[256], int sort[256], int length, MOVE *best
     return move_count;
 }
 
-//order captures with mvv-lva and SEE
+// order captures with mvv-lva and SEE
 inline int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2)
 {
     int mvv = 0;
@@ -241,7 +241,7 @@ inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
         return mvv + lva + LCAPTURE;
 }
 
-//quiet move ordering based on killer moves and history heuristic
+// quiet move ordering based on killer moves and history heuristic
 inline int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
 {
     if (compareMove(&killers[ply][0], move))
@@ -293,7 +293,7 @@ inline int piece_value(char piece)
     }
 }
 
-//capture ordering for qsearch
+// capture ordering for qsearch
 inline int wCapQsearch_score(char piece, char op_piece)
 {
     int mvv = 0;
@@ -343,7 +343,7 @@ inline int wCapQsearch_score(char piece, char op_piece)
             break;
     }
 
-    //check if lower takes higher or equal
+    // check if lower takes higher or equal
     if (piece_value(op_piece) >= piece_value(piece))
     {
         mvv += 600;
@@ -401,7 +401,7 @@ inline int bCapQsearch_score(char piece, char op_piece)
             break;
     }
 
-    //check if lower takes higher or equal
+    // check if lower takes higher or equal
     if (piece_value(op_piece) >= piece_value(piece))
     {
         mvv += 600;

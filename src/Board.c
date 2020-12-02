@@ -33,7 +33,7 @@ black pieces
 white pieces
 */
 
-//starting board
+// starting board
 const char chess_board[8][8] = {
 
             {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'},
@@ -47,21 +47,21 @@ const char chess_board[8][8] = {
 
 };
 
-//starting piece list
+// starting piece list
 const int piece_list[12][10] = {
 
-            { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, //wP
-            { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wN
-            { c1, f1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wB
-            { a1, h1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wR
-            { d1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wQ
-            { e1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //wK
-            { a7, b7, c7, d7, e7, f7, g7, h7, -1, -1 }, //bP
-            { b8, g8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bN
-            { c8, f8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bB
-            { a8, h8, -1, -1, -1, -1, -1, -1, -1, -1 }, //bR
-            { d8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bQ
-            { e8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, //bK
+            { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, // wP
+            { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wN
+            { c1, f1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wB
+            { a1, h1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wR
+            { d1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wQ
+            { e1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wK
+            { a7, b7, c7, d7, e7, f7, g7, h7, -1, -1 }, // bP
+            { b8, g8, -1, -1, -1, -1, -1, -1, -1, -1 }, // bN
+            { c8, f8, -1, -1, -1, -1, -1, -1, -1, -1 }, // bB
+            { a8, h8, -1, -1, -1, -1, -1, -1, -1, -1 }, // bR
+            { d8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // bQ
+            { e8, -1, -1, -1, -1, -1, -1, -1, -1, -1 }, // bK
 
 };
 
@@ -82,10 +82,10 @@ const int index_board[64] = {
 
 void displayboard(char board[8][8])
 {
-    int j = 8; //row numbers
+    int j = 8; // row numbers
 
     printf("\n    a   b   c   d   e   f   g   h\n");
-    //print the board
+    // print the board
     for (int i = 0; i < 8; i++)
     {
         printf("  +---+---+---+---+---+---+---+---+\n");
@@ -105,7 +105,7 @@ void displayboard(char board[8][8])
     printf("    a   b   c   d   e   f   g   h\n\n");
 }
 
-//get the x index from a position on the board
+// get the x index from a position on the board
 inline int position_to_x(char position[3])
 {
     switch (position[1])
@@ -128,10 +128,10 @@ inline int position_to_x(char position[3])
             return 7;
     }
 
-    return -1; //when nothing is matched
+    return -1; // when nothing is matched
 }
 
-//get the y index from a position on the board
+// get the y index from a position on the board
 inline int position_to_y(char position[3])
 {
     switch (position[0])
@@ -157,16 +157,16 @@ inline int position_to_y(char position[3])
     return -1;
 }
 
-//initialize board struct to starting position
+// initialize board struct to starting position
 inline void init_board(BOARD *pos)
 {
     memcpy(pos->board, chess_board, sizeof(pos->board));
-    //set the castling flags
+    // set the castling flags
     pos->ksb = 1;
     pos->qsb = 1;
     pos->ksw = 1;
     pos->qsw = 1;
-    //set en passant files
+    // set en passant files
     pos->ep_file = 0;
     pos->halfmove_counter = 0;
     pos->piece_num = 32;
@@ -196,7 +196,7 @@ inline void clear_board(char board[8][8])
     memcpy(board, board_reset, sizeof(board_reset));
 }
 
-//set piece lists based on the position
+// set piece lists based on the position
 void set_piecelists(BOARD *pos)
 {
     int i;

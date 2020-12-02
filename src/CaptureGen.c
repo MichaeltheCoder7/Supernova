@@ -11,8 +11,8 @@
 #include "Board.h"
 #include "Move.h"
 
-//generate captures and queen promotion
-//generate scores for each move
+// generate captures and queen promotion
+// generate scores for each move
 int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
 {
     int index = 0;
@@ -23,10 +23,10 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
 
     switch (color)
     {
-        //black pieces
+        // black pieces
         case 1:
         {
-            //pawn
+            // pawn
             for (int i = 0; i < pos->piece_count[bP]; i++)
             {
                 origin = pos->piece_list[bP][i];
@@ -37,12 +37,12 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x + 1) + index_y - 1;
                     sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y - 1]);
-                    //capture + promotion
+                    // capture + promotion
                     if (index_x == 6)
                         sort[index] += 500;
                     index++;
                 }
-                //promotion
+                // promotion
                 if (index_x == 6 && pos->board[7][index_y] == ' ')
                 {
                     all_moves[index].from = origin;
@@ -55,13 +55,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x + 1) + index_y + 1;
                     sort[index] = bCapQsearch_score('p', pos->board[index_x + 1][index_y + 1]);
-                    //capture + promotion
+                    // capture + promotion
                     if (index_x == 6)
                         sort[index] += 500;
                     index++;
                 }
             }
-            //knight
+            // knight
             for (int i = 0; i < pos->piece_count[bN]; i++)
             {
                 origin = pos->piece_list[bN][i];
@@ -71,7 +71,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 {
                     x = index_x + knight_moves_x[j];
                     y = index_y + knight_moves_y[j];
-                    if (x & 8 || y & 8) //skip when out of board
+                    if (x & 8 || y & 8) // skip when out of board
                     {
                         continue;
                     }
@@ -84,13 +84,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //bishop
+            // bishop
             for (int i = 0; i < pos->piece_count[bB]; i++)
             {
                 origin = pos->piece_list[bB][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -111,7 +111,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -132,7 +132,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -153,7 +153,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -175,13 +175,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //rook
+            // rook
             for (int i = 0; i < pos->piece_count[bR]; i++)
             {
                 origin = pos->piece_list[bR][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (isWhitePiece(pos->board[j][index_y]))
@@ -196,7 +196,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (isWhitePiece(pos->board[index_x][j]))
@@ -211,7 +211,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (isWhitePiece(pos->board[index_x][j]))
@@ -226,7 +226,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (isWhitePiece(pos->board[j][index_y]))
@@ -242,13 +242,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //queen
+            // queen
             for (int i = 0; i < pos->piece_count[bQ]; i++)
             {
                 origin = pos->piece_list[bQ][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -269,7 +269,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (isWhitePiece(pos->board[j][index_y]))
@@ -284,7 +284,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -305,7 +305,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (isWhitePiece(pos->board[index_x][j]))
@@ -320,7 +320,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (isWhitePiece(pos->board[index_x][j]))
@@ -335,7 +335,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -356,7 +356,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (isWhitePiece(pos->board[j][index_y]))
@@ -371,7 +371,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -393,7 +393,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //king
+            // king
             origin = pos->piece_list[bK][0];
             index_x = origin / 8;
             index_y = origin % 8;
@@ -401,7 +401,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
             {
                 x = index_x + king_moves_x[j];
                 y = index_y + king_moves_y[j];
-                if (x & 8 || y & 8) //skip when out of board
+                if (x & 8 || y & 8) // skip when out of board
                 {
                     continue;
                 }
@@ -415,10 +415,10 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
             }
             break;
         }
-        //white pieces
+        // white pieces
         case -1:
         {
-            //pawn
+            // pawn
             for (int i = 0; i < pos->piece_count[wP]; i++)
             {
                 origin = pos->piece_list[wP][i];
@@ -429,12 +429,12 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x - 1) + index_y - 1;
                     sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y - 1]);
-                    //capture + promotion
+                    // capture + promotion
                     if (index_x == 1)
                         sort[index] += 500;
                     index++;
                 }
-                //promotion
+                // promotion
                 if (index_x == 1 && pos->board[0][index_y] == ' ')
                 {
                     all_moves[index].from = origin;
@@ -447,13 +447,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x - 1) + index_y + 1;
                     sort[index] = wCapQsearch_score('P', pos->board[index_x - 1][index_y + 1]);
-                    //capture + promotion
+                    // capture + promotion
                     if (index_x == 1)
                         sort[index] += 500;
                     index++;
                 }
             }
-            //knight
+            // knight
             for (int i = 0; i < pos->piece_count[wN]; i++)
             {
                 origin = pos->piece_list[wN][i];
@@ -463,7 +463,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 {
                     x = index_x + knight_moves_x[j];
                     y = index_y + knight_moves_y[j];
-                    if (x & 8 || y & 8) //skip when out of board
+                    if (x & 8 || y & 8) // skip when out of board
                     {
                         continue;
                     }
@@ -476,13 +476,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //bishop
+            // bishop
             for (int i = 0; i < pos->piece_count[wB]; i++)
             {
                 origin = pos->piece_list[wB][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -503,7 +503,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -524,7 +524,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -545,7 +545,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -567,13 +567,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //rook
+            // rook
             for (int i = 0; i < pos->piece_count[wR]; i++)
             {
                 origin = pos->piece_list[wR][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (isBlackPiece(pos->board[j][index_y]))
@@ -588,7 +588,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (isBlackPiece(pos->board[index_x][j]))
@@ -603,7 +603,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (isBlackPiece(pos->board[index_x][j]))
@@ -618,7 +618,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (isBlackPiece(pos->board[j][index_y]))
@@ -634,13 +634,13 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //queen
+            // queen
             for (int i = 0; i < pos->piece_count[wQ]; i++)
             {
                 origin = pos->piece_list[wQ][i];
                 index_x = pos->piece_list[wQ][i] / 8;
                 index_y = pos->piece_list[wQ][i] % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -661,7 +661,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (isBlackPiece(pos->board[j][index_y]))
@@ -676,7 +676,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -697,7 +697,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (isBlackPiece(pos->board[index_x][j]))
@@ -712,7 +712,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (isBlackPiece(pos->board[index_x][j]))
@@ -727,7 +727,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -748,7 +748,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (isBlackPiece(pos->board[j][index_y]))
@@ -763,7 +763,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -785,7 +785,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
-            //king
+            // king
             origin = pos->piece_list[wK][0];
             index_x = origin / 8;
             index_y = origin % 8;
@@ -793,7 +793,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
             {
                 x = index_x + king_moves_x[j];
                 y = index_y + king_moves_y[j];
-                if (x & 8 || y & 8) //skip when out of board
+                if (x & 8 || y & 8) // skip when out of board
                 {
                     continue;
                 }

@@ -21,8 +21,8 @@ static const int SafetyTable[100] = {
 
 };
 
-//piece-square tables:
-//add bonus points based on position
+// piece-square tables:
+// add bonus points based on position
 static const int white_pawn_midgame[8][8] = {
 
                     {  0,   0,	 0,   0,   0,   0,   0,	  0 },
@@ -128,7 +128,7 @@ static const int white_king_endgame[8][8] = {
 
 };
 
-//for black:
+// for black:
 static const int black_pawn_midgame[8][8] = {
 
                     {  0,   0,	 0,   0,   0,	0,   0,	  0 },

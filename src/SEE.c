@@ -8,20 +8,20 @@
 #include "Move.h"
 #include "OrderMove.h"
 
-//1: white attackers
-//-1: black attackers
-//x and y are the indices of the board
-//return index 0 - 63 of the smallest attacker on the board
-//return -1 if not attacked
+// 1: white attackers
+// -1: black attackers
+// x and y are the indices of the board
+// return index 0 - 63 of the smallest attacker on the board
+// return -1 if not attacked
 static int get_smallest_attacker(char board[8][8], int x, int y, int color)
 {
-    int attackers_index[2] = { -2, -2 }; //for queen and king
+    int attackers_index[2] = { -2, -2 }; // for queen and king
 
     switch (color)
     {
         case 1:
         {
-            //pawn attack
+            // pawn attack
             if (x + 1 <= 7 && y - 1 >= 0)
             {
                 if (board[x + 1][y - 1] == 'P')
@@ -36,7 +36,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     return 8 * (x + 1) + (y + 1);
                 }
             }
-            //knight attacks
+            // knight attacks
             if (x + 2 <= 7 && y + 1 <= 7)
             {
                 if (board[x + 2][y + 1] == 'N')
@@ -77,7 +77,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 if (board[x - 1][y - 2] == 'N')
                     return 8 * (x - 1) + (y - 2);
             }
-            //down left
+            // down left
             for (int i = 1; i <= 7; i++)
             {
                 if (x + i > 7 || y - i < 0)
@@ -101,7 +101,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //down right
+            // down right
             for (int i = 1; i <= 7; i++)
             {
                 if (x + i > 7 || y + i > 7)
@@ -125,7 +125,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //up left
+            // up left
             for (int i = 1; i <= 7; i++)
             {
                 if (x - i < 0 || y - i < 0)
@@ -149,7 +149,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //up right
+            // up right
             for (int i = 1; i <= 7; i++)
             {
                 if (x - i < 0 || y + i > 7)
@@ -173,7 +173,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //down
+            // down
             for (int i = x + 1; i <= 7; i++)
             {
                 if (board[i][y] != ' ')
@@ -193,7 +193,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //left
+            // left
             for (int i = y - 1; i >= 0; i--)
             {
                 if (board[x][i] != ' ')
@@ -214,7 +214,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //right
+            // right
             for (int i = y + 1; i <= 7; i++)
             {
                 if (board[x][i] != ' ')
@@ -234,7 +234,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //up
+            // up
             for (int i = x - 1; i >= 0; i--)
             {
                 if (board[i][y] != ' ')
@@ -258,7 +258,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
         }
         case -1:
         {
-            //pawn attack
+            // pawn attack
             if (x - 1 >= 0 && y - 1 >= 0)
             {
                 if (board[x - 1][y - 1] == 'p')
@@ -273,7 +273,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     return 8 * (x - 1) + (y + 1);
                 }
             }
-            //knight attacks
+            // knight attacks
             if (x - 2 >= 0 && y + 1 <= 7)
             {
                 if (board[x - 2][y + 1] == 'n')
@@ -314,7 +314,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 if (board[x + 1][y - 2] == 'n')
                     return 8 * (x + 1) + (y - 2);
             }
-            //up left
+            // up left
             for (int i = 1; i <= 7; i++)
             {
                 if (x - i < 0 || y - i < 0)
@@ -338,7 +338,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //up right
+            // up right
             for (int i = 1; i <= 7; i++)
             {
                 if (x - i < 0 || y + i > 7)
@@ -362,7 +362,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //down left
+            // down left
             for (int i = 1; i <= 7; i++)
             {
                 if (x + i > 7 || y - i < 0)
@@ -386,7 +386,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //down right
+            // down right
             for (int i = 1; i <= 7; i++)
             {
                 if (x + i > 7 || y + i > 7)
@@ -410,7 +410,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //up
+            // up
             for (int i = x - 1; i >= 0; i--)
             {
                 if (board[i][y] != ' ')
@@ -430,7 +430,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //left
+            // left
             for (int i = y - 1; i >= 0; i--)
             {
                 if (board[x][i] != ' ')
@@ -451,7 +451,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //right
+            // right
             for (int i = y + 1; i <= 7; i++)
             {
                 if (board[x][i] != ' ')
@@ -471,7 +471,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
-            //down
+            // down
             for (int i = x + 1; i <= 7; i++)
             {
                 if (board[i][y] != ' ')
@@ -507,11 +507,11 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
     return -1;
 }
 
-//static exchange evaluation for quiescence search
+// static exchange evaluation for quiescence search
 inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 {
     int attacker_index = get_smallest_attacker(board, new_x, new_y, color);
-    //exit if no attackers found
+    // exit if no attackers found
     if (attacker_index == -1)
         return target;
     char board_copy[8][8];
@@ -526,7 +526,7 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
     do
     {
         d++;
-        //convert indices to 2D
+        // convert indices to 2D
         x = attacker_index / 8;
         y = attacker_index % 8;
 
@@ -534,12 +534,12 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
             king_attack = true;
 
         piece = board_copy[new_x][new_y];
-        //make the capture
+        // make the capture
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         color = -color;
         attacker_index = get_smallest_attacker(board_copy, new_x, new_y, color);
 
-        //stop when king is captured
+        // stop when king is captured
         if (king_attack && attacker_index != -1)
         {
             gain[d] = -gain[d - 1];
@@ -548,7 +548,7 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 
         gain[d] = piece_value(piece) - gain[d - 1];
 
-        //pruning that won't change the sign of the result
+        // pruning that won't change the sign of the result
         if (((-gain[d - 1] >= gain[d]) ? -gain[d - 1] : gain[d]) < 0)
         {
             gain[d] = -gain[d - 1];
@@ -566,7 +566,7 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
     return gain[0];
 }
 
-//static exchange evaluation for move ordering
+// static exchange evaluation for move ordering
 inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int target, int color)
 {
     char board_copy[8][8];
@@ -587,19 +587,19 @@ inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, 
         if (toupper(board_copy[x][y]) == 'K')
             king_attack = true;
 
-        //pruning
+        // pruning
         if (((-gain[d - 1] >= gain[d]) ? -gain[d - 1] : gain[d]) < 0)
         {
             if (!king_attack)
                 break;
         }
 
-        //make the capture
+        // make the capture
         makeMove_SEE(board_copy, x, y, new_x, new_y);
         attacker_index = get_smallest_attacker(board_copy, new_x, new_y, color);
         color = -color;
 
-        //stop when king is captured
+        // stop when king is captured
         if (king_attack && attacker_index != -1)
         {
             d--;
@@ -608,7 +608,7 @@ inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, 
             break;
         }
 
-        //convert indices to 2D
+        // convert indices to 2D
         x = attacker_index / 8;
         y = attacker_index % 8;
 

@@ -59,7 +59,7 @@ inline int piece_code(char piece)
     return -1;
 }
 
-//return a 64 bit random number
+// return a 64 bit random number
 inline unsigned long long llrand()
 {
     unsigned long long r = 0;
@@ -71,10 +71,10 @@ inline unsigned long long llrand()
     return r & 0xFFFFFFFFFFFFFFFFULL;
 }
 
-//initialize zobrist hashing:
+// initialize zobrist hashing:
 inline void init_zobrist()
 {
-    //fill a table of random numbers
+    // fill a table of random numbers
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -94,7 +94,7 @@ inline void init_zobrist()
     qsbcr = llrand();
 }
 
-//use zobrist hashing to encode chess board
+// use zobrist hashing to encode chess board
 inline unsigned long long getHash(BOARD *pos, int color)
 {
     unsigned long long h = 0;
@@ -111,12 +111,12 @@ inline unsigned long long getHash(BOARD *pos, int color)
             }
         }
     }
-    //encode turn
+    // encode turn
     if (color == 1)
     {
         h ^= turn;
     }
-    //encode castling rights
+    // encode castling rights
     if (pos->ksw)
     {
         h ^= kswcr;
@@ -133,7 +133,7 @@ inline unsigned long long getHash(BOARD *pos, int color)
     {
         h ^= qsbcr;
     }
-    //encode en passant
+    // encode en passant
     switch (pos->ep_file)
     {
         case 0:
@@ -177,11 +177,11 @@ inline int valueToTT(int value, int ply)
     return (value > 19000) ? value + ply : (value < -19000) ? value - ply : value;
 }
 
-//transposition/hash table:
-//+1 index for collision
+// transposition/hash table:
+// +1 index for collision
 inline struct DataItem *probeTT(unsigned long long key)
 {
-    //get the hash 
+    // get the hash 
     int hashIndex = key % (HASHSIZE - 1);
 
     if (tt[hashIndex].flag != EMPTY && tt[hashIndex].key == key)
@@ -202,10 +202,10 @@ inline struct DataItem *probeTT(unsigned long long key)
 
 inline void storeTT(unsigned long long key, int evaluation, int statEval, int depth, MOVE *bestmove, int flag)
 {
-    if (stop_search) //don't save when time up
+    if (stop_search) // don't save when time up
         return;
 
-    //get the hash 
+    // get the hash 
     int hashIndex = key % (HASHSIZE - 1);
 
     if (tt[hashIndex].flag == EMPTY || (tt[hashIndex].key == key && tt[hashIndex].depth <= depth) || tt[hashIndex].age == true)
@@ -230,7 +230,7 @@ inline void storeTT(unsigned long long key, int evaluation, int statEval, int de
     }
 }
 
-//set age in tt
+// set age in tt
 inline void setAge()
 {
     for (int x = 0; x < HASHSIZE; x++)
@@ -239,7 +239,7 @@ inline void setAge()
     }
 }
 
-//clear the hash table
+// clear the hash table
 inline void clearTT()
 {
     for (int x = 0; x < HASHSIZE; x++)
@@ -287,7 +287,7 @@ inline void clearEvalTT()
     }
 }
 
-//include king positions
+// include king positions
 inline unsigned long long getPawnHash(char board[8][8])
 {
     unsigned long long h = 0;

@@ -7,7 +7,7 @@
 #include "CheckMove.h"
 #include "Attack.h"
 
-//exclude kings
+// exclude kings
 inline int isWhitePiece(char piece)
 {
     switch (piece)
@@ -70,18 +70,18 @@ inline int isBlackPiece_withKing(char piece)
     return 0;
 }
 
-//1 for legal move, 0 for illegal move
-//captures for white pawn
+// 1 for legal move, 0 for illegal move
+// captures for white pawn
 inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 {
     if (pos->board[new_x][new_y] == ' ')
     {
-        if (pos->ep_file == new_y + 1 && new_x == 2) //en passant
+        if (pos->ep_file == new_y + 1 && new_x == 2) // en passant
         {
             return 1;
         }
     }
-    else if (isBlackPiece(pos->board[new_x][new_y])) //capture
+    else if (isBlackPiece(pos->board[new_x][new_y])) // capture
     {
         return 1;
     }
@@ -89,17 +89,17 @@ inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
     return 0;
 }
 
-//captures for black pawn
+// captures for black pawn
 inline int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
 {
     if (pos->board[new_x][new_y] == ' ')
     {
-        if (pos->ep_file == new_y + 1 && new_x == 5) //en passant
+        if (pos->ep_file == new_y + 1 && new_x == 5) // en passant
         {
             return 1;
         }
     }
-    else if (isWhitePiece(pos->board[new_x][new_y])) //capture
+    else if (isWhitePiece(pos->board[new_x][new_y])) // capture
     {
         return 1;
     }
@@ -107,16 +107,16 @@ inline int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
     return 0;
 }
 
-//king side castling for white king
+// king side castling for white king
 inline int CheckMove_wkingside(BOARD *pos)
 {
-    //check if king and rook have been moved
+    // check if king and rook have been moved
     if (pos->ksw)
     {
-        //check if positions between king and rook are empty
+        // check if positions between king and rook are empty
         if (pos->board[7][5] == ' ' && pos->board[7][6] == ' ')
         {
-            //check if king is in check and the two other spots are threatened
+            // check if king is in check and the two other spots are threatened
             if (!ifCheck(pos, -1) && !isThreatened(pos->board, 7, 5, -1) && !isThreatened(pos->board, 7, 6, -1))
             {
                 return 1;
@@ -127,16 +127,16 @@ inline int CheckMove_wkingside(BOARD *pos)
     return 0;
 }
 
-//queen side castling for white king
+// queen side castling for white king
 inline int CheckMove_wqueenside(BOARD *pos)
 {
-    //check if king and rook have been moved
+    // check if king and rook have been moved
     if (pos->qsw)
     {
-        //check if positions between king and rook are empty
+        // check if positions between king and rook are empty
         if (pos->board[7][1] == ' ' && pos->board[7][2] == ' ' && pos->board[7][3] == ' ')
         {
-            //check if king is in check and the two other spots are threatened
+            // check if king is in check and the two other spots are threatened
             if (!ifCheck(pos, -1) && !isThreatened(pos->board, 7, 2, -1) && !isThreatened(pos->board, 7, 3, -1))
             {
                 return 1;
@@ -147,16 +147,16 @@ inline int CheckMove_wqueenside(BOARD *pos)
     return 0;
 }
 
-//king side castling for black king
+// king side castling for black king
 inline int CheckMove_bkingside(BOARD *pos)
 {
-    //check if king and rook have been moved
+    // check if king and rook have been moved
     if (pos->ksb)
     {
-        //check if positions between king and rook are empty
+        // check if positions between king and rook are empty
         if (pos->board[0][5] == ' ' && pos->board[0][6] == ' ')
         {
-            //check if king is in check and the two other spots are threatened
+            // check if king is in check and the two other spots are threatened
             if (!ifCheck(pos, 1) && !isThreatened(pos->board, 0, 5, 1) && !isThreatened(pos->board, 0, 6, 1))
             {
                 return 1;
@@ -167,16 +167,16 @@ inline int CheckMove_bkingside(BOARD *pos)
     return 0;
 }
 
-//queen side castling for black king
+// queen side castling for black king
 inline int CheckMove_bqueenside(BOARD *pos)
 {
-    //check if king and rook have been moved
+    // check if king and rook have been moved
     if (pos->qsb)
     {
-        //check if positions between king and rook are empty
+        // check if positions between king and rook are empty
         if (pos->board[0][1] == ' ' && pos->board[0][2] == ' ' && pos->board[0][3] == ' ')
         {
-            //check if king is in check and the two other spots are threatened
+            // check if king is in check and the two other spots are threatened
             if (!ifCheck(pos, 1) && !isThreatened(pos->board, 0, 2, 1) && !isThreatened(pos->board, 0, 3, 1))
             {
                 return 1;
@@ -187,12 +187,12 @@ inline int CheckMove_bqueenside(BOARD *pos)
     return 0;
 }
 
-//for sliders, check if a square in the route is occupied
+// for sliders, check if a square in the route is occupied
 static inline int isOccupied_rook(char board[8][8], int index_x, int index_y, int new_x, int new_y)
 {
     if (index_x == new_x)
     {
-        //left
+        // left
         if (index_y > new_y)
         {
             for (int i = index_y - 1; i > new_y; i--)
@@ -203,7 +203,7 @@ static inline int isOccupied_rook(char board[8][8], int index_x, int index_y, in
                 }
             }
         }
-        //right
+        // right
         else if (index_y < new_y)
         {
             for (int i = index_y + 1; i < new_y; i++)
@@ -217,7 +217,7 @@ static inline int isOccupied_rook(char board[8][8], int index_x, int index_y, in
     }
     else if (index_y == new_y)
     {
-        //up
+        // up
         if (index_x > new_x)
         {
             for (int i = index_x - 1; i > new_x; i--)
@@ -228,7 +228,7 @@ static inline int isOccupied_rook(char board[8][8], int index_x, int index_y, in
                 }
             }
         }
-        //down
+        // down
         else if (index_x < new_x)
         {
             for (int i = index_x + 1; i < new_x; i++)
@@ -248,7 +248,7 @@ static inline int isOccupied_bishop(char board[8][8], int index_x, int index_y, 
 {
     if (index_x > new_x)
     {
-        //up left
+        // up left
         if (index_y > new_y)
         {
             for (int i = index_x - new_x - 1; i > 0; i--)
@@ -259,7 +259,7 @@ static inline int isOccupied_bishop(char board[8][8], int index_x, int index_y, 
                 }
             }
         }
-        //up right
+        // up right
         else if (index_y < new_y)
         {
             for (int i = index_x - new_x - 1; i > 0; i--)
@@ -273,7 +273,7 @@ static inline int isOccupied_bishop(char board[8][8], int index_x, int index_y, 
     }
     else if (index_x < new_x)
     {
-        //down left
+        // down left
         if (index_y > new_y)
         {
             for (int i = new_x - index_x - 1; i > 0; i--)
@@ -284,7 +284,7 @@ static inline int isOccupied_bishop(char board[8][8], int index_x, int index_y, 
                 }
             }
         }
-        //down right
+        // down right
         else if (index_y < new_y)
         {
             for (int i = new_x - index_x - 1; i > 0; i--)
@@ -304,7 +304,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
 {
     if (index_x > new_x)
     {
-        //up left
+        // up left
         if (index_y > new_y)
         {
             for (int i = index_x - new_x - 1; i > 0; i--)
@@ -315,7 +315,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
                 }
             }
         }
-        //up right
+        // up right
         else if (index_y < new_y)
         {
             for (int i = index_x - new_x - 1; i > 0; i--)
@@ -326,7 +326,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
                 }
             }
         }
-        //up
+        // up
         else if (index_y == new_y)
         {
             for (int i = index_x - 1; i > new_x; i--)
@@ -340,7 +340,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
     }
     else if (index_x < new_x)
     {
-        //down left
+        // down left
         if (index_y > new_y)
         {
             for (int i = new_x - index_x - 1; i > 0; i--)
@@ -351,7 +351,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
                 }
             }
         }
-        //down right
+        // down right
         else if (index_y < new_y)
         {
             for (int i = new_x - index_x - 1; i > 0; i--)
@@ -362,7 +362,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
                 }
             }
         }
-        //down
+        // down
         else if (index_y == new_y)
         {
             for (int i = index_x + 1; i < new_x; i++)
@@ -376,7 +376,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
     }
     else if (index_x == new_x)
     {
-        //left
+        // left
         if (index_y > new_y)
         {
             for (int i = index_y - 1; i > new_y; i--)
@@ -387,7 +387,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
                 }
             }
         }
-        //right
+        // right
         else if (index_y < new_y)
         {
             for (int i = index_y + 1; i < new_y; i++)
@@ -403,7 +403,7 @@ static inline int isOccupied_queen(char board[8][8], int index_x, int index_y, i
     return 0;
 }
 
-//check if this move is pseudo-legal
+// check if this move is pseudo-legal
 int isPseudoLegal(BOARD *pos, MOVE *move, int color)
 {
     int cur_64 = move->from;
@@ -415,14 +415,14 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
     char piece = pos->board[cur_x][cur_y];
     char op_piece = pos->board[new_x][new_y];
 
-    //quick check
-    //illegal if move a piece that is not ours or attack our pieces or attack enemy king
-    if (color == 1) //black
+    // quick check
+    // illegal if move a piece that is not ours or attack our pieces or attack enemy king
+    if (color == 1) // black
     {
         if (!isBlackPiece_withKing(piece) || isBlackPiece_withKing(op_piece) || op_piece == 'K')
             return 0;
     }
-    else //white
+    else // white
     {
         if (!isWhitePiece_withKing(piece) || isWhitePiece_withKing(op_piece) || op_piece == 'k')
             return 0;
@@ -446,13 +446,13 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
             }
             else if ((new_x == cur_x - 1 && new_y == cur_y + 1) || (new_x == cur_x - 1 && new_y == cur_y - 1))
             {
-                //en passant
+                // en passant
                 if (op_piece == ' ')
                 {
                     if (pos->ep_file == new_y + 1 && new_x == 2)
                         return 1;
                 }
-                else //capture
+                else // capture
                 {
                     return 1;
                 }
@@ -474,13 +474,13 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
             }
             else if ((new_x == cur_x + 1 && new_y == cur_y + 1) || (new_x == cur_x + 1 && new_y == cur_y - 1))
             {
-                //en passant
+                // en passant
                 if (op_piece == ' ')
                 {
                     if (pos->ep_file == new_y + 1 && new_x == 5)
                         return 1;
                 }
-                else //capture
+                else // capture
                 {
                     return 1;
                 }
@@ -522,7 +522,7 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
             }
             break;
         case 'K':
-            //castling
+            // castling
             if (cur_64 == e1 && new_64 == g1)
             {
                 if (CheckMove_wkingside(pos))
@@ -534,13 +534,13 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
                     return 1;
             }
             else if ((abs(cur_x - new_x) == 1 && abs(cur_y - new_y) == 1) || (abs(cur_x - new_x) == 1 && cur_y == new_y)
-                || (cur_x == new_x && abs(cur_y - new_y) == 1)) //normal move
+                || (cur_x == new_x && abs(cur_y - new_y) == 1)) // normal move
             {
                 return 1;
             }
             break;
         case 'k':
-            //castling
+            // castling
             if (cur_64 == e8 && new_64 == g8)
             {
                 if (CheckMove_bkingside(pos))
@@ -552,7 +552,7 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
                     return 1;
             }
             else if ((abs(cur_x - new_x) == 1 && abs(cur_y - new_y) == 1) || (abs(cur_x - new_x) == 1 && cur_y == new_y)
-                || (cur_x == new_x && abs(cur_y - new_y) == 1)) //normal move
+                || (cur_x == new_x && abs(cur_y - new_y) == 1)) // normal move
             {
                 return 1;
             }

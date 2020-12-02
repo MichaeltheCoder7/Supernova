@@ -24,14 +24,14 @@
 #define ASWINDOW    50
 #define INFINITE    20000
 
-//global variables:
+// global variables:
 int nodes;
 struct timeval starting_time;
 char BestMove[6];
 MOVE searched_move;
 char pv_table[MAXDEPTH][6];
 
-//global variables in header
+// global variables in header
 unsigned long long history_log[800];
 int history_index;
 bool stop;
@@ -48,19 +48,19 @@ bool node_mode;
 int search_nodes;
 bool stop_search;
 
-//save killer moves
+// save killer moves
 static inline void saveKiller(MOVE move, int ply)
 {
-    //make sure killer moves are different
+    // make sure killer moves are different
     if (!compareMove(&killers[ply][0], &move))
     {
         killers[ply][1] = killers[ply][0];
     }
-    //save killer move
+    // save killer move
     killers[ply][0] = move;
 }
 
-//clear killer moves table
+// clear killer moves table
 static inline void clearKiller()
 {
     for (int x = 0; x < MAXDEPTH; x++)
@@ -70,7 +70,7 @@ static inline void clearKiller()
     }
 }
 
-//age history heuristic array
+// age history heuristic array
 static inline void ageHistory()
 {
     for (int x = 0; x < 2; x++)
@@ -85,7 +85,7 @@ static inline void ageHistory()
     }
 }
 
-//prevent history heuristic array to overflow 
+// prevent history heuristic array to overflow 
 static inline void preventOverflow()
 {
     for (int d = 0; d < 2; d++)
@@ -100,7 +100,7 @@ static inline void preventOverflow()
     }
 }
 
-//save data in the history heuristic table for move ordering
+// save data in the history heuristic table for move ordering
 static inline void saveHistory(MOVE move, int depth, int color)
 {
     int a = (color == 1) ? 1 : 0;
@@ -108,14 +108,14 @@ static inline void saveHistory(MOVE move, int depth, int color)
     int c = move.to;
 
     history[a][b][c] += depth * depth;
-    //prevent overflow
+    // prevent overflow
     if (history[a][b][c] > 80000000)
     {
         preventOverflow();
     }
 }
 
-//check for time up or stop command from GUI every 1024 nodes
+// check for time up or stop command from GUI every 1024 nodes
 static inline void timeUp()
 {
     if (!stop_search && !(nodes & 1023))
@@ -137,9 +137,9 @@ static inline void timeUp()
 
 static inline bool check_repetition(unsigned long long key, int counter, int ply)
 {
-    //store the current position key into the history table
+    // store the current position key into the history table
     history_log[history_index + ply] = key;
-    //check positions till a capture or a pawn move
+    // check positions till a capture or a pawn move
     for (int x = history_index + ply - 2; x >= history_index + ply - counter; x -= 2)
     {
         if (key == history_log[x])
@@ -151,8 +151,8 @@ static inline bool check_repetition(unsigned long long key, int counter, int ply
     return false;
 }
 
-//contempt factor
-//draw contempt factor of -0.25 pawn
+// contempt factor
+// draw contempt factor of -0.25 pawn
 static inline int contempt(BOARD *pos, int ply)
 {
     if (pos->piece_num <= 14)
@@ -166,10 +166,10 @@ static inline int contempt(BOARD *pos, int ply)
     return 25;
 }
 
-//check if the side to move has any non-pawn materials
+// check if the side to move has any non-pawn materials
 static inline bool nonPawnMaterial(BOARD *pos, int color)
 {
-    //black
+    // black
     if (color == 1)
     {
         if (pos->piece_count[bN] || pos->piece_count[bB] || pos->piece_count[bR] || pos->piece_count[bQ])
@@ -177,7 +177,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
             return true;
         }
     }
-    //white
+    // white
     else
     {
         if (pos->piece_count[wN] || pos->piece_count[wB] || pos->piece_count[wR] || pos->piece_count[wQ])
@@ -189,7 +189,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
     return false;
 }
 
-//quiescence search with captures and queen promotion
+// quiescence search with captures and queen promotion
 static int quiescence(BOARD *pos, int color, int alpha, int beta)
 {
     int value = -INFINITE;
@@ -201,10 +201,10 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     int new_x, new_y;
     BOARD pos_copy;
 
-    //prefetch eval hash table
+    // prefetch eval hash table
     __builtin_prefetch(&Evaltt[pos->key % EVALHASHSIZE]);
 
-    //exit if time is up
+    // exit if time is up
     timeUp();
     if (stop_search)
         return 0;
@@ -218,7 +218,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         return beta;
     }
 
-    //delta pruning
+    // delta pruning
     if (standing_pat + 975 < alpha)
     {
         return alpha;
@@ -229,32 +229,32 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         alpha = standing_pat;
     }
 
-    //generate captures and queen promotion
+    // generate captures and queen promotion
     MOVE moves[256];
     int scores[256];
     length = captureGen(pos, moves, scores, color);
 
     for (int x = 0; x < length; x++)
     {
-        //find the move with highest score
+        // find the move with highest score
         movesort(moves, scores, length, x);
-        //make a copy of the board
+        // make a copy of the board
         pos_copy = *pos;
         isprom = makeMove_qsearch(&pos_copy, &moves[x]);
 
-        //skip if the king is left in check
+        // skip if the king is left in check
         if (ifCheck(&pos_copy, color))
         {
             continue;
         }
 
-        //get piece value
+        // get piece value
         new_x = moves[x].to / 8;
         new_y = moves[x].to % 8;
         piece = pos->board[new_x][new_y];
         cap_piece_value = piece_value(piece);
 
-        //delta pruning
+        // delta pruning
         if ((standing_pat + cap_piece_value + 200) < alpha && !isprom)
         {
             if (pos_copy.piece_num > 10)
@@ -264,9 +264,9 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         moved_piece = pos_copy.board[new_x][new_y];
         moved_piece_value = piece_value(moved_piece);
 
-        //SEE pruning
-        //only check when higher takes lower and not promotion
-        //do not check when king is capturing
+        // SEE pruning
+        // only check when higher takes lower and not promotion
+        // do not check when king is capturing
         if (moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && !isprom)
         {
             if (SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
@@ -282,7 +282,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
         {
             if (value >= beta)
             {
-                return beta; //beta cut-off
+                return beta; // beta cut-off
             }
             alpha = value;
         }
@@ -291,7 +291,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     return alpha;
 }
 
-//fail-hard principal variation search
+// fail-hard principal variation search
 static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV, int isCheck)
 {
     int value = -INFINITE;
@@ -313,15 +313,15 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     bm.from = NOMOVE;
     hash_move.from = NOMOVE;
 
-    //prefetch hash table
+    // prefetch hash table
     __builtin_prefetch(&tt[pos->key % (HASHSIZE - 1)]);
 
-    //exit if time is up
+    // exit if time is up
     timeUp();
     if (stop_search)
         return 0;
 
-    //mate distance pruning
+    // mate distance pruning
     if (alpha < -mate_value)
         alpha = -mate_value;
     if (beta > mate_value - 1)
@@ -329,20 +329,20 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     if (alpha >= beta)
         return alpha;
 
-    //do not drop to qsearch when in check
+    // do not drop to qsearch when in check
     if (isCheck && depth == 0)
     {
         depth++;
     }
 
-    //check draw of repetition
+    // check draw of repetition
     if (check_repetition(pos->key, pos->halfmove_counter, ply))
     {
         nodes++;
         return contempt(pos, ply);
     }
 
-    //if depth reaches the end
+    // if depth reaches the end
     if (depth == 0)
     {
         return quiescence(pos, color, alpha, beta);
@@ -352,15 +352,15 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
     int TTeval;
     short eval = VALUENONE;
-    //transposition table look up
+    // transposition table look up
     entry = probeTT(pos->key);
     if (entry != NULL)
     {
         if (entry->depth >= depth)
         {
-            //adjust mate scores form tt
+            // adjust mate scores form tt
             TTeval = valueFromTT(entry->evaluation, ply);
-            //cutoff based on the flag
+            // cutoff based on the flag
             switch (entry->flag)
             {
                 case EXACT:
@@ -382,36 +382,36 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                 }
             }
         }
-        //get the hash move
+        // get the hash move
         if (entry->flag != UPPERBOUND)
             hash_move = entry->bestmove;
-        //get static eval from tt
+        // get static eval from tt
         eval = entry->statEval;
     }
 
-    //get static eval
+    // get static eval
     if (!is_PV && !isCheck && eval == VALUENONE)
     {
         eval = evaluate(pos, pos->board, color);
     }
 
-    //razoring
+    // razoring
     if (!is_PV && !isCheck && depth == 1 && eval <= alpha - 300)
     {
         return quiescence(pos, color, alpha, beta);
     }
 
-    //static null move / reverse futility pruning
+    // static null move / reverse futility pruning
     if (depth <= 7 && !is_PV && !isCheck && abs(beta) < 19000)
     {
         int margin = 96 * depth;
         if (eval - margin >= beta)
         {
-            return eval - margin; //same as returning beta or eval in fail-hard
+            return eval - margin; // same as returning beta or eval in fail-hard
         }
     }
 
-    //null move pruning
+    // null move pruning
     if (DoNull && !isCheck && depth >= 3 && !is_PV && eval >= beta)
     {
         if (nonPawnMaterial(pos, color))
@@ -422,12 +422,12 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                 R = 3;
             }
 
-            //make null move
+            // make null move
             int ep_file = make_nullmove(pos);
 
             int nullVal = -pvs(pos, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
 
-            //undo null move
+            // undo null move
             undo_nullmove(pos, ep_file);
 
             if (stop_search)
@@ -440,7 +440,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
     }
 
-    //probcut
+    // probcut
     if (!is_PV && !isCheck && depth >= 5 && abs(beta) < 19000 && eval >= beta)
     {
         int moved_piece_value, cap_piece_value;
@@ -450,40 +450,40 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
         probcutBeta = beta + 80;
         length = captureGen(pos, moves, scores, color);
-        //try tactical moves
+        // try tactical moves
         for (int x = 0; x < length; x++)
         {
-            //find the move with highest score
+            // find the move with highest score
             movesort(moves, scores, length, x);
-            //make a copy of the board
+            // make a copy of the board
             pos_copy = *pos;
             isTactical = makeMove(&pos_copy, &moves[x]);
 
-            //skip if the king is left in check
+            // skip if the king is left in check
             if (ifCheck(&pos_copy, color))
             {
                 continue;
             }
 
-            //get piece value
+            // get piece value
             new_x = moves[x].to / 8;
             new_y = moves[x].to % 8;
             cap_piece_value = piece_value(pos->board[new_x][new_y]);
             moved_piece_value = piece_value(pos_copy.board[new_x][new_y]);
-            //skip moves with SEE < 0
+            // skip moves with SEE < 0
             if (moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isTactical != 2)
             {
                 if (SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
                     continue;
             }
 
-            //verify first with qsearch
+            // verify first with qsearch
             probcutVal = -quiescence(&pos_copy, -color, -probcutBeta, -probcutBeta + 1);
 
             if (probcutVal >= probcutBeta)
             {
                 giveCheck = ifCheck(&pos_copy, -color);
-                //reduced depth search to confirm the value is above beta
+                // reduced depth search to confirm the value is above beta
                 probcutVal = -pvs(&pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false, giveCheck);
             }
             if (probcutVal >= probcutBeta)
@@ -493,24 +493,24 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
     }
 
-    //conditions for futility pruning
+    // conditions for futility pruning
     if (eval != VALUENONE && (eval + futilityMargin[depth]) <= alpha && abs(alpha) < 19000)
     {
         futility = true;
     }
 
-    //internal iterative deepening
+    // internal iterative deepening
     if (is_PV && depth >= 6 && hash_move.from == NOMOVE)
     {
         hash_move = internalID(pos, depth - depth / 4 - 1, ply, color, alpha, beta);
     }
 
-    //initialize for move generation
+    // initialize for move generation
     length = 256;
     MOVE moves[256];
     int scores[256];
     int start_moveGen = 0;
-    //try hash move first
+    // try hash move first
     if (hash_move.from != NOMOVE && isPseudoLegal(pos, &hash_move, color))
     {
         moves[0] = hash_move;
@@ -520,20 +520,20 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
     for (int x = 0; x < length; x++)
     {
-        //generate moves after hash move or if hash move doesn't exist
+        // generate moves after hash move or if hash move doesn't exist
         if (x == start_moveGen)
         {
             length = moveGen(pos, moves, scores, ply, color);
             skipHashMove(moves, scores, length, &hash_move, x);
         }
-        //find the move with highest score
+        // find the move with highest score
         if (x >= start_moveGen)
             movesort(moves, scores, length, x);
-        //make a copy of the board
+        // make a copy of the board
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
 
-        //skip if the king is left in check
+        // skip if the king is left in check
         if (ifCheck(&pos_copy, color))
         {
             continue;
@@ -541,15 +541,15 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
         giveCheck = ifCheck(&pos_copy, -color);
 
-        if (!is_PV && !isCheck && !giveCheck && depth <= 8 && !isTactical && best > -19000) //not mated
+        if (!is_PV && !isCheck && !giveCheck && depth <= 8 && !isTactical && best > -19000) // not mated
         {
-            //futility pruning
+            // futility pruning
             if (futility)
             {
                 continue;
             }
 
-            //late move pruning
+            // late move pruning
             if (!pos_copy.pawn_push && quietCount > lmpMargin[depth])
             {
                 continue;
@@ -560,20 +560,20 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if (!isTactical)
             quietCount++;
 
-        //hack to ensure pv line is more intact
+        // hack to ensure pv line is more intact
         if (moves_made == 1)
             bm = moves[x];
 
         extension = 0;
-        //passed pawn extension
+        // passed pawn extension
         if (pos_copy.piece_num <= 18 && pos_copy.pawn_push)
         {
             extension = 1;
         }
-        //check extension
+        // check extension
         else if (giveCheck)
         {
-            //don't extend checks with negative SEE
+            // don't extend checks with negative SEE
             if (isTactical)
             {
                 if (scores[x] >= ECAPTURE)
@@ -586,7 +586,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
         }
 
-        //late move reduction
+        // late move reduction
         reduction_depth = 0;
         new_depth = depth - 1 + extension;
 
@@ -602,11 +602,11 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             if (moves_made > 6)
                 reduction_depth += 1;
 
-            //increase reductions for bad history moves
+            // increase reductions for bad history moves
             if (scores[x] == 0)
                 reduction_depth += 1;
 
-            reduction_depth = MIN(new_depth - 1, reduction_depth); //do not drop to qsearch
+            reduction_depth = MIN(new_depth - 1, reduction_depth); // do not drop to qsearch
             new_depth -= reduction_depth;
         }
 
@@ -625,7 +625,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
         }
 
-        //search again if lmr failed
+        // search again if lmr failed
         if (reduction_depth && value > alpha)
         {
             new_depth += reduction_depth;
@@ -651,7 +651,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                     }
                     alpha = beta;
                     entryFlag = LOWERBOUND;
-                    break; //beta cut-off
+                    break; // beta cut-off
                 }
                 alpha_raised = true;
                 alpha = value;
@@ -665,25 +665,25 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         bm.from = NOMOVE;
         if (isCheck)
         {
-            alpha = -INFINITE + ply; //checkmate
+            alpha = -INFINITE + ply; // checkmate
         }
         else
         {
-            alpha = contempt(pos, ply); //stalemate
+            alpha = contempt(pos, ply); // stalemate
         }
     }
-    //draw by fifty moves
+    // draw by fifty moves
     else if (pos->halfmove_counter >= 100)
     {
         return contempt(pos, ply);
     }
 
-    //transposition table store:    
+    // transposition table store:    
     storeTT(pos->key, valueToTT(alpha, ply), eval, depth, &bm, entryFlag);
     return alpha;
 }
 
-//internal iterative deepening
+// internal iterative deepening
 MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 {
     int value = -INFINITE;
@@ -694,27 +694,27 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     MOVE bm;
     bm.from = NOMOVE;
 
-    //exit if time is up
+    // exit if time is up
     timeUp();
     if (stop_search)
         return bm;
 
     nodes++;
 
-    //generate moves
+    // generate moves
     MOVE moves[256];
     int scores[256];
     length = moveGen(pos, moves, scores, ply, color);
 
     for (int x = 0; x < length; x++)
     {
-        //find the move with highest score
+        // find the move with highest score
         movesort(moves, scores, length, x);
-        //make a copy of the board
+        // make a copy of the board
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
 
-        //skip if the king is left in check
+        // skip if the king is left in check
         if (ifCheck(&pos_copy, color))
         {
             continue;
@@ -735,7 +735,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
             }
         }
 
-        //exit if time is up
+        // exit if time is up
         if (stop_search)
             return bm;
 
@@ -751,19 +751,19 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
                 }
                 alpha = beta;
                 entryFlag = LOWERBOUND;
-                break; //beta cut-off
+                break; // beta cut-off
             }
             alpha = value;
             entryFlag = EXACT;
         }
     }
 
-    //transposition table store:  
+    // transposition table store:  
     storeTT(pos->key, valueToTT(alpha, ply), VALUENONE, depth, &bm, entryFlag);
     return bm;
 }
 
-//principal variation search at root
+// principal variation search at root
 static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 {
     int value = -INFINITE;
@@ -779,17 +779,17 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 
     nodes++;
 
-    //transposition table look up
+    // transposition table look up
     entry = probeTT(pos->key);
     if (entry != NULL && entry->flag != UPPERBOUND)
     {
         hash_move = entry->bestmove;
     }
 
-    //generate moves
+    // generate moves
     MOVE moves[256];
     int scores[256];
-    //get the best move from last iteration if any
+    // get the best move from last iteration if any
     MOVE pv_move = string_to_move(BestMove);
 
     length = moveGen(pos, moves, scores, 0, color);
@@ -797,14 +797,14 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 
     for (int x = 0; x < length; x++)
     {
-        //find the move with highest score
+        // find the move with highest score
         if (x >= sorted)
             movesort(moves, scores, length, x);
-        //make a copy of the board
+        // make a copy of the board
         pos_copy = *pos;
         isTactical = makeMove(&pos_copy, &moves[x]);
 
-        //skip if the king is left in check
+        // skip if the king is left in check
         if (ifCheck(&pos_copy, color))
         {
             continue;
@@ -825,7 +825,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
             }
         }
 
-        //exit if time is up
+        // exit if time is up
         if (stop_search)
             break;
 
@@ -841,20 +841,20 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                 }
                 alpha = beta;
                 entryFlag = LOWERBOUND;
-                break; //beta cut-off
+                break; // beta cut-off
             }
             alpha = value;
             entryFlag = EXACT;
         }
     }
 
-    searched_move = bm; //save the best move to play
-    //transposition table store:  
+    searched_move = bm; // save the best move to play
+    // transposition table store:  
     storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
     return alpha;
 }
 
-//obtain the principal variation from the hash table
+// obtain the principal variation from the hash table
 static inline void getPVline(BOARD *pos, MOVE *bestmove, int depth)
 {
     struct DataItem *item;
@@ -862,7 +862,7 @@ static inline void getPVline(BOARD *pos, MOVE *bestmove, int depth)
     BOARD pos_copy;
     char move[6];
 
-    //make a copy
+    // make a copy
     pos_copy = *pos;
     smove = *bestmove;
     move_to_string(bestmove, move);
@@ -892,7 +892,7 @@ static inline void getPVline(BOARD *pos, MOVE *bestmove, int depth)
     }
 }
 
-//get nodes per second
+// get nodes per second
 static inline int get_nps(int node_count, double secs)
 {
     if (secs == 0)
@@ -901,7 +901,7 @@ static inline int get_nps(int node_count, double secs)
     return (int)(node_count / secs);
 }
 
-//check if the destinations of these two moves are the same
+// check if the destinations of these two moves are the same
 static inline bool isRecapture(char move[6], char op_move[6])
 {
     if (move[2] == op_move[2] && move[3] == op_move[3])
@@ -912,7 +912,7 @@ static inline bool isRecapture(char move[6], char op_move[6])
     return false;
 }
 
-//iterative deepening
+// iterative deepening
 static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6])
 {
     int current_depth;
@@ -930,10 +930,10 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     for (current_depth = 1; current_depth <= depth; current_depth++)
     {
         clear_move(&searched_move);
-        //search starts
+        // search starts
         val = pvs_root(pos, current_depth, color, alpha, beta);
 
-        //check time
+        // check time
         gettimeofday(&ending_time, NULL);
         secs = (double)(ending_time.tv_usec - starting_time.tv_usec) / 1000000
             + (double)(ending_time.tv_sec - starting_time.tv_sec);
@@ -948,7 +948,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
 
         if (stop_search)
         {
-            //allow partial search results if at least one move searched and it's within the bounds/not failed low
+            // allow partial search results if at least one move searched and it's within the bounds/not failed low
             if (searched_move.from != NOMOVE && !failed_low && val > alpha && val < beta)
             {
                 valid_partial_search = true;
@@ -959,12 +959,12 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
             }
         }
 
-        //aspiration window
+        // aspiration window
         if (val <= alpha)
         {
             alpha = -INFINITE;
             beta = INFINITE;
-            //search longer if failed low
+            // search longer if failed low
             if (more_time && extra_time)
             {
                 if (secs >= (search_time / 8))
@@ -997,7 +997,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         alpha = val - ASWINDOW;
         beta = val + ASWINDOW;
 
-        //get the pv line and best move
+        // get the pv line and best move
         memset(pv_table, 0, sizeof(pv_table));
         getPVline(pos, &searched_move, current_depth);
         move_to_string(&searched_move, move);
@@ -1008,7 +1008,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         strncpy(BestMove, move, 6);
         BestMove[5] = '\0';
 
-        //send info to GUI
+        // send info to GUI
         if (val > 19000)
         {
             printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1,
@@ -1035,14 +1035,14 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         {
             break;
         }
-        //easy move if the best move is a recapture and has not changed after depth 12
+        // easy move if the best move is a recapture and has not changed after depth 12
         if (time_management && eazy_move && current_depth >= 12 && secs >= (search_time / 16))
         {
             if (isRecapture(BestMove, op_move))
                 break;
         }
     }
-    //send move to GUI
+    // send move to GUI
     if (!strncmp(BestMove, "", 5))
     {
         printf("bestmove 0000\n");
@@ -1059,27 +1059,27 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
 
 void search(BOARD *pos, int piece_color, char op_move[6])
 {
-    //prepare to search
+    // prepare to search
     gettimeofday(&starting_time, NULL);
     ageHistory();
-    clearKiller(); //clear killer move table
+    clearKiller(); // clear killer move table
     memset(BestMove, 0, sizeof(BestMove));
     stop_search = false;
     nodes = 0;
 
-    //search
+    // search
     iterative_deepening(pos, (search_depth == -1) ? MAXDEPTH : search_depth, piece_color, op_move);
 
-    //clear tables in analyze mode
+    // clear tables in analyze mode
     if (analyze)
     {
-        clearTT(); //clear main hash table
-        clearEvalTT(); //clear evaluation hash table
-        clearPawnTT(); //clear pawn hash table
-        memset(history, 0, sizeof(history)); //clear history heuristic table
+        clearTT(); // clear main hash table
+        clearEvalTT(); // clear evaluation hash table
+        clearPawnTT(); // clear pawn hash table
+        memset(history, 0, sizeof(history)); // clear history heuristic table
     }
     else
     {
-        setAge(); //age tt
+        setAge(); // age tt
     }
 }

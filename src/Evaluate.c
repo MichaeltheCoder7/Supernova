@@ -12,11 +12,11 @@
 #include "PSQT.h"
 #include "Transposition.h"
 
-//1: black
-//-1: white
+// 1: black
+// -1: white
 int evaluate(BOARD *pos, char board[8][8], int color)
 {
-    //tt probe
+    // tt probe
     struct Eval *entry = probeEvalTT(pos->key);
     if (entry != NULL)
     {
@@ -24,12 +24,12 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     }
 
     int P_count = pos->piece_count[wP], R_count = pos->piece_count[wR], N_count = pos->piece_count[wN];
-    int B_count = pos->piece_count[wB], Q_count = pos->piece_count[wQ]; //white chess piece counts
+    int B_count = pos->piece_count[wB], Q_count = pos->piece_count[wQ]; // white chess piece counts
     int p_count = pos->piece_count[bP], r_count = pos->piece_count[bR], n_count = pos->piece_count[bN];
-    int b_count = pos->piece_count[bB], q_count = pos->piece_count[bQ]; //black chess piece counts
-    int white_king_x = pos->piece_list[wK][0] / 8; //get white king's coordinate
+    int b_count = pos->piece_count[bB], q_count = pos->piece_count[bQ]; // black chess piece counts
+    int white_king_x = pos->piece_list[wK][0] / 8; // get white king's coordinate
     int white_king_y = pos->piece_list[wK][0] % 8;
-    int black_king_x = pos->piece_list[bK][0] / 8; //get black king's coordinate
+    int black_king_x = pos->piece_list[bK][0] / 8; // get black king's coordinate
     int black_king_y = pos->piece_list[bK][0] % 8;
     int midgame_white = 0, midgame_black = 0, endgame_white = 0, endgame_black = 0;
     int points = 0, other_bonus_white = 0, other_bonus_black = 0;
@@ -43,7 +43,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     bool passed;
     wattack_count = battack_count = wattack_weight = battack_weight = 0;
 
-    //pawn tt probe
+    // pawn tt probe
     struct Pawn *pEntry = probePawnTT(pos->pawn_key);
     if (pEntry != NULL)
     {
@@ -52,7 +52,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     }
     else
     {
-        //white pawn
+        // white pawn
         for (int i = 0; i < P_count; i++)
         {
             x = pos->piece_list[wP][i] / 8;
@@ -69,7 +69,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                     wpawn_mg += PHALANX;
                     wpawn_eg += PHALANX;
                 }
-                //king proximity
+                // king proximity
                 wpawn_eg -= (abs(x - white_king_x) + abs(y - white_king_y) - 7) * 3;
                 wpawn_eg += (abs(x - black_king_x) + abs(y - black_king_y) - 7) * 3;
             }
@@ -78,7 +78,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 wpawn_mg += white_pawn_midgame[x][y];
                 wpawn_eg += white_pawn_endgame[x][y];
             }
-            //connected pawn bonus
+            // connected pawn bonus
             if (connected_white(board, x, y))
             {
                 if (passed)
@@ -92,13 +92,13 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                     wpawn_eg += CONNECTEDPAWN;
                 }
             }
-            //doubled pawn penalty 
+            // doubled pawn penalty 
             else if (board[x + 1][y] == 'P')
             {
                 wpawn_mg -= DOUBLEDPAWNMG;
                 wpawn_eg -= DOUBLEDPAWNEG;
             }
-            //isolated / backward pawn
+            // isolated / backward pawn
             if (isolated_white(board, y))
             {
                 wpawn_mg -= ISOLATEDPAWNMG;
@@ -110,7 +110,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 wpawn_eg -= BACKWARDPAWNEG;
             }
         }
-        //black pawn
+        // black pawn
         for (int i = 0; i < p_count; i++)
         {
             x = pos->piece_list[bP][i] / 8;
@@ -127,7 +127,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                     bpawn_mg += PHALANX;
                     bpawn_eg += PHALANX;
                 }
-                //king proximity
+                // king proximity
                 bpawn_eg -= (abs(x - black_king_x) + abs(y - black_king_y) - 7) * 3;
                 bpawn_eg += (abs(x - white_king_x) + abs(y - white_king_y) - 7) * 3;
             }
@@ -136,7 +136,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 bpawn_mg += black_pawn_midgame[x][y];
                 bpawn_eg += black_pawn_endgame[x][y];
             }
-            //connected pawn bonus
+            // connected pawn bonus
             if (connected_black(board, x, y))
             {
                 if (passed)
@@ -150,13 +150,13 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                     bpawn_eg += CONNECTEDPAWN;
                 }
             }
-            //doubled pawn penalty
+            // doubled pawn penalty
             else if (board[x - 1][y] == 'p')
             {
                 bpawn_mg -= DOUBLEDPAWNMG;
                 bpawn_eg -= DOUBLEDPAWNEG;
             }
-            //isolated / backward pawn
+            // isolated / backward pawn
             if (isolated_black(board, y))
             {
                 bpawn_mg -= ISOLATEDPAWNMG;
@@ -168,7 +168,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 bpawn_eg -= BACKWARDPAWNEG;
             }
         }
-        //pawn shield bonus and pawn storm penalty
+        // pawn shield bonus and pawn storm penalty
         if (white_king_x > 5 && white_king_y > 4)
         {
             if (board[6][5] == 'P')
@@ -298,22 +298,22 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             else if (board[3][2] == 'P')
                 bpawn_mg -= 5;
         }
-        //open files next to king penalty
+        // open files next to king penalty
         wpawn_mg -= wking_file(board, white_king_y);
         bpawn_mg -= bking_file(board, black_king_y);
-        //for king position bonus midgame
+        // for king position bonus midgame
         wpawn_mg += white_king_midgame[white_king_x][white_king_y];
         bpawn_mg += black_king_midgame[black_king_x][black_king_y];
-        //king position bonus endgame
+        // king position bonus endgame
         wpawn_eg += white_king_endgame[white_king_x][white_king_y];
         bpawn_eg += black_king_endgame[black_king_x][black_king_y];
 
         pawn_mg = bpawn_mg - wpawn_mg;
         pawn_eg = bpawn_eg - wpawn_eg;
-        //pawn tt store
+        // pawn tt store
         storePawnTT(pos->pawn_key, pawn_mg, pawn_eg);
     }
-    //white rook
+    // white rook
     for (int i = 0; i < R_count; i++)
     {
         x = pos->piece_list[wR][i] / 8;
@@ -330,21 +330,21 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             midgame_white += ROOKHALFFILEMG;
             endgame_white += ROOKHALFFILEEG;
         }
-        //bonus for being on the same file as any queen
+        // bonus for being on the same file as any queen
         if (queenFile(pos, y))
         {
             other_bonus_white += ROOKQUEENFILE;
         }
-        //mobility
+        // mobility
         wrook_mob = wrook_mobility(board, x, y, black_king_x, black_king_y);
         midgame_white += wrook_mob;
         endgame_white += wrook_mob * 2;
-        //king tropism
+        // king tropism
         wrook_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wrook_tropism * 2;
         endgame_black += wrook_tropism * 1;
-        //trapped rook penalty
-        //when mobility < 4
+        // trapped rook penalty
+        // when mobility < 4
         if (wrook_mob < -6)
         {
             switch (pos->piece_list[wK][0])
@@ -376,7 +376,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             }
         }
     }
-    //white knight
+    // white knight
     for (int i = 0; i < N_count; i++)
     {
         x = pos->piece_list[wN][i] / 8;
@@ -385,15 +385,15 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         other_bonus_white += white_knight[x][y];
         if (outpost_white(board, x, y))
         {
-            other_bonus_white += OUTPOST; //outpost bonus
+            other_bonus_white += OUTPOST; // outpost bonus
         }
-        //mobility
+        // mobility
         other_bonus_white += wknight_mobility(board, x, y, black_king_x, black_king_y);
-        //king tropism
+        // king tropism
         wknight_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wknight_tropism * 3;
         endgame_black += wknight_tropism * 3;
-        //trapped pieces penalty
+        // trapped pieces penalty
         switch (pos->piece_list[wN][i])
         {
             case a8:
@@ -423,12 +423,12 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             case c3:
                 if (board[6][2] == 'P' && board[4][3] == 'P' && board[4][4] != 'P')
                 {
-                    other_bonus_white -= 5; //c3 knight penalty
+                    other_bonus_white -= 5; // c3 knight penalty
                 }
                 break;
         }
     }
-    //white bishop
+    // white bishop
     for (int i = 0; i < B_count; i++)
     {
         x = pos->piece_list[wB][i] / 8;
@@ -437,19 +437,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         other_bonus_white += white_bishop[x][y];
         if (badBishop_white(board, x, y))
         {
-            other_bonus_white -= BADBISHOP; //bad bishop penalty
+            other_bonus_white -= BADBISHOP; // bad bishop penalty
         }
         if (outpost_white(board, x, y))
         {
-            other_bonus_white += OUTPOST; //outpost bonus
+            other_bonus_white += OUTPOST; // outpost bonus
         }
-        //mobility
+        // mobility
         other_bonus_white += wbishop_mobility(board, x, y, black_king_x, black_king_y);
-        //king tropism
+        // king tropism
         wbishop_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wbishop_tropism * 2;
         endgame_black += wbishop_tropism * 1;
-        //trapped pieces penalty
+        // trapped pieces penalty
         switch (pos->piece_list[wB][i])
         {
             case a7:
@@ -483,7 +483,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 }
                 if (board[6][4] == 'P' && board[5][4] != ' ')
                 {
-                    other_bonus_white -= 20; //bishop no development penalty
+                    other_bonus_white -= 20; // bishop no development penalty
                 }
                 break;
             case c1:
@@ -493,19 +493,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 }
                 if (board[6][3] == 'P' && board[5][3] != ' ')
                 {
-                    other_bonus_white -= 20; //bishop no development penalty
+                    other_bonus_white -= 20; // bishop no development penalty
                 }
                 break;
         }
     }
-    //white queen
+    // white queen
     for (int i = 0; i < Q_count; i++)
     {
         x = pos->piece_list[wQ][i] / 8;
         y = pos->piece_list[wQ][i] % 8;
 
         other_bonus_white += white_queen[x][y];
-        //queen early development penalty
+        // queen early development penalty
         if (x < 6)
         {
             if (board[7][1] == 'N')
@@ -525,16 +525,16 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 other_bonus_white -= 4;
             }
         }
-        //mobility
+        // mobility
         wqueen_mob = wqueen_mobility(board, x, y, black_king_x, black_king_y);
         midgame_white += wqueen_mob;
         endgame_white += wqueen_mob * 2;
-        //king tropism
+        // king tropism
         wqueen_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wqueen_tropism * 2;
         endgame_black += wqueen_tropism * 4;
     }
-    //black rook
+    // black rook
     for (int i = 0; i < r_count; i++)
     {
         x = pos->piece_list[bR][i] / 8;
@@ -551,21 +551,21 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             midgame_black += ROOKHALFFILEMG;
             endgame_black += ROOKHALFFILEEG;
         }
-        //bonus for being on the same file as any queen
+        // bonus for being on the same file as any queen
         if (queenFile(pos, y))
         {
             other_bonus_black += ROOKQUEENFILE;
         }
-        //mobility
+        // mobility
         brook_mob = brook_mobility(board, x, y, white_king_x, white_king_y);
         midgame_black += brook_mob;
         endgame_black += brook_mob * 2;
-        //king tropism
+        // king tropism
         brook_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += brook_tropism * 2;
         endgame_white += brook_tropism * 1;
-        //trapped rook penalty
-        //when mobility < 4
+        // trapped rook penalty
+        // when mobility < 4
         if (brook_mob < -6)
         {
             switch (pos->piece_list[bK][0])
@@ -597,7 +597,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             }
         }
     }
-    //black knight
+    // black knight
     for (int i = 0; i < n_count; i++)
     {
         x = pos->piece_list[bN][i] / 8;
@@ -606,15 +606,15 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         other_bonus_black += black_knight[x][y];
         if (outpost_black(board, x, y))
         {
-            other_bonus_black += OUTPOST; //outpost bonus
+            other_bonus_black += OUTPOST; // outpost bonus
         }
-        //mobility
+        // mobility
         other_bonus_black += bknight_mobility(board, x, y, white_king_x, white_king_y);
-        //king tropism
+        // king tropism
         bknight_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bknight_tropism * 3;
         endgame_white += bknight_tropism * 3;
-        //trapped pieces penalty
+        // trapped pieces penalty
         switch (pos->piece_list[bN][i])
         {
             case a1:
@@ -644,12 +644,12 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             case c6:
                 if (board[1][2] == 'p' && board[3][3] == 'p' && board[3][4] != 'p')
                 {
-                    other_bonus_black -= 5; //c6 knight penalty
+                    other_bonus_black -= 5; // c6 knight penalty
                 }
                 break;
         }
     }
-    //black bishop
+    // black bishop
     for (int i = 0; i < b_count; i++)
     {
         x = pos->piece_list[bB][i] / 8;
@@ -658,19 +658,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         other_bonus_black += black_bishop[x][y];
         if (badBishop_black(board, x, y))
         {
-            other_bonus_black -= BADBISHOP; //bad bishop penalty
+            other_bonus_black -= BADBISHOP; // bad bishop penalty
         }
         if (outpost_black(board, x, y))
         {
-            other_bonus_black += OUTPOST; //outpost bonus
+            other_bonus_black += OUTPOST; // outpost bonus
         }
-        //mobility
+        // mobility
         other_bonus_black += bbishop_mobility(board, x, y, white_king_x, white_king_y);
-        //king tropism
+        // king tropism
         bbishop_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bbishop_tropism * 2;
         endgame_white += bbishop_tropism * 1;
-        //trapped pieces penalty
+        // trapped pieces penalty
         switch (pos->piece_list[bB][i])
         {
             case a2:
@@ -704,7 +704,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 }
                 if (board[1][4] == 'p' && board[2][4] != ' ')
                 {
-                    other_bonus_black -= 20; //bishop no development penalty
+                    other_bonus_black -= 20; // bishop no development penalty
                 }
                 break;
             case c8:
@@ -714,19 +714,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 }
                 if (board[1][3] == 'p' && board[2][3] != ' ')
                 {
-                    other_bonus_black -= 20; //bishop no development penalty
+                    other_bonus_black -= 20; // bishop no development penalty
                 }
                 break;
         }
     }
-    //black queen
+    // black queen
     for (int i = 0; i < q_count; i++)
     {
         x = pos->piece_list[bQ][i] / 8;
         y = pos->piece_list[bQ][i] % 8;
 
         other_bonus_black += black_queen[x][y];
-        //queen early development penalty
+        // queen early development penalty
         if (x > 1)
         {
             if (board[0][1] == 'n')
@@ -746,38 +746,38 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 other_bonus_black -= 4;
             }
         }
-        //mobility
+        // mobility
         bqueen_mob = bqueen_mobility(board, x, y, white_king_x, white_king_y);
         midgame_black += bqueen_mob;
         endgame_black += bqueen_mob * 2;
-        //king tropism
+        // king tropism
         bqueen_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bqueen_tropism * 2;
         endgame_white += bqueen_tropism * 4;
     }
 
-    //game phase based on non-pawn materials
+    // game phase based on non-pawn materials
     int phase = N_count + n_count + B_count + b_count + R_count * 2 + r_count * 2 + Q_count * 4 + q_count * 4;
-    //tempo
+    // tempo
     if (phase > 4)
         tempo = color * TEMPO;
 
-    //sum up scores from black's perspective
+    // sum up scores from black's perspective
     points = p_count * 100 + r_count * (500 + rook_val[p_count]) + n_count * (325 + knight_val[p_count]) + b_count * 335 + q_count * 975
         + ((b_count >= 2) ? 1 : 0) * BISHOPPAIR - ((n_count >= 2) ? 1 : 0) * KNIGHTPAIR - ((r_count >= 2) ? 1 : 0) * ROOKPAIR + other_bonus_black
         - P_count * 100 - R_count * (500 + rook_val[P_count]) - N_count * (325 + knight_val[P_count]) - B_count * 335 - Q_count * 975
         - ((B_count >= 2) ? 1 : 0) * BISHOPPAIR + ((N_count >= 2) ? 1 : 0) * KNIGHTPAIR + ((R_count >= 2) ? 1 : 0) * ROOKPAIR - other_bonus_white
         + tempo;
 
-    //adjust phase score based on materials
+    // adjust phase score based on materials
     if (phase > 24)
         phase = 24;
     int mg_weight = phase;
     int eg_weight = 24 - mg_weight;
     points += (((midgame_black - midgame_white + pawn_mg) * mg_weight + (endgame_black - endgame_white + pawn_eg) * eg_weight) / 24);
 
-    //king attack score
-    //disabled when the number of attackers is less than 2 or there is no queen
+    // king attack score
+    // disabled when the number of attackers is less than 2 or there is no queen
     if (wattack_count < 2 || !Q_count)
         wattack_weight = 0;
     if (battack_count < 2 || !q_count)
@@ -785,9 +785,9 @@ int evaluate(BOARD *pos, char board[8][8], int color)
     points += SafetyTable[battack_weight];
     points -= SafetyTable[wattack_weight];
 
-    //material draw
-    //score as 0 for insufficient bishops and knights
-    //score half of the points for insufficient rooks
+    // material draw
+    // score as 0 for insufficient bishops and knights
+    // score half of the points for insufficient rooks
     if (!P_count && !p_count)
     {
         if (!R_count && !r_count && !Q_count && !q_count)
@@ -796,7 +796,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             {
                 if (N_count < 3 && n_count < 3)
                 {
-                    //tt store
+                    // tt store
                     storeEvalTT(pos->key, 0);
                     return 0;
                 }
@@ -805,7 +805,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             {
                 if (abs(B_count - b_count) < 2)
                 {
-                    //tt store
+                    // tt store
                     storeEvalTT(pos->key, 0);
                     return 0;
                 }
@@ -814,7 +814,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             {
                 if ((n_count < 3 && !b_count) || (b_count == 1 && !n_count))
                 {
-                    //tt store
+                    // tt store
                     storeEvalTT(pos->key, 0);
                     return 0;
                 }
@@ -826,7 +826,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             {
                 if (((N_count + B_count) < 2 && (n_count + b_count) == 0) || ((N_count + B_count) == 0 && (n_count + b_count) < 2))
                 {
-                    //tt store
+                    // tt store
                     storeEvalTT(pos->key, color * points / 2);
                     return color * points / 2;
                 }
@@ -835,7 +835,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             {
                 if ((N_count + B_count == 0) && (((n_count + b_count) == 1) || ((n_count + b_count) == 2)))
                 {
-                    //tt store
+                    // tt store
                     storeEvalTT(pos->key, color * points / 2);
                     return color * points / 2;
                 }
@@ -844,7 +844,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             {
                 if ((n_count + b_count == 0) && (((N_count + B_count) == 1) || ((N_count + B_count) == 2)))
                 {
-                    //tt store
+                    // tt store
                     storeEvalTT(pos->key, color * points / 2);
                     return color * points / 2;
                 }
@@ -852,7 +852,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         }
     }
 
-    //tt store
+    // tt store
     storeEvalTT(pos->key, color * points);
     return color * points;
 }

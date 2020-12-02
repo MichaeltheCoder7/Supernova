@@ -8,7 +8,7 @@
 #include "EvalHelpers.h"
 #include "Board.h"
 
-//return how many white pawns are attacking this square
+// return how many white pawns are attacking this square
 inline int wpawn_controlled(char board[8][8], int x, int y)
 {
     int squares = 0;
@@ -45,7 +45,7 @@ inline int wpawn_controlled(char board[8][8], int x, int y)
     return squares;
 }
 
-//return how many black pawns are attacking this square
+// return how many black pawns are attacking this square
 inline int bpawn_controlled(char board[8][8], int x, int y)
 {
     int squares = 0;
@@ -82,9 +82,9 @@ inline int bpawn_controlled(char board[8][8], int x, int y)
     return squares;
 }
 
-//count as candidate passed pawn if no enemy pawn is in the path
-//and no square in the path is controlled by more enemy pawns than own pawns
-//don't count as passed when there's a doubled pawn in the path
+// count as candidate passed pawn if no enemy pawn is in the path
+// and no square in the path is controlled by more enemy pawns than own pawns
+// don't count as passed when there's a doubled pawn in the path
 inline bool candidate_passed_white(char board[8][8], int x, int y)
 {
     for (int rank = 1; rank < x; rank++)
@@ -119,7 +119,7 @@ inline bool candidate_passed_black(char board[8][8], int x, int y)
     return true;
 }
 
-//check if this pawn is supported by own pawns
+// check if this pawn is supported by own pawns
 inline bool connected_white(char board[8][8], int x, int y)
 {
     switch (y)
@@ -174,7 +174,7 @@ inline bool connected_black(char board[8][8], int x, int y)
     return false;
 }
 
-//check if a friendly pawn is next to this pawn
+// check if a friendly pawn is next to this pawn
 inline bool phalanx_white(char board[8][8], int x, int y)
 {
     switch (y)
@@ -448,7 +448,7 @@ inline bool semiOpenFile_black(char board[8][8], int y)
     return true;
 }
 
-//only on rank 4, 5, 6 for white, 5, 4, 3 for black
+// only on rank 4, 5, 6 for white, 5, 4, 3 for black
 inline bool outpost_white(char board[8][8], int x, int y)
 {
     if (x < 5 && x > 1)
@@ -509,7 +509,7 @@ inline bool outpost_black(char board[8][8], int x, int y)
     return false;
 }
 
-//bad bishop when its forward mobility is blocked by own pawn
+// bad bishop when its forward mobility is blocked by own pawn
 inline bool badBishop_white(char board[8][8], int x, int y)
 {
     if (x > 1)
@@ -570,7 +570,7 @@ inline bool badBishop_black(char board[8][8], int x, int y)
     return false;
 }
 
-//penalty for semi-open files around king
+// penalty for semi-open files around king
 inline int wking_file(char board[8][8], int y)
 {
     int result = 0;

@@ -15,8 +15,8 @@ const int knight_moves_y[8] = { -1,  1, -2,  2, -2,  2, -1,  1 };
 const int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
 const int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
-//generate all pseudo-legal moves
-//generate scores for each move
+// generate all pseudo-legal moves
+// generate scores for each move
 int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
 {
     int index = 0;
@@ -27,25 +27,25 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
 
     switch (color)
     {
-        //black pieces
+        // black pieces
         case 1:
         {
-            //pawn
+            // pawn
             for (int i = 0; i < pos->piece_count[bP]; i++)
             {
                 origin = pos->piece_list[bP][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //capture
+                // capture
                 for (y = index_y - 1; y < index_y + 2; y += 2)
                 {
-                    if (y & 8) //skip when out of board
+                    if (y & 8) // skip when out of board
                     {
                         continue;
                     }
                     if (CheckCapture_bpawn(pos, index_x + 1, y))
                     {
-                        //promotions
+                        // promotions
                         if (index_x == 6)
                         {
                             all_moves[index].from = origin;
@@ -79,10 +79,10 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         }
                     }
                 }
-                //1 step
+                // 1 step
                 if (pos->board[index_x + 1][index_y] == ' ')
                 {
-                    //promotions
+                    // promotions
                     if (index_x == 6)
                     {
                         all_moves[index].from = origin;
@@ -115,7 +115,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         index++;
                     }
                 }
-                //2 steps at starting position
+                // 2 steps at starting position
                 if (index_x == 1)
                 {
                     if (pos->board[2][index_y] == ' ' && pos->board[3][index_y] == ' ')
@@ -128,7 +128,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //knight
+            // knight
             for (int i = 0; i < pos->piece_count[bN]; i++)
             {
                 origin = pos->piece_list[bN][i];
@@ -138,7 +138,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                 {
                     x = index_x + knight_moves_x[j];
                     y = index_y + knight_moves_y[j];
-                    if (x & 8 || y & 8) //skip when out of board
+                    if (x & 8 || y & 8) // skip when out of board
                     {
                         continue;
                     }
@@ -160,13 +160,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //bishop
+            // bishop
             for (int i = 0; i < pos->piece_count[bB]; i++)
             {
                 origin = pos->piece_list[bB][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -196,7 +196,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -226,7 +226,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -256,7 +256,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -287,13 +287,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //rook
+            // rook
             for (int i = 0; i < pos->piece_count[bR]; i++)
             {
                 origin = pos->piece_list[bR][i];
                 index_x = pos->piece_list[bR][i] / 8;
                 index_y = pos->piece_list[bR][i] % 8;
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -317,7 +317,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -341,7 +341,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -365,7 +365,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -390,13 +390,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //queen
+            // queen
             for (int i = 0; i < pos->piece_count[bQ]; i++)
             {
                 origin = pos->piece_list[bQ][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -426,7 +426,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -450,7 +450,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -480,7 +480,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -504,7 +504,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -528,7 +528,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -558,7 +558,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -582,7 +582,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -613,11 +613,11 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //king
+            // king
             origin = pos->piece_list[bK][0];
             index_x = origin / 8;
             index_y = origin % 8;
-            //castling
+            // castling
             if (origin == e8)
             {
                 if (CheckMove_bkingside(pos))
@@ -641,7 +641,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
             {
                 x = index_x + king_moves_x[j];
                 y = index_y + king_moves_y[j];
-                if (x & 8 || y & 8) //skip when out of board
+                if (x & 8 || y & 8) // skip when out of board
                 {
                     continue;
                 }
@@ -664,10 +664,10 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
             }
             break;
         }
-        //white pieces
+        // white pieces
         case -1:
         {
-            //pawn
+            // pawn
             for (int i = 0; i < pos->piece_count[wP]; i++)
             {
                 origin = pos->piece_list[wP][i];
@@ -675,13 +675,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                 index_y = origin % 8;
                 for (y = index_y - 1; y < index_y + 2; y += 2)
                 {
-                    if (y & 8) //skip when out of board
+                    if (y & 8) // skip when out of board
                     {
                         continue;
                     }
                     if (CheckCapture_wpawn(pos, index_x - 1, y))
                     {
-                        //promotions
+                        // promotions
                         if (index_x == 1)
                         {
                             all_moves[index].from = origin;
@@ -715,10 +715,10 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         }
                     }
                 }
-                //1 step
+                // 1 step
                 if (pos->board[index_x - 1][index_y] == ' ')
                 {
-                    //promotions
+                    // promotions
                     if (index_x == 1)
                     {
                         all_moves[index].from = origin;
@@ -751,7 +751,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         index++;
                     }
                 }
-                //2 steps at starting position
+                // 2 steps at starting position
                 if (index_x == 6)
                 {
                     if (pos->board[5][index_y] == ' ' && pos->board[4][index_y] == ' ')
@@ -764,7 +764,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //knight
+            // knight
             for (int i = 0; i < pos->piece_count[wN]; i++)
             {
                 origin = pos->piece_list[wN][i];
@@ -774,7 +774,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                 {
                     x = index_x + knight_moves_x[j];
                     y = index_y + knight_moves_y[j];
-                    if (x & 8 || y & 8) //skip when out of board
+                    if (x & 8 || y & 8) // skip when out of board
                     {
                         continue;
                     }
@@ -796,13 +796,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //bishop
+            // bishop
             for (int i = 0; i < pos->piece_count[wB]; i++)
             {
                 origin = pos->piece_list[wB][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -832,7 +832,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -862,7 +862,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -892,7 +892,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -923,13 +923,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //rook
+            // rook
             for (int i = 0; i < pos->piece_count[wR]; i++)
             {
                 origin = pos->piece_list[wR][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -953,7 +953,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -977,7 +977,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -1001,7 +1001,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -1026,13 +1026,13 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //queen
+            // queen
             for (int i = 0; i < pos->piece_count[wQ]; i++)
             {
                 origin = pos->piece_list[wQ][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                //up left
+                // up left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -1062,7 +1062,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //up
+                // up
                 for (int j = index_x - 1; j >= 0; j--)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -1086,7 +1086,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //up right
+                // up right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x - j;
@@ -1116,7 +1116,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //left
+                // left
                 for (int j = index_y - 1; j >= 0; j--)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -1140,7 +1140,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //right
+                // right
                 for (int j = index_y + 1; j <= 7; j++)
                 {
                     if (pos->board[index_x][j] == ' ')
@@ -1164,7 +1164,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down left
+                // down left
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -1194,7 +1194,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down
+                // down
                 for (int j = index_x + 1; j <= 7; j++)
                 {
                     if (pos->board[j][index_y] == ' ')
@@ -1218,7 +1218,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         break;
                     }
                 }
-                //down right
+                // down right
                 for (int j = 1; j <= 7; j++)
                 {
                     x = index_x + j;
@@ -1249,11 +1249,11 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
-            //king
+            // king
             origin = pos->piece_list[wK][0];
             index_x = origin / 8;
             index_y = origin % 8;
-            //castling
+            // castling
             if (origin == e1)
             {
                 if (CheckMove_wkingside(pos))
@@ -1277,7 +1277,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
             {
                 x = index_x + king_moves_x[j];
                 y = index_y + king_moves_y[j];
-                if (x & 8 || y & 8) //skip when out of board
+                if (x & 8 || y & 8) // skip when out of board
                 {
                     continue;
                 }

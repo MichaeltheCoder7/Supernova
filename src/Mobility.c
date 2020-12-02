@@ -13,7 +13,7 @@ int battack_count;
 int wattack_weight;
 int battack_weight;
 
-//check if this square is defended by pawns
+// check if this square is defended by pawns
 static inline bool defended_by_wpawn(char board[8][8], int x, int y)
 {
     if (x < 6)
@@ -74,8 +74,8 @@ static inline bool defended_by_bpawn(char board[8][8], int x, int y)
     return false;
 }
 
-//get king zone
-//including king ring, king's position, and 3 forward positions
+// get king zone
+// including king ring, king's position, and 3 forward positions
 static inline bool wking_zone(int wkingx, int wkingy, int x, int y)
 {
     if (y >= wkingy - 1 && y <= wkingy + 1 && x >= wkingx - 2 && x <= wkingx + 1)
@@ -96,12 +96,12 @@ static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
     return false;
 }
 
-//mobility
-//exclude space protected by enemy pawns for minor pieces
-//exclude own queen for minor pieces
-//exclude own blocked pawns and own pawns on rank 2 and 3
-//exclude own king
-//also consider attack on enemy king
+// mobility
+// exclude space protected by enemy pawns for minor pieces
+// exclude own queen for minor pieces
+// exclude own blocked pawns and own pawns on rank 2 and 3
+// exclude own king
+// also consider attack on enemy king
 inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
@@ -112,7 +112,7 @@ inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkin
     {
         x = index_x + knight_moves_x[j];
         y = index_y + knight_moves_y[j];
-        if (x & 8 || y & 8) //out of board
+        if (x & 8 || y & 8) // out of board
         {
             continue;
         }
@@ -145,7 +145,7 @@ inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkin
     {
         x = index_x + knight_moves_x[j];
         y = index_y + knight_moves_y[j];
-        if (x & 8 || y & 8) //out of board
+        if (x & 8 || y & 8) // out of board
         {
             continue;
         }
@@ -174,7 +174,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
     int move_count = 0;
     int x, y;
 
-    //up left
+    // up left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -197,7 +197,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
             break;
         }
     }
-    //up right
+    // up right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -220,7 +220,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
             break;
         }
     }
-    //down left
+    // down left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -243,7 +243,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
             break;
         }
     }
-    //down right
+    // down right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -281,7 +281,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
     int move_count = 0;
     int x, y;
 
-    //up left
+    // up left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -304,7 +304,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
             break;
         }
     }
-    //up right
+    // up right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -327,7 +327,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
             break;
         }
     }
-    //down left
+    // down left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -350,7 +350,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
             break;
         }
     }
-    //down right
+    // down right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -388,7 +388,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     int move_count = 0;
     int x, y;
 
-    //up
+    // up
     for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
@@ -406,7 +406,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
             break;
         }
     }
-    //left
+    // left
     for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
@@ -424,7 +424,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
             break;
         }
     }
-    //right
+    // right
     for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
@@ -442,7 +442,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
             break;
         }
     }
-    //down
+    // down
     for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
@@ -475,7 +475,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     int move_count = 0;
     int x, y;
 
-    //up
+    // up
     for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
@@ -493,7 +493,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
             break;
         }
     }
-    //left
+    // left
     for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
@@ -511,7 +511,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
             break;
         }
     }
-    //right
+    // right
     for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
@@ -529,7 +529,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
             break;
         }
     }
-    //down
+    // down
     for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
@@ -562,7 +562,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     int move_count = 0;
     int x, y;
 
-    //up left
+    // up left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -584,7 +584,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //up
+    // up
     for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
@@ -602,7 +602,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //up right
+    // up right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -624,7 +624,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //left
+    // left
     for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
@@ -642,7 +642,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //right
+    // right
     for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
@@ -660,7 +660,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //down left
+    // down left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -682,7 +682,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //down
+    // down
     for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
@@ -700,7 +700,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
-    //down right
+    // down right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -737,7 +737,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
     int move_count = 0;
     int x, y;
 
-    //up left
+    // up left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -759,7 +759,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //up
+    // up
     for (int j = index_x - 1; j >= 0; j--)
     {
         x = j;
@@ -777,7 +777,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //up right
+    // up right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x - j;
@@ -799,7 +799,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //left
+    // left
     for (int j = index_y - 1; j >= 0; j--)
     {
         x = index_x;
@@ -817,7 +817,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //right
+    // right
     for (int j = index_y + 1; j <= 7; j++)
     {
         x = index_x;
@@ -835,7 +835,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //down left
+    // down left
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
@@ -857,7 +857,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //down
+    // down
     for (int j = index_x + 1; j <= 7; j++)
     {
         x = j;
@@ -875,7 +875,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
-    //down right
+    // down right
     for (int j = 1; j <= 7; j++)
     {
         x = index_x + j;
