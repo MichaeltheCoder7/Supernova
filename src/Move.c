@@ -299,7 +299,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 pos->key ^= table[0][new_y][wP];
                 // pawn hash update
                 pos->pawn_key ^= table[0][new_y][wP];
-                // white Pawn Promotion
+                // white pawn promotion
                 switch (move->promotion)
                 {
                     case 'r':
@@ -372,7 +372,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 pos->key ^= table[7][new_y][bP];
                 // pawn hash update
                 pos->pawn_key ^= table[7][new_y][bP];
-                // black Pawn Promotion 
+                // black pawn promotion 
                 switch (move->promotion)
                 {
                     case 'r':
@@ -590,7 +590,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
                 pos->piece_list[wQ][pos->piece_count[wQ]] = new_64;
                 pos->index_board[new_64] = pos->piece_count[wQ];
                 pos->piece_count[wQ]++;
-                // white Pawn Promotion
+                // white pawn promotion
                 pos->board[0][new_y] = 'Q';
                 pos->key ^= table[0][new_y][wP];
                 pos->key ^= table[0][new_y][wQ];
@@ -629,7 +629,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
                 pos->piece_list[bQ][pos->piece_count[bQ]] = new_64;
                 pos->index_board[new_64] = pos->piece_count[bQ];
                 pos->piece_count[bQ]++;
-                // black Pawn Promotion 
+                // black pawn promotion 
                 pos->board[7][new_y] = 'q';
                 pos->key ^= table[7][new_y][bP];
                 pos->key ^= table[7][new_y][bQ];
@@ -757,11 +757,11 @@ inline void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int 
         switch (new_x)
         {
             case '0':
-                // white Pawn Promotion 
+                // white pawn promotion 
                 board[0][new_y] = 'Q';
                 break;
             case '7':
-                // black Pawn Promotion 
+                // black pawn promotion 
                 board[7][new_y] = 'q';
                 break;
             default:
