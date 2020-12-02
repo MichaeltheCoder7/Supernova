@@ -1,4 +1,4 @@
-#ifndef CHECKMOVE_H
+#ifndef CHECKMOVE_H 
 #define CHECKMOVE_H
 
 #include "Board.h"

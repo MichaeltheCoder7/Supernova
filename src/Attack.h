@@ -1,4 +1,4 @@
-#ifndef ATTACK_H
+#ifndef ATTACK_H 
 #define ATTACK_H
 
 #include "Board.h"

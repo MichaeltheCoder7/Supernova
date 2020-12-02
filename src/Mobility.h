@@ -1,4 +1,4 @@
-#ifndef MOBILITY_H
+#ifndef MOBILITY_H 
 #define MOBILITY_H
 
 extern int wattack_count;

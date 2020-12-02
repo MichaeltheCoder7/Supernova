@@ -1,4 +1,4 @@
-#ifndef ORDERMOVE_H
+#ifndef ORDERMOVE_H 
 #define ORDERMOVE_H
 
 #include "Move.h"
