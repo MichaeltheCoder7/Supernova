@@ -128,6 +128,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // knight
             for (int i = 0; i < pos->piece_count[bN]; i++)
             {
@@ -160,6 +161,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // bishop
             for (int i = 0; i < pos->piece_count[bB]; i++)
             {
@@ -287,6 +289,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // rook
             for (int i = 0; i < pos->piece_count[bR]; i++)
             {
@@ -390,6 +393,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // queen
             for (int i = 0; i < pos->piece_count[bQ]; i++)
             {
@@ -613,6 +617,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // king
             origin = pos->piece_list[bK][0];
             index_x = origin / 8;
@@ -764,6 +769,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // knight
             for (int i = 0; i < pos->piece_count[wN]; i++)
             {
@@ -796,6 +802,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // bishop
             for (int i = 0; i < pos->piece_count[wB]; i++)
             {
@@ -923,6 +930,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // rook
             for (int i = 0; i < pos->piece_count[wR]; i++)
             {
@@ -1026,6 +1034,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // queen
             for (int i = 0; i < pos->piece_count[wQ]; i++)
             {
@@ -1249,6 +1258,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     }
                 }
             }
+
             // king
             origin = pos->piece_list[wK][0];
             index_x = origin / 8;

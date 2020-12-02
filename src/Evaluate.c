@@ -110,6 +110,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 wpawn_eg -= BACKWARDPAWNEG;
             }
         }
+
         // black pawn
         for (int i = 0; i < p_count; i++)
         {
@@ -168,6 +169,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 bpawn_eg -= BACKWARDPAWNEG;
             }
         }
+
         // pawn shield bonus and pawn storm penalty
         if (white_king_x > 5 && white_king_y > 4)
         {
@@ -298,6 +300,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             else if (board[3][2] == 'P')
                 bpawn_mg -= 5;
         }
+
         // open files next to king penalty
         wpawn_mg -= wking_file(board, white_king_y);
         bpawn_mg -= bking_file(board, black_king_y);
@@ -310,9 +313,11 @@ int evaluate(BOARD *pos, char board[8][8], int color)
 
         pawn_mg = bpawn_mg - wpawn_mg;
         pawn_eg = bpawn_eg - wpawn_eg;
+
         // pawn tt store
         storePawnTT(pos->pawn_key, pawn_mg, pawn_eg);
     }
+
     // white rook
     for (int i = 0; i < R_count; i++)
     {
@@ -376,6 +381,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             }
         }
     }
+
     // white knight
     for (int i = 0; i < N_count; i++)
     {
@@ -428,6 +434,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 break;
         }
     }
+
     // white bishop
     for (int i = 0; i < B_count; i++)
     {
@@ -498,6 +505,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 break;
         }
     }
+
     // white queen
     for (int i = 0; i < Q_count; i++)
     {
@@ -534,6 +542,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         midgame_black += wqueen_tropism * 2;
         endgame_black += wqueen_tropism * 4;
     }
+
     // black rook
     for (int i = 0; i < r_count; i++)
     {
@@ -597,6 +606,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             }
         }
     }
+
     // black knight
     for (int i = 0; i < n_count; i++)
     {
@@ -649,6 +659,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 break;
         }
     }
+
     // black bishop
     for (int i = 0; i < b_count; i++)
     {
@@ -719,6 +730,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 break;
         }
     }
+
     // black queen
     for (int i = 0; i < q_count; i++)
     {

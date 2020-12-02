@@ -61,6 +61,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     index++;
                 }
             }
+
             // knight
             for (int i = 0; i < pos->piece_count[bN]; i++)
             {
@@ -84,6 +85,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // bishop
             for (int i = 0; i < pos->piece_count[bB]; i++)
             {
@@ -175,6 +177,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // rook
             for (int i = 0; i < pos->piece_count[bR]; i++)
             {
@@ -242,6 +245,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // queen
             for (int i = 0; i < pos->piece_count[bQ]; i++)
             {
@@ -393,6 +397,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // king
             origin = pos->piece_list[bK][0];
             index_x = origin / 8;
@@ -453,6 +458,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     index++;
                 }
             }
+
             // knight
             for (int i = 0; i < pos->piece_count[wN]; i++)
             {
@@ -476,6 +482,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // bishop
             for (int i = 0; i < pos->piece_count[wB]; i++)
             {
@@ -567,6 +574,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // rook
             for (int i = 0; i < pos->piece_count[wR]; i++)
             {
@@ -634,6 +642,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // queen
             for (int i = 0; i < pos->piece_count[wQ]; i++)
             {
@@ -785,6 +794,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     }
                 }
             }
+
             // king
             origin = pos->piece_list[wK][0];
             index_x = origin / 8;
