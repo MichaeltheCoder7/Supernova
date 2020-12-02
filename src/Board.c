@@ -86,16 +86,16 @@ void displayboard(char board[8][8])
 
     printf("\n    a   b   c   d   e   f   g   h\n");
     //print the board
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++)
+    {
         printf("  +---+---+---+---+---+---+---+---+\n");
         printf(" %d", j);
-        for (int k = 0; k < 8; k++) {
-            if (k == 7) {
+        for (int k = 0; k < 8; k++)
+        {
+            if (k == 7)
                 printf("| %c |", board[i][k]);
-            }
-            else {
+            else
                 printf("| %c ", board[i][k]);
-            }
         }
         printf("%d", j);
         printf("\n");
