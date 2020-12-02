@@ -85,12 +85,12 @@ inline void init_zobrist()
         }
     }
 
+    turn = llrand();
     for (int i = 0; i < 8; i++)
     {
         ep[i] = llrand();
     }
 
-    turn = llrand();
     kswcr = llrand();
     qswcr = llrand();
     ksbcr = llrand();
