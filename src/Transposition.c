@@ -84,11 +84,13 @@ inline void init_zobrist()
                 table[i][j][k] = llrand();
         }
     }
-    turn = llrand();
+
     for (int i = 0; i < 8; i++)
     {
         ep[i] = llrand();
     }
+
+    turn = llrand();
     kswcr = llrand();
     qswcr = llrand();
     ksbcr = llrand();
@@ -112,6 +114,7 @@ inline unsigned long long getHash(BOARD *pos, int color)
             }
         }
     }
+
     // encode turn
     if (color == 1)
     {
@@ -134,6 +137,7 @@ inline unsigned long long getHash(BOARD *pos, int color)
     {
         h ^= qsbcr;
     }
+
     // encode en passant
     switch (pos->ep_file)
     {
