@@ -36,6 +36,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     return 8 * (x + 1) + (y + 1);
                 }
             }
+
             // knight attacks
             if (x + 2 <= 7 && y + 1 <= 7)
             {
@@ -77,6 +78,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 if (board[x - 1][y - 2] == 'N')
                     return 8 * (x - 1) + (y - 2);
             }
+
             // down left
             for (int i = 1; i <= 7; i++)
             {
@@ -101,6 +103,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // down right
             for (int i = 1; i <= 7; i++)
             {
@@ -125,6 +128,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // up left
             for (int i = 1; i <= 7; i++)
             {
@@ -149,6 +153,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // up right
             for (int i = 1; i <= 7; i++)
             {
@@ -173,6 +178,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // down
             for (int i = x + 1; i <= 7; i++)
             {
@@ -193,6 +199,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // left
             for (int i = y - 1; i >= 0; i--)
             {
@@ -214,6 +221,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // right
             for (int i = y + 1; i <= 7; i++)
             {
@@ -234,6 +242,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // up
             for (int i = x - 1; i >= 0; i--)
             {
@@ -273,6 +282,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     return 8 * (x - 1) + (y + 1);
                 }
             }
+
             // knight attacks
             if (x - 2 >= 0 && y + 1 <= 7)
             {
@@ -314,6 +324,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 if (board[x + 1][y - 2] == 'n')
                     return 8 * (x + 1) + (y - 2);
             }
+
             // up left
             for (int i = 1; i <= 7; i++)
             {
@@ -338,6 +349,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // up right
             for (int i = 1; i <= 7; i++)
             {
@@ -362,6 +374,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // down left
             for (int i = 1; i <= 7; i++)
             {
@@ -386,6 +399,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // down right
             for (int i = 1; i <= 7; i++)
             {
@@ -410,6 +424,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // up
             for (int i = x - 1; i >= 0; i--)
             {
@@ -430,6 +445,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // left
             for (int i = y - 1; i >= 0; i--)
             {
@@ -451,6 +467,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+
             // right
             for (int i = y + 1; i <= 7; i++)
             {
@@ -471,6 +488,7 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                     break;
                 }
             }
+            
             // down
             for (int i = x + 1; i <= 7; i++)
             {
