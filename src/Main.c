@@ -201,13 +201,16 @@ void parse_fen(char *position, BOARD *pos)
         }
         position++;
     }
+    
     // save number of pieces
     pos->piece_num = piece_count;
+    
     // side to move
     if (*position == 'w')
         engine_color = -1;
     else if (*position == 'b')
         engine_color = 1;
+    
     // castling rights
     position += 2;
     pos->ksb = 0;
@@ -237,6 +240,7 @@ void parse_fen(char *position, BOARD *pos)
         if (*position == ' ')
             break;
     }
+    
     // en passant
     position++;
     pos->ep_file = 0;
@@ -245,6 +249,7 @@ void parse_fen(char *position, BOARD *pos)
         pos->ep_file = *position - 96;
         position++;
     }
+    
     // half move counter
     position += 2;
     sscanf(position, "%s %s", halfmove, fullmove);
