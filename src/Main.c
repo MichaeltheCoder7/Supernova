@@ -64,12 +64,14 @@ void configure_hash(char *input)
         free(Evaltt);
         Evaltt = NULL;
     }
+
     sscanf(input, "setoption name Hash value %s\n", hash_value); // get the hash size
     hash_size = atoi(hash_value);
     if (hash_size < 1)
         hash_size = 1;
     else if (hash_size > 4096)
         hash_size = 4096;
+        
     HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
     EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
@@ -91,6 +93,7 @@ void handle_newgame()
         EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * 8);
         Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
     }
+
     // generate random zobrist numbers
     init_zobrist();
     memset(history, 0, sizeof(history)); // clear history heuristic table
@@ -289,6 +292,7 @@ void handle_position(char *input)
             Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
             clearEvalTT();
         }
+
         init_zobrist();
         memset(history, 0, sizeof(history)); // clear history heuristic table
         clearPawnTT();
@@ -502,6 +506,7 @@ void uci_loop()
         {
             continue;
         }
+        
         // listen for command
         if (!strncmp("isready", string, 7))
         {

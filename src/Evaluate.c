@@ -78,6 +78,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 wpawn_mg += white_pawn_midgame[x][y];
                 wpawn_eg += white_pawn_endgame[x][y];
             }
+
             // connected pawn bonus
             if (connected_white(board, x, y))
             {
@@ -98,6 +99,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 wpawn_mg -= DOUBLEDPAWNMG;
                 wpawn_eg -= DOUBLEDPAWNEG;
             }
+
             // isolated / backward pawn
             if (isolated_white(board, y))
             {
@@ -137,6 +139,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 bpawn_mg += black_pawn_midgame[x][y];
                 bpawn_eg += black_pawn_endgame[x][y];
             }
+
             // connected pawn bonus
             if (connected_black(board, x, y))
             {
@@ -157,6 +160,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 bpawn_mg -= DOUBLEDPAWNMG;
                 bpawn_eg -= DOUBLEDPAWNEG;
             }
+
             // isolated / backward pawn
             if (isolated_black(board, y))
             {
@@ -304,6 +308,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         // open files next to king penalty
         wpawn_mg -= wking_file(board, white_king_y);
         bpawn_mg -= bking_file(board, black_king_y);
+
         // for king position bonus midgame
         wpawn_mg += white_king_midgame[white_king_x][white_king_y];
         bpawn_mg += black_king_midgame[black_king_x][black_king_y];
@@ -325,6 +330,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[wR][i] % 8;
 
         other_bonus_white += white_rook[x][y];
+
         if (openFile(board, y))
         {
             midgame_white += ROOKOPENFILEMG;
@@ -335,11 +341,13 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             midgame_white += ROOKHALFFILEMG;
             endgame_white += ROOKHALFFILEEG;
         }
+
         // bonus for being on the same file as any queen
         if (queenFile(pos, y))
         {
             other_bonus_white += ROOKQUEENFILE;
         }
+
         // mobility
         wrook_mob = wrook_mobility(board, x, y, black_king_x, black_king_y);
         midgame_white += wrook_mob;
@@ -348,6 +356,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         wrook_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wrook_tropism * 2;
         endgame_black += wrook_tropism * 1;
+
         // trapped rook penalty
         // when mobility < 4
         if (wrook_mob < -6)
@@ -389,16 +398,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[wN][i] % 8;
 
         other_bonus_white += white_knight[x][y];
+
         if (outpost_white(board, x, y))
         {
             other_bonus_white += OUTPOST; // outpost bonus
         }
+
         // mobility
         other_bonus_white += wknight_mobility(board, x, y, black_king_x, black_king_y);
         // king tropism
         wknight_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wknight_tropism * 3;
         endgame_black += wknight_tropism * 3;
+
         // trapped pieces penalty
         switch (pos->piece_list[wN][i])
         {
@@ -442,6 +454,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[wB][i] % 8;
 
         other_bonus_white += white_bishop[x][y];
+
         if (badBishop_white(board, x, y))
         {
             other_bonus_white -= BADBISHOP; // bad bishop penalty
@@ -450,12 +463,14 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         {
             other_bonus_white += OUTPOST; // outpost bonus
         }
+
         // mobility
         other_bonus_white += wbishop_mobility(board, x, y, black_king_x, black_king_y);
         // king tropism
         wbishop_tropism = abs(x - black_king_x) + abs(y - black_king_y) - 7;
         midgame_black += wbishop_tropism * 2;
         endgame_black += wbishop_tropism * 1;
+
         // trapped pieces penalty
         switch (pos->piece_list[wB][i])
         {
@@ -513,6 +528,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[wQ][i] % 8;
 
         other_bonus_white += white_queen[x][y];
+
         // queen early development penalty
         if (x < 6)
         {
@@ -533,6 +549,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 other_bonus_white -= 4;
             }
         }
+
         // mobility
         wqueen_mob = wqueen_mobility(board, x, y, black_king_x, black_king_y);
         midgame_white += wqueen_mob;
@@ -550,6 +567,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[bR][i] % 8;
 
         other_bonus_black += black_rook[x][y];
+
         if (openFile(board, y))
         {
             midgame_black += ROOKOPENFILEMG;
@@ -560,11 +578,13 @@ int evaluate(BOARD *pos, char board[8][8], int color)
             midgame_black += ROOKHALFFILEMG;
             endgame_black += ROOKHALFFILEEG;
         }
+
         // bonus for being on the same file as any queen
         if (queenFile(pos, y))
         {
             other_bonus_black += ROOKQUEENFILE;
         }
+
         // mobility
         brook_mob = brook_mobility(board, x, y, white_king_x, white_king_y);
         midgame_black += brook_mob;
@@ -573,6 +593,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         brook_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += brook_tropism * 2;
         endgame_white += brook_tropism * 1;
+
         // trapped rook penalty
         // when mobility < 4
         if (brook_mob < -6)
@@ -614,16 +635,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[bN][i] % 8;
 
         other_bonus_black += black_knight[x][y];
+
         if (outpost_black(board, x, y))
         {
             other_bonus_black += OUTPOST; // outpost bonus
         }
+
         // mobility
         other_bonus_black += bknight_mobility(board, x, y, white_king_x, white_king_y);
         // king tropism
         bknight_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bknight_tropism * 3;
         endgame_white += bknight_tropism * 3;
+
         // trapped pieces penalty
         switch (pos->piece_list[bN][i])
         {
@@ -667,6 +691,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[bB][i] % 8;
 
         other_bonus_black += black_bishop[x][y];
+
         if (badBishop_black(board, x, y))
         {
             other_bonus_black -= BADBISHOP; // bad bishop penalty
@@ -675,12 +700,14 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         {
             other_bonus_black += OUTPOST; // outpost bonus
         }
+
         // mobility
         other_bonus_black += bbishop_mobility(board, x, y, white_king_x, white_king_y);
         // king tropism
         bbishop_tropism = abs(x - white_king_x) + abs(y - white_king_y) - 7;
         midgame_white += bbishop_tropism * 2;
         endgame_white += bbishop_tropism * 1;
+
         // trapped pieces penalty
         switch (pos->piece_list[bB][i])
         {
@@ -738,6 +765,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         y = pos->piece_list[bQ][i] % 8;
 
         other_bonus_black += black_queen[x][y];
+
         // queen early development penalty
         if (x > 1)
         {
@@ -758,6 +786,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 other_bonus_black -= 4;
             }
         }
+
         // mobility
         bqueen_mob = bqueen_mobility(board, x, y, white_king_x, white_king_y);
         midgame_black += bqueen_mob;

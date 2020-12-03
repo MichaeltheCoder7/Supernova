@@ -126,6 +126,7 @@ inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkin
             attack++;
         }
     }
+
     if (attack)
     {
         wattack_count++;
@@ -159,6 +160,7 @@ inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkin
             attack++;
         }
     }
+
     if (attack)
     {
         battack_count++;
@@ -266,6 +268,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
             break;
         }
     }
+
     if (attack)
     {
         wattack_count++;
@@ -373,6 +376,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
             break;
         }
     }
+
     if (attack)
     {
         battack_count++;
@@ -460,6 +464,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
             break;
         }
     }
+
     if (attack)
     {
         wattack_count++;
@@ -547,6 +552,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
             break;
         }
     }
+
     if (attack)
     {
         battack_count++;
@@ -722,6 +728,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
             break;
         }
     }
+
     if (attack)
     {
         wattack_count++;
@@ -897,6 +904,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
             break;
         }
     }
+    
     if (attack)
     {
         battack_count++;
