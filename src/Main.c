@@ -34,7 +34,7 @@ void *engine()
 {
     search(&pos_info, engine_color, op_move);
 
-    return 0;
+    return NULL;
 }
 
 void handle_uci()
