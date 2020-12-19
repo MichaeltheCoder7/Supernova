@@ -121,6 +121,10 @@ int makeMove(BOARD *pos, MOVE *move)
     int isCapture = 0;
     int index, square;
 
+    // update previous move
+    pos->last_move.piece = my_piece;
+    pos->last_move.to = new_64;
+
     // update board
     pos->board[new_x][new_y] = piece;
     pos->board[cur_x][cur_y] = ' ';
@@ -666,8 +670,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
 }
 
 // for null move pruning
-// return en passant file
-inline int make_nullmove(BOARD *pos)
+inline void make_nullmove(BOARD *pos)
 {
     int temp_ep = pos->ep_file;
     pos->key ^= turn;
@@ -704,44 +707,8 @@ inline int make_nullmove(BOARD *pos)
     }
     pos->ep_file = 0;
 
-    return temp_ep;
-}
-
-inline void undo_nullmove(BOARD *pos, int ep_file)
-{
-    pos->ep_file = ep_file;
-    pos->key ^= turn;
-
-    // encode en passant
-    switch (ep_file)
-    {
-        case 0:
-            break;
-        case 1:
-            pos->key ^= ep[0];
-            break;
-        case 2:
-            pos->key ^= ep[1];
-            break;
-        case 3:
-            pos->key ^= ep[2];
-            break;
-        case 4:
-            pos->key ^= ep[3];
-            break;
-        case 5:
-            pos->key ^= ep[4];
-            break;
-        case 6:
-            pos->key ^= ep[5];
-            break;
-        case 7:
-            pos->key ^= ep[6];
-            break;
-        case 8:
-            pos->key ^= ep[7];
-            break;
-    }
+    // change last move to no move
+    pos->last_move.piece = NOMOVE;
 }
 
 // for static exchange evaluation

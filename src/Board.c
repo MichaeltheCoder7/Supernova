@@ -176,6 +176,8 @@ inline void init_board(BOARD *pos)
     pos->key = getHash(pos, -1);
     pos->pawn_key = getPawnHash(pos->board);
     pos->pawn_push = false;
+    pos->last_move.piece = NOMOVE;
+    pos->last_move.to = NOMOVE;
 }
 
 inline void clear_board(char board[8][8])

@@ -8,6 +8,7 @@
 #include "SEE.h"
 #include "Search.h"
 #include "Move.h"
+#include "Transposition.h"
 
 // swap two ints
 static inline void swap(int *a, int *b)
@@ -241,8 +242,21 @@ inline int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, i
         return mvv + lva + LCAPTURE;
 }
 
-// quiet move ordering based on killer moves and history heuristic
-inline int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int color)
+// return 1 if counter moves are the same, 0 otherwise
+static inline int compareCounterMove(BOARD *pos, MOVE *move)
+{
+    if (pos->last_move.piece != NOMOVE
+        && counterMoves[pos->last_move.piece][pos->last_move.to].piece == piece_code(pos->board[move->from / 8][move->from % 8])
+        && counterMoves[pos->last_move.piece][pos->last_move.to].to == move->to)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// quiet move ordering based on killer moves, counter move, and history heuristic
+inline int quietMove_score(BOARD *pos, MOVE *move, int origin, int x, int y, int ply, int color)
 {
     if (compareMove(&killers[ply][0], move))
     {
@@ -251,6 +265,10 @@ inline int quietMove_score(MOVE *move, int origin, int x, int y, int ply, int co
     else if (compareMove(&killers[ply][1], move))
     {
         return KILLER2;
+    }
+    else if (compareCounterMove(pos, move))
+    {
+        return COUNTER;
     }
     else
     {

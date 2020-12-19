@@ -36,6 +36,7 @@ unsigned long long history_log[800];
 int history_index;
 bool stop;
 MOVE killers[MAXDEPTH][2];
+COUNTERMOVE counterMoves[12][64];
 double search_time;
 int history[2][64][64];
 bool ponderhit;
@@ -67,6 +68,28 @@ static inline void clearKiller()
     {
         clear_move(&killers[x][0]);
         clear_move(&killers[x][1]);
+    }
+}
+
+// save data in the counter move heuristic table for move ordering
+static inline void saveCounterMove(BOARD *pos, MOVE move)
+{
+    if (pos->last_move.piece != NOMOVE)
+    {
+        counterMoves[pos->last_move.piece][pos->last_move.to].piece = piece_code(pos->board[move.from / 8][move.from % 8]);
+        counterMoves[pos->last_move.piece][pos->last_move.to].to = move.to;
+    }
+}
+
+// clear counter move table
+inline void clearCounterMoveTable()
+{
+    for (int a = 0; a < 12; a++)
+    {
+        for (int b = 0; b < 64; b++)
+        {
+            counterMoves[a][b].piece = NOMOVE;
+        }
     }
 }
 
@@ -423,12 +446,10 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
 
             // make null move
-            int ep_file = make_nullmove(pos);
+            pos_copy = *pos;
+            make_nullmove(&pos_copy);
 
-            int nullVal = -pvs(pos, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
-
-            // undo null move
-            undo_nullmove(pos, ep_file);
+            int nullVal = -pvs(&pos_copy, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
 
             if (stop_search)
                 return 0;
@@ -647,6 +668,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                     if (!isTactical)
                     {
                         saveKiller(moves[x], ply);
+                        saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
                     alpha = beta;
@@ -747,6 +769,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
                 if (!isTactical)
                 {
                     saveKiller(moves[x], ply);
+                    saveCounterMove(pos, moves[x]);
                     saveHistory(moves[x], depth, color);
                 }
                 alpha = beta;
@@ -837,6 +860,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                 if (!isTactical)
                 {
                     saveKiller(moves[x], 0);
+                    saveCounterMove(pos, moves[x]);
                     saveHistory(moves[x], depth, color);
                 }
                 alpha = beta;
@@ -1076,6 +1100,7 @@ void search(BOARD *pos, int piece_color, char op_move[6])
         clearTT(); // clear main hash table
         clearEvalTT(); // clear evaluation hash table
         clearPawnTT(); // clear pawn hash table
+        clearCounterMoveTable();
         memset(history, 0, sizeof(history)); // clear history heuristic table
     }
     else

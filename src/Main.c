@@ -96,6 +96,7 @@ void handle_newgame()
 
     // generate random zobrist numbers
     init_zobrist();
+    clearCounterMoveTable();
     memset(history, 0, sizeof(history)); // clear history heuristic table
     outofbook = 0;
     // clear hash tables
@@ -262,6 +263,8 @@ void parse_fen(char *position, BOARD *pos)
     pos->key = getHash(pos, engine_color);
     pos->pawn_key = getPawnHash(pos->board);
     pos->pawn_push = false;
+    pos->last_move.piece = NOMOVE;
+    pos->last_move.to = NOMOVE;
 }
 
 void handle_position(char *input)
@@ -294,6 +297,7 @@ void handle_position(char *input)
         }
 
         init_zobrist();
+        clearCounterMoveTable();
         memset(history, 0, sizeof(history)); // clear history heuristic table
         clearPawnTT();
         outofbook = 0;
