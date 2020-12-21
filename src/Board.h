@@ -33,7 +33,7 @@ typedef struct {
     int qsw;
     int ksb;
     int qsb;
-    int ep_file;
+    int ep_file; // 0: no ep, 1: a, 2: b...
     int piece_num;
     int halfmove_counter;
     int piece_list[12][10];
