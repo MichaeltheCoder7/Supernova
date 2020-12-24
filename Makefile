@@ -1,14 +1,14 @@
 # Makefile
 CC = gcc
-SRC = ./src/*.c
+SRC = src/*.c src/Fathom/tbprobe.c
 LIBS = -lpthread
-WEXE = ./bin/Supernova_dev.exe
-LEXE = ./bin/Supernova_dev_linux
-TEXE = ./bin/Supernova_test.exe
+WEXE = bin/Supernova_dev.exe
+LEXE = bin/Supernova_dev_linux
+TEXE = bin/Supernova_test.exe
 WFLAGS = -std=c99 $(LIBS) -static -flto -Ofast
 LFLAGS = -std=c99 $(LIBS) -O3 -DLINUX
 DFLAGS = -std=c99 $(LIBS) -static -g -Wall -Wextra -Wshadow
-PSRC = $(filter-out ./src/Main.c, $(wildcard ./src/*.c ./tests/Perft.c))
+PSRC = $(filter-out src/Main.c, $(wildcard src/*.c tests/Perft.c))
 
 ######################## executables for release ######################
 windows:

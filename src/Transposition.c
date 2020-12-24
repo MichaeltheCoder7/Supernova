@@ -72,7 +72,7 @@ inline unsigned long long llrand()
     return r & 0xFFFFFFFFFFFFFFFFULL;
 }
 
-// initialize zobrist hashing:
+// initialize zobrist hashing
 inline void init_zobrist()
 {
     // fill a table of random numbers
@@ -81,7 +81,9 @@ inline void init_zobrist()
         for (int j = 0; j < 8; j++)
         {
             for (int k = 0; k < 12; k++)
+            {
                 table[i][j][k] = llrand();
+            }
         }
     }
 
