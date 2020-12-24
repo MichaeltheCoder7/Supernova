@@ -17,8 +17,10 @@
 #include "Move.h"
 #include "Search.h"
 #include "Transposition.h"
+#include "Syzygy.h"
+#include "Fathom/tbprobe.h"
 
-#define VERSION "dev"
+#define VERSION "syzygy"
 
 // global variables
 // specify color for engine
@@ -28,7 +30,6 @@ int engine_color;
 int outofbook;
 BOARD pos_info;
 char op_move[6] = "";
-bool newgame;
 
 void *engine()
 {
@@ -43,9 +44,12 @@ void handle_uci()
     printf("id author Minkai Yang\n");
     // options
     printf("option name Hash type spin default 32 min 1 max 4096\n");
-    printf("option name Ponder type check default false\n");
     printf("option name Clear Hash type button\n");
+    printf("option name Ponder type check default false\n");
+    printf("option name SyzygyPath type string default <empty>\n");
+    printf("option name SyzygyProbeDepth type spin default 1 min 1 max 100\n");
     printf("uciok\n");
+    fflush(stdout);
 }
 
 // configure hash table size
@@ -65,45 +69,80 @@ void configure_hash(char *input)
         Evaltt = NULL;
     }
 
-    sscanf(input, "setoption name Hash value %s\n", hash_value); // get the hash size
+    sscanf(input, "Hash value %s\n", hash_value); // get the hash size
     hash_size = atoi(hash_value);
     if (hash_size < 1)
         hash_size = 1;
     else if (hash_size > 4096)
         hash_size = 4096;
-        
+    
+    // allocate 3/4 memory to main hash table and 1/4 memory to eval hash table 
     HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * (3.0 * hash_size / 4.0));
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
     EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * (hash_size / 4.0));
     Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
+    if (!tt || !Evaltt)
+    {
+        printf("info string Out of memory!\n");
+        fflush(stdout);
+        exit(1);
+    }
     clearTT();
     clearEvalTT();
+
+    printf("info string Hash tables set to %dMB.\n", hash_size);
 }
 
-// some GUIs might not support this command
-void handle_newgame()
+// handle options
+void handle_options(char *input)
 {
-    if (tt == NULL) // default main tt if not set
+    char buffer[20] = "";
+
+    input += 15;
+    if (!strncmp("Hash", input, 4))
     {
-        HASHSIZE = (long)((1048576.0 / sizeof(struct DataItem)) * 24);
-        tt = malloc(HASHSIZE * sizeof(struct DataItem));
+        configure_hash(input);
     }
-    if (Evaltt == NULL) // default eval tt if not set
+    else if (!strncmp("Clear Hash", input, 10))
     {
-        EVALHASHSIZE = (long)((1048576.0 / sizeof(struct Eval)) * 8);
-        Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
+        // clear hash tables 
+        clearTT();
+        clearEvalTT();
+        clearPawnTT();
+        clearCounterMoveTable();
+        memset(history, 0, sizeof(history)); // clear history heuristic table
+    }
+    else if (!strncmp("SyzygyPath", input, 10))
+    {
+        input += 17;
+        input[strlen(input) - 1] = '\0'; // remove the new line character
+        tb_init(input);
+        if (TB_LARGEST > 0)
+        {
+            printf("info string Syzygy Path set to %s.\n", input);
+        }
+    }
+    else if (!strncmp("SyzygyProbeDepth", input, 16))
+    {
+        sscanf(input, "SyzygyProbeDepth value %s\n", buffer);
+        TB_DEPTH = atoi(buffer);
     }
 
-    // generate random zobrist numbers
-    init_zobrist();
+    fflush(stdout);
+}
+
+// some GUIs might not use this command at the beginning
+void handle_newgame()
+{
+    init_zobrist(); // generate random zobrist numbers
     clearCounterMoveTable();
     memset(history, 0, sizeof(history)); // clear history heuristic table
     outofbook = 0;
+
     // clear hash tables
     clearTT();
     clearEvalTT();
     clearPawnTT();
-    newgame = true;
 }
 
 // parse fen notation
@@ -199,8 +238,9 @@ void parse_fen(char *position, BOARD *pos)
                 x++;
                 break;
             default:
-                printf("Can't parse fen!\n");
-                exit(0);
+                printf("info string Can't parse fen!\n");
+                fflush(stdout);
+                exit(1);
                 break;
         }
         position++;
@@ -280,30 +320,6 @@ void handle_position(char *input)
     memset(op_move, 0, sizeof(op_move));
     memset(history_log, -1, sizeof(history_log)); // clear history table
 
-    // in case the GUI doesn't send ucinewgame command
-    if (!newgame)
-    {
-        if (tt == NULL) // default main tt if not set
-        {
-            HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
-            tt = malloc(HASHSIZE * sizeof(struct DataItem));
-            clearTT();
-        }
-        if (Evaltt == NULL) // default eval tt if not set
-        {
-            EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
-            Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
-            clearEvalTT();
-        }
-
-        init_zobrist();
-        clearCounterMoveTable();
-        memset(history, 0, sizeof(history)); // clear history heuristic table
-        clearPawnTT();
-        outofbook = 0;
-        newgame = true;
-    }
-
     // parse starting position
     if ((position = strstr(input, "startpos")))
     {
@@ -377,13 +393,6 @@ void handle_go(char *input)
     analyze = false;
     node_mode = false;
     time_management = false;
-
-    // in case tt size is not set
-    if (tt == NULL || Evaltt == NULL)
-    {
-        printf("info string Error! Hash table size not set!\n");
-        return;
-    }
 
     // get remaining time
     if ((pointer = strstr(input, "wtime")))
@@ -485,8 +494,9 @@ void handle_go(char *input)
 
     if (error)
     {
-        printf("info string Pthread error occured: %d.\n", error);
-        exit(0);
+        printf("info string Thread error occured: %d.\n", error);
+        fflush(stdout);
+        exit(1);
     }
 }
 
@@ -515,6 +525,7 @@ void uci_loop()
         if (!strncmp("isready", string, 7))
         {
             printf("readyok\n");
+            fflush(stdout);
         }
         else if (!strncmp("ucinewgame", string, 10))
         {
@@ -540,17 +551,9 @@ void uci_loop()
         {
             ponderhit = true;
         }
-        else if (!strncmp("setoption name Hash", string, 19))
+        else if (!strncmp("setoption name", string, 14))
         {
-            configure_hash(string);
-        }
-        else if (!strncmp("setoption name Clear Hash", string, 25))
-        {
-            // clear hash tables 
-            clearTT();
-            clearEvalTT();
-            clearPawnTT();
-            memset(history, 0, sizeof(history)); // clear history heuristic table
+            handle_options(string);
         }
         else if (!strncmp("quit", string, 4))
         {
@@ -573,6 +576,12 @@ void uci_loop()
                 free(Evaltt);
                 Evaltt = NULL;
             }
+
+            // free tb
+            if (TB_LARGEST > 0)
+            {
+                tb_free();
+            }
             break;
         }
     }
@@ -581,13 +590,29 @@ void uci_loop()
 // UCI GUI
 int main()
 {
-    // initialize global variables
+    // initialize variables
     tt = NULL;
     Evaltt = NULL;
-    HASHSIZE = EVALHASHSIZE = 0;
     engine_color = 0;
     outofbook = 0;
-    newgame = false;
+    TB_DEPTH = 1;
+    init_zobrist();
+    init_setMask();
+
+    // default main tt (24MB)
+    HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
+    tt = malloc(HASHSIZE * sizeof(struct DataItem));
+    clearTT();
+    // default eval tt (8MB)
+    EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
+    Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
+    clearEvalTT();
+
+    clearCounterMoveTable();
+    memset(history, 0, sizeof(history));
+    clearPawnTT();
+
+    // start UCI loop
     uci_loop();
 
     return 0;

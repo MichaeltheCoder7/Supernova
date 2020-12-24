@@ -17,6 +17,7 @@
 #include "Evaluate.h"
 #include "Transposition.h"
 #include "SEE.h"
+#include "Syzygy.h"
 
 #define LOWERBOUND  0
 #define EXACT       1
@@ -25,7 +26,7 @@
 #define INFINITE    20000
 
 // global variables:
-int nodes;
+int nodes, tbhits;
 struct timeval starting_time;
 char BestMove[6];
 MOVE searched_move;
@@ -89,6 +90,7 @@ inline void clearCounterMoveTable()
         for (int b = 0; b < 64; b++)
         {
             counterMoves[a][b].piece = NOMOVE;
+            counterMoves[a][b].to = NOMOVE;
         }
     }
 }
@@ -333,6 +335,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     MOVE hash_move;
     int extension;
     int probcutVal, probcutBeta;
+    unsigned tbprobe;
+    int tbValue, tbBound;
     bm.from = NOMOVE;
     hash_move.from = NOMOVE;
 
@@ -410,6 +414,36 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             hash_move = entry->bestmove;
         // get static eval from tt
         eval = entry->statEval;
+    }
+
+    // probe Syzygy tablebases
+    if ((tbprobe = tablebasesProbeWDL(pos, depth, color)) != TB_RESULT_FAILED)
+    {
+        tbhits++;
+
+        switch (tbprobe)
+        {
+            case TB_WIN:
+                tbValue = INFINITE - MAXDEPTH - ply;
+                tbBound = LOWERBOUND;
+                break;
+            case TB_LOSS:
+                tbValue = -INFINITE + MAXDEPTH + ply;
+                tbBound = UPPERBOUND;
+                break;
+            default:
+                tbValue = 0;
+                tbBound = EXACT;
+                break;
+        }
+
+        if (tbBound == EXACT 
+            || (tbBound == LOWERBOUND && tbValue >= beta)
+            || (tbBound == UPPERBOUND && tbValue <= alpha))
+        {
+            storeTT(pos->key, valueToTT(tbValue, ply), eval, depth, &bm, tbBound);
+            return tbValue;
+        }
     }
 
     // get static eval
@@ -1035,18 +1069,18 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         // send info to GUI
         if (val > 19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, (INFINITE - val - 1) / 2 + 1,
-                nodes, (int)(secs * 1000), get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d tbhits %d pv", current_depth, (INFINITE - val - 1) / 2 + 1,
+                nodes, (int)(secs * 1000), get_nps(nodes, secs), tbhits);
         }
         else if (val < -19000)
         {
-            printf("info depth %d score mate %d nodes %d time %d nps %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1,
-                nodes, (int)(secs * 1000), get_nps(nodes, secs));
+            printf("info depth %d score mate %d nodes %d time %d nps %d tbhits %d pv", current_depth, -(INFINITE + val - 1) / 2 - 1,
+                nodes, (int)(secs * 1000), get_nps(nodes, secs), tbhits);
         }
         else
         {
-            printf("info depth %d score cp %d nodes %d time %d nps %d pv", current_depth, val, nodes, (int)(secs * 1000),
-                get_nps(nodes, secs));
+            printf("info depth %d score cp %d nodes %d time %d nps %d tbhits %d pv", current_depth, val, nodes, (int)(secs * 1000),
+                get_nps(nodes, secs), tbhits);
         }
 
         for (int i = 0; i < current_depth; i++)
@@ -1054,6 +1088,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
             printf(" %s", pv_table[i]);
         }
         printf("\n");
+        fflush(stdout);
 
         if (valid_partial_search)
         {
@@ -1079,17 +1114,34 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     {
         printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);
     }
+
+    fflush(stdout);
 }
 
 void search(BOARD *pos, int piece_color, char op_move[6])
 {
-    // prepare to search
+    // get the starting time
     gettimeofday(&starting_time, NULL);
+
+    MOVE probedMove;
+    char move[6];
+    int score;
+    // probe Syzygy tablebases at root
+    if (tablebasesProbeDTZ(pos, &probedMove, &score, piece_color))
+    {
+        move_to_string(&probedMove, move);
+        printf("info depth 1 score cp %d nodes 0 time 0 nps 0 tbhits 1 pv %s\n", score, move);
+        printf("bestmove %s\n", move);
+        fflush(stdout);
+        return;
+    }
+
+    // prepare to search
     ageHistory();
     clearKiller(); // clear killer move table
     memset(BestMove, 0, sizeof(BestMove));
     stop_search = false;
-    nodes = 0;
+    nodes = 0, tbhits = 0;
 
     // search
     iterative_deepening(pos, (search_depth == -1) ? MAXDEPTH : search_depth, piece_color, op_move);
@@ -1100,7 +1152,7 @@ void search(BOARD *pos, int piece_color, char op_move[6])
         clearTT(); // clear main hash table
         clearEvalTT(); // clear evaluation hash table
         clearPawnTT(); // clear pawn hash table
-        clearCounterMoveTable();
+        clearCounterMoveTable(); // clear counter move table
         memset(history, 0, sizeof(history)); // clear history heuristic table
     }
     else
