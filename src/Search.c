@@ -215,7 +215,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
 }
 
 // quiescence search with captures and queen promotion
-static int quiescence(BOARD *pos, int color, int ply, int alpha, int beta)
+static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
 {
     int value = -INFINITE;
     int length;
@@ -327,7 +327,7 @@ static int quiescence(BOARD *pos, int color, int ply, int alpha, int beta)
                 continue;
         }
 
-        value = -quiescence(&pos_copy, -color, ply + 1, -beta, -alpha);
+        value = -quiescence(&pos_copy, ply + 1, -color, -beta, -alpha);
 
         if (stop_search)
             return 0;
@@ -401,7 +401,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     // if depth reaches the end
     if (depth == 0)
     {
-        return quiescence(pos, color, ply, alpha, beta);
+        return quiescence(pos, ply, color, alpha, beta);
     }
 
     nodes++;
@@ -479,7 +479,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     // razoring
     if (!is_PV && !isCheck && depth == 1 && eval <= alpha - 300)
     {
-        return quiescence(pos, color, ply, alpha, beta);
+        return quiescence(pos, ply, color, alpha, beta);
     }
 
     // static null move / reverse futility pruning
@@ -557,7 +557,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
 
             // verify first with qsearch
-            probcutVal = -quiescence(&pos_copy, -color, ply + 1, -probcutBeta, -probcutBeta + 1);
+            probcutVal = -quiescence(&pos_copy, ply + 1, -color, -probcutBeta, -probcutBeta + 1);
 
             if (probcutVal >= probcutBeta)
             {
