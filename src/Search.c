@@ -215,7 +215,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
 }
 
 // quiescence search with captures and queen promotion
-static int quiescence(BOARD *pos, int color, int alpha, int beta)
+static int quiescence(BOARD *pos, int color, int ply, int alpha, int beta)
 {
     int value = -INFINITE;
     int length;
@@ -225,9 +225,10 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
     int cap_piece_value;
     int new_x, new_y;
     BOARD pos_copy;
+    struct DataItem *entry;
 
-    // prefetch eval hash table
-    __builtin_prefetch(&Evaltt[pos->key % EVALHASHSIZE]);
+    // prefetch hash table
+    __builtin_prefetch(&tt[pos->key % (HASHSIZE - 1)]);
 
     // exit if time is up
     timeUp();
@@ -236,7 +237,35 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
 
     nodes++;
 
-    int standing_pat = evaluate(pos, pos->board, color);
+    int TTeval;
+    short eval = VALUENONE;
+    // transposition table look up
+    entry = probeTT(pos->key);
+    if (entry != NULL)
+    {
+        // adjust mate scores form tt
+        TTeval = valueFromTT(entry->evaluation, ply);
+        
+        // cutoff based on the flag
+        switch (entry->flag)
+        {
+            case EXACT:
+                return TTeval;
+            case LOWERBOUND:
+                if (beta <= TTeval)
+                    return beta;
+                break;
+            case UPPERBOUND:
+                if (alpha >= TTeval)
+                    return alpha;
+                break;
+        }
+
+        // get static eval from tt
+        eval = entry->statEval;
+    }
+
+    int standing_pat = ((eval != VALUENONE)? eval : evaluate(pos, pos->board, color));
 
     if (standing_pat >= beta)
     {
@@ -298,7 +327,7 @@ static int quiescence(BOARD *pos, int color, int alpha, int beta)
                 continue;
         }
 
-        value = -quiescence(&pos_copy, -color, -beta, -alpha);
+        value = -quiescence(&pos_copy, -color, ply + 1, -beta, -alpha);
 
         if (stop_search)
             return 0;
@@ -372,7 +401,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     // if depth reaches the end
     if (depth == 0)
     {
-        return quiescence(pos, color, alpha, beta);
+        return quiescence(pos, color, ply, alpha, beta);
     }
 
     nodes++;
@@ -387,28 +416,23 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         {
             // adjust mate scores form tt
             TTeval = valueFromTT(entry->evaluation, ply);
+
             // cutoff based on the flag
             switch (entry->flag)
             {
                 case EXACT:
-                {
                     return TTeval;
-                    break;
-                }
                 case LOWERBOUND:
-                {
                     if (beta <= TTeval)
                         return beta;
                     break;
-                }
                 case UPPERBOUND:
-                {
                     if (alpha >= TTeval)
                         return alpha;
                     break;
-                }
             }
         }
+
         // get the hash move
         if (entry->flag != UPPERBOUND)
             hash_move = entry->bestmove;
@@ -455,7 +479,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     // razoring
     if (!is_PV && !isCheck && depth == 1 && eval <= alpha - 300)
     {
-        return quiescence(pos, color, alpha, beta);
+        return quiescence(pos, color, ply, alpha, beta);
     }
 
     // static null move / reverse futility pruning
@@ -464,7 +488,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         int margin = 96 * depth;
         if (eval - margin >= beta)
         {
-            return eval - margin; // same as returning beta or eval in fail-hard
+            return eval - margin;
         }
     }
 
@@ -533,7 +557,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
 
             // verify first with qsearch
-            probcutVal = -quiescence(&pos_copy, -color, -probcutBeta, -probcutBeta + 1);
+            probcutVal = -quiescence(&pos_copy, -color, ply + 1, -probcutBeta, -probcutBeta + 1);
 
             if (probcutVal >= probcutBeta)
             {
