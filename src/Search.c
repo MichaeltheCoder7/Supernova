@@ -214,7 +214,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
     return false;
 }
 
-// quiescence search with captures and queen promotion
+// fail-soft quiescence search with captures and queen promotion
 static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
 {
     int value = -INFINITE;
@@ -253,11 +253,11 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
                 return TTeval;
             case LOWERBOUND:
                 if (beta <= TTeval)
-                    return beta;
+                    return TTeval;
                 break;
             case UPPERBOUND:
                 if (alpha >= TTeval)
-                    return alpha;
+                    return TTeval;
                 break;
         }
 
@@ -269,7 +269,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
 
     if (standing_pat >= beta)
     {
-        return beta;
+        return standing_pat;
     }
 
     // delta pruning
@@ -282,6 +282,8 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
     {
         alpha = standing_pat;
     }
+
+    int best = standing_pat;
 
     // generate captures and queen promotion
     MOVE moves[256];
@@ -332,20 +334,26 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
         if (stop_search)
             return 0;
 
-        if (value > alpha)
+        if (value > best)
         {
-            if (value >= beta)
+            best = value;
+
+            if (value > alpha)
             {
-                return beta; // beta cut-off
+                alpha = value;
+
+                if (value >= beta)
+                {
+                    break; // beta cut-off
+                }
             }
-            alpha = value;
         }
     }
 
-    return alpha;
+    return best;
 }
 
-// fail-hard principal variation search
+// fail-soft principal variation search
 static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV, int isCheck)
 {
     int value = -INFINITE;
@@ -424,11 +432,11 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                     return TTeval;
                 case LOWERBOUND:
                     if (beta <= TTeval)
-                        return beta;
+                        return TTeval;
                     break;
                 case UPPERBOUND:
                     if (alpha >= TTeval)
-                        return alpha;
+                        return TTeval;
                     break;
             }
         }
@@ -488,7 +496,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         int margin = 96 * depth;
         if (eval - margin >= beta)
         {
-            return eval - margin;
+            return eval;
         }
     }
 
@@ -639,10 +647,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if (!isTactical)
             quietCount++;
 
-        // hack to ensure pv line is more intact
-        if (moves_made == 1)
-            bm = moves[x];
-
         extension = 0;
         // passed pawn extension
         if (pos_copy.piece_num <= 18 && pos_copy.pawn_push)
@@ -698,7 +702,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         else
         {
             value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
-            if (value > alpha)
+            if (value > alpha && value < beta)
             {
                 value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
@@ -718,9 +722,14 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         if (value > best)
         {
             best = value;
+            bm = moves[x];
+
             if (value > alpha)
             {
-                bm = moves[x];
+                alpha = value;
+                alpha_raised = true;
+                entryFlag = EXACT;
+
                 if (value >= beta)
                 {
                     if (!isTactical)
@@ -729,13 +738,9 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
-                    alpha = beta;
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }
-                alpha_raised = true;
-                alpha = value;
-                entryFlag = EXACT;
             }
         }
     }
@@ -745,11 +750,11 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         bm.from = NOMOVE;
         if (isCheck)
         {
-            alpha = -INFINITE + ply; // checkmate
+            best = -INFINITE + ply; // checkmate
         }
         else
         {
-            alpha = contempt(pos, ply); // stalemate
+            best = contempt(pos, ply); // stalemate
         }
     }
     // draw by fifty moves
@@ -759,14 +764,15 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     // transposition table store:    
-    storeTT(pos->key, valueToTT(alpha, ply), eval, depth, &bm, entryFlag);
-    return alpha;
+    storeTT(pos->key, valueToTT(best, ply), eval, depth, &bm, entryFlag);
+    return best;
 }
 
 // internal iterative deepening
 MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 {
     int value = -INFINITE;
+    int best = -INFINITE;
     int length;
     int entryFlag = UPPERBOUND;
     int isTactical, giveCheck;
@@ -809,7 +815,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         else
         {
             value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
-            if (value > alpha)
+            if (value > alpha && value < beta)
             {
                 value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
@@ -819,28 +825,33 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         if (stop_search)
             return bm;
 
-        if (value > alpha)
+        if (value > best)
         {
-            bm = moves[x];
-            if (value >= beta)
+            best = value;
+
+            if (value > alpha)
             {
-                if (!isTactical)
+                alpha = value;
+                bm = moves[x];
+                entryFlag = EXACT;
+
+                if (value >= beta)
                 {
-                    saveKiller(moves[x], ply);
-                    saveCounterMove(pos, moves[x]);
-                    saveHistory(moves[x], depth, color);
+                    if (!isTactical)
+                    {
+                        saveKiller(moves[x], ply);
+                        saveCounterMove(pos, moves[x]);
+                        saveHistory(moves[x], depth, color);
+                    }
+                    entryFlag = LOWERBOUND;
+                    break; // beta cut-off
                 }
-                alpha = beta;
-                entryFlag = LOWERBOUND;
-                break; // beta cut-off
             }
-            alpha = value;
-            entryFlag = EXACT;
         }
     }
 
     // transposition table store:  
-    storeTT(pos->key, valueToTT(alpha, ply), VALUENONE, depth, &bm, entryFlag);
+    storeTT(pos->key, valueToTT(best, ply), VALUENONE, depth, &bm, entryFlag);
     return bm;
 }
 
@@ -848,6 +859,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
 {
     int value = -INFINITE;
+    int best = -INFINITE;
     int length;
     struct DataItem *entry;
     int entryFlag = UPPERBOUND;
@@ -900,7 +912,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         else
         {
             value = -pvs(&pos_copy, depth - 1, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
-            if (value > alpha)
+            if (value > alpha && value < beta)
             {
                 value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true, giveCheck);
             }
@@ -910,30 +922,35 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         if (stop_search)
             break;
 
-        if (value > alpha)
+        if (value > best)
         {
-            bm = moves[x];
-            if (value >= beta)
+            best = value;
+
+            if (value > alpha)
             {
-                if (!isTactical)
+                alpha = value;
+                bm = moves[x];
+                entryFlag = EXACT;
+
+                if (value >= beta)
                 {
-                    saveKiller(moves[x], 0);
-                    saveCounterMove(pos, moves[x]);
-                    saveHistory(moves[x], depth, color);
+                    if (!isTactical)
+                    {
+                        saveKiller(moves[x], 0);
+                        saveCounterMove(pos, moves[x]);
+                        saveHistory(moves[x], depth, color);
+                    }
+                    entryFlag = LOWERBOUND;
+                    break; // beta cut-off
                 }
-                alpha = beta;
-                entryFlag = LOWERBOUND;
-                break; // beta cut-off
             }
-            alpha = value;
-            entryFlag = EXACT;
         }
     }
 
     searched_move = bm; // save the best move to play
     // transposition table store:  
-    storeTT(pos->key, alpha, VALUENONE, depth, &bm, entryFlag);
-    return alpha;
+    storeTT(pos->key, best, VALUENONE, depth, &bm, entryFlag);
+    return best;
 }
 
 // obtain the principal variation from the hash table
