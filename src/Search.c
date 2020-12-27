@@ -310,7 +310,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
         piece = pos->board[new_x][new_y];
         cap_piece_value = piece_value(piece);
 
-        // delta pruning
+        // futility pruning
         if ((standing_pat + cap_piece_value + 200) < alpha && !isprom)
         {
             if (pos_copy.piece_num > 10)
@@ -441,7 +441,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
         }
 
-        // get the hash move
+        // get the hash move when it's not upperbound
         if (entry->flag != UPPERBOUND)
             hash_move = entry->bestmove;
         // get static eval from tt
