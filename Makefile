@@ -1,7 +1,7 @@
 # Makefile
 CC = gcc
 SRC = src/*.c src/Fathom/tbprobe.c
-LIBS = -lpthread
+LIBS = -lpthread -lm
 WEXE = bin/Supernova_dev.exe
 LEXE = bin/Supernova_dev_linux
 TEXE = bin/Supernova_test.exe
