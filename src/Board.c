@@ -157,6 +157,18 @@ inline int position_to_y(char position[3])
     return -1;
 }
 
+// convert 0 - 63 index to rank
+inline int get_rank(int index)
+{
+    return index / 8;
+}
+
+// convert 0 - 63 index to file
+inline int get_file(int index)
+{
+    return index % 8;
+}
+
 // initialize board struct to starting position
 inline void init_board(BOARD *pos)
 {

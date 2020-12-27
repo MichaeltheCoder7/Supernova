@@ -17,6 +17,9 @@ enum positions {
     a1, b1, c1, d1, e1, f1, g1, h1
 };
 
+enum ranks { Rank8, Rank7, Rank6, Rank5, Rank4, Rank3, Rank2, Rank1 };
+enum files { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
+
 typedef struct {
 
     unsigned char piece;
@@ -44,11 +47,17 @@ typedef struct {
 
 } BOARD;
 
+static const int pieceValues[12] = { 100, 325, 335, 500, 975, 20000, 100, 325, 335, 500, 975, 20000 };
+
 void displayboard(char board[8][8]);
 
 int position_to_x(char position[3]);
 
 int position_to_y(char position[3]);
+
+int get_rank(int index);
+
+int get_file(int index);
 
 void init_board(BOARD *pos);
 
