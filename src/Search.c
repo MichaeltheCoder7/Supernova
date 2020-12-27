@@ -321,8 +321,8 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
         moved_piece_value = piece_value(moved_piece);
 
         // SEE pruning
-        // only check when higher takes lower and not promotion
-        // do not check when king is capturing
+        // only check when higher takes lower
+        // do not check when king is capturing or promotion
         if (moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && !isprom)
         {
             if (SEE(pos_copy.board, new_x, new_y, cap_piece_value, color) < 0)
@@ -478,20 +478,24 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
     }
 
+    // skip forward prunings when it's a pv node or in check 
+    if (is_PV || isCheck)
+        goto skip_pruning;
+
     // get static eval
-    if (!is_PV && !isCheck && eval == VALUENONE)
+    if (eval == VALUENONE)
     {
         eval = evaluate(pos, pos->board, color);
     }
 
     // razoring
-    if (!is_PV && !isCheck && depth == 1 && eval <= alpha - 300)
+    if (depth == 1 && eval <= alpha - 300)
     {
         return quiescence(pos, ply, color, alpha, beta);
     }
 
     // static null move / reverse futility pruning
-    if (depth <= 7 && !is_PV && !isCheck && abs(beta) < 19000)
+    if (depth <= 7 && abs(beta) < 19000)
     {
         int margin = 96 * depth;
         if (eval - margin >= beta)
@@ -501,7 +505,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     // null move pruning
-    if (DoNull && !isCheck && depth >= 3 && !is_PV && eval >= beta)
+    if (DoNull && depth >= 3 && eval >= beta)
     {
         if (nonPawnMaterial(pos, color))
         {
@@ -528,7 +532,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     // probcut
-    if (!is_PV && !isCheck && depth >= 5 && abs(beta) < 19000 && eval >= beta)
+    if (depth >= 5 && abs(beta) < 19000 && eval >= beta)
     {
         int moved_piece_value, cap_piece_value;
         int new_x, new_y;
@@ -557,6 +561,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             new_y = moves[x].to % 8;
             cap_piece_value = piece_value(pos->board[new_x][new_y]);
             moved_piece_value = piece_value(pos_copy.board[new_x][new_y]);
+
             // skip moves with SEE < 0
             if (moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isTactical != 2)
             {
@@ -569,8 +574,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 
             if (probcutVal >= probcutBeta)
             {
-                giveCheck = ifCheck(&pos_copy, -color);
                 // reduced depth search to confirm the value is above beta
+                giveCheck = ifCheck(&pos_copy, -color);
                 probcutVal = -pvs(&pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false, giveCheck);
             }
             if (probcutVal >= probcutBeta)
@@ -581,10 +586,12 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     // conditions for futility pruning
-    if (eval != VALUENONE && (eval + futilityMargin[depth]) <= alpha && abs(alpha) < 19000)
+    if ((eval + futilityMargin[depth]) <= alpha && abs(alpha) < 19000)
     {
         futility = true;
     }
+
+skip_pruning:
 
     // internal iterative deepening
     if (is_PV && depth >= 6 && hash_move.from == NOMOVE)
