@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <math.h>
 #include "Attack.h"
 #include "Search.h"
 #include "Board.h"
@@ -31,6 +32,7 @@ struct timeval starting_time;
 char BestMove[6];
 MOVE searched_move;
 char pv_table[MAXDEPTH][6];
+int lmr_table[64][64];
 
 // global variables in header
 unsigned long long history_log[800];
@@ -49,6 +51,17 @@ bool time_management;
 bool node_mode;
 int search_nodes;
 bool stop_search;
+
+void init_lmr()
+{
+    for(int depth = 1; depth < 64; depth++)
+    {
+        for(int move = 1; move < 64; move++)
+        {
+            lmr_table[depth][move] = 1 + log(depth) * log(move) / 2;
+        }
+    }
+}
 
 // save killer moves
 static inline void saveKiller(MOVE move, int ply)
@@ -688,9 +701,7 @@ skip_pruning:
             && !compareMove(&killers[ply][0], &moves[x])
             && !compareMove(&killers[ply][1], &moves[x]))
         {
-            reduction_depth = 1;
-            if (moves_made > 6)
-                reduction_depth += 1;
+            reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
             // increase reductions for bad history moves
             if (scores[x] == 0)

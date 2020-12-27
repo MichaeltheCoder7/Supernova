@@ -598,6 +598,7 @@ int main()
     TB_DEPTH = 1;
     init_zobrist();
     init_setMask();
+    init_lmr();
 
     // default main tt (24MB)
     HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
