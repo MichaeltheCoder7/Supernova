@@ -10,6 +10,7 @@ typedef struct {
     unsigned char from;
     unsigned char to;
     char promotion;
+    unsigned char move_type; // 0: quiet 1: capture 2: promotion 3: castling
 
 } MOVE;
 

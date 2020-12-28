@@ -145,11 +145,37 @@ static inline void saveHistory(MOVE move, int depth, int color)
     int b = move.from;
     int c = move.to;
 
+    // increase score for this move
     history[a][b][c] += depth * depth;
+
     // prevent overflow
     if (history[a][b][c] > 80000000)
     {
         preventOverflow();
+    }
+}
+
+static inline void adjustHistory(MOVE moveList[256], int moveIndex, int depth, int color)
+{
+    int a = (color == 1) ? 1 : 0;
+    int b, c;
+
+    // loop through previous moves and reduce scores
+    for (int i = 0; i < moveIndex; i++)
+    {
+        if (!moveList[i].move_type) // quiet
+        {
+            b = moveList[i].from;
+            c = moveList[i].to;
+
+            history[a][b][c] -= depth * depth;
+            
+            // prevent overflow
+            if (history[a][b][c] < -80000000)
+            {
+                preventOverflow();
+            }
+        }
     }
 }
 
@@ -704,8 +730,8 @@ skip_pruning:
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
             // increase reductions for bad history moves
-            if (scores[x] == 0)
-                reduction_depth += 1;
+            //if (scores[x] == 0)
+                //reduction_depth += 1;
 
             reduction_depth = MIN(new_depth - 1, reduction_depth); // do not drop to qsearch
             new_depth -= reduction_depth;
@@ -756,6 +782,7 @@ skip_pruning:
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
+                    adjustHistory(moves, x, depth, color);
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }
@@ -861,6 +888,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
+                    adjustHistory(moves, x, depth, color);
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }
@@ -958,6 +986,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
+                    adjustHistory(moves, x, depth, color);
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }

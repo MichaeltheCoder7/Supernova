@@ -33,6 +33,7 @@ inline void clear_move(MOVE *move)
     move->from = NOMOVE;
     move->to = NOMOVE;
     move->promotion = ' ';
+    move->move_type = NOMOVE;
 }
 
 // return 1 if moves are the same, 0 otherwise
@@ -339,6 +340,8 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[wQ]++;
                         break;
                 }
+                // update move type
+                move->move_type = 2;
                 return 2;
             }
             else if (abs(new_y - cur_y) == 1 && op_piece == ' ')
@@ -355,6 +358,8 @@ int makeMove(BOARD *pos, MOVE *move)
                 square = pos->piece_list[bP][pos->piece_count[bP]];
                 pos->piece_list[bP][index] = square;
                 pos->index_board[square] = index;
+                // update move type
+                move->move_type = 1;
                 return 1;
             }
             if (new_x == 1)
@@ -412,6 +417,8 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[bQ]++;
                         break;
                 }
+                // update move type
+                move->move_type = 2;
                 return 2;
             }
             else if (abs(new_y - cur_y) == 1 && op_piece == ' ')
@@ -428,6 +435,8 @@ int makeMove(BOARD *pos, MOVE *move)
                 square = pos->piece_list[wP][pos->piece_count[wP]];
                 pos->piece_list[wP][index] = square;
                 pos->index_board[square] = index;
+                // update move type
+                move->move_type = 1;
                 return 1;
             }
             if (new_x == 6)
@@ -447,6 +456,8 @@ int makeMove(BOARD *pos, MOVE *move)
                 index = pos->index_board[h1];
                 pos->index_board[f1] = index;
                 pos->piece_list[wR][index] = f1;
+                // update move type
+                move->move_type = 3;
                 return 3;
             }
             else if (cur_64 == 60 && new_64 == 58)
@@ -459,6 +470,8 @@ int makeMove(BOARD *pos, MOVE *move)
                 index = pos->index_board[a1];
                 pos->index_board[d1] = index;
                 pos->piece_list[wR][index] = d1;
+                // update move type
+                move->move_type = 3;
                 return 3;
             }
             break;
@@ -476,6 +489,8 @@ int makeMove(BOARD *pos, MOVE *move)
                 index = pos->index_board[h8];
                 pos->index_board[f8] = index;
                 pos->piece_list[bR][index] = f8;
+                // update move type
+                move->move_type = 3;
                 return 3;
             }
             else if (cur_64 == 4 && new_64 == 2)
@@ -488,10 +503,15 @@ int makeMove(BOARD *pos, MOVE *move)
                 index = pos->index_board[a8];
                 pos->index_board[d8] = index;
                 pos->piece_list[bR][index] = d8;
+                // update move type
+                move->move_type = 3;
                 return 3;
             }
             break;
     }
+
+    // update move type
+    move->move_type = isCapture;
 
     return isCapture;
 }
