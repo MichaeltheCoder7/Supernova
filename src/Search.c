@@ -54,9 +54,9 @@ bool stop_search;
 
 void init_lmr()
 {
-    for(int depth = 1; depth < 64; depth++)
+    for (int depth = 1; depth < 64; depth++)
     {
-        for(int move = 1; move < 64; move++)
+        for (int move = 1; move < 64; move++)
         {
             lmr_table[depth][move] = 1 + log(depth) * log(move) / 2;
         }
@@ -729,11 +729,10 @@ skip_pruning:
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
-            // increase reductions for bad history moves
-            //if (scores[x] == 0)
-                //reduction_depth += 1;
+            // adjust reductions based on history
+            //reduction_depth -= (history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to] / 1000);
 
-            reduction_depth = MIN(new_depth - 1, reduction_depth); // do not drop to qsearch
+            reduction_depth = MIN(new_depth - 1, MAX(reduction_depth, 0)); // do not drop to qsearch or extend
             new_depth -= reduction_depth;
         }
 
