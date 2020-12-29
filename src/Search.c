@@ -724,13 +724,16 @@ skip_pruning:
             && !isCheck
             && !extension
             && !isTactical
-            && !compareMove(&killers[ply][0], &moves[x])
-            && !compareMove(&killers[ply][1], &moves[x]))
+            && scores[x] != KILLER1
+            && scores[x] != KILLER2)
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
+     
+            int hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
 
             // adjust reductions based on history
-            //reduction_depth -= (history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to] / 1000);
+            if (hist_score < 0)
+                reduction_depth += MIN(hist_score / -250, 2);
 
             reduction_depth = MIN(new_depth - 1, MAX(reduction_depth, 0)); // do not drop to qsearch or extend
             new_depth -= reduction_depth;
