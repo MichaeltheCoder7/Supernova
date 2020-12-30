@@ -3,6 +3,9 @@
 
 #include <stdbool.h>
 
+#define GET_RANK(INDEX) INDEX / 8 // convert 0 - 63 index to rank
+#define GET_FILE(INDEX) INDEX % 8 // convert 0 - 63 index to file
+
 enum pieces { wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 
 enum positions {
@@ -54,10 +57,6 @@ void displayboard(char board[8][8]);
 int position_to_x(char position[3]);
 
 int position_to_y(char position[3]);
-
-int get_rank(int index);
-
-int get_file(int index);
 
 void init_board(BOARD *pos);
 
