@@ -548,17 +548,13 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     {
         if (nonPawnMaterial(pos, color))
         {
-            int R = 2;
-            if (depth > 6)
-            {
-                R = 3;
-            }
+            int R = 3 + depth / 4;
 
             // make null move
             pos_copy = *pos;
             make_nullmove(&pos_copy);
 
-            int nullVal = -pvs(&pos_copy, depth - 1 - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
+            int nullVal = -pvs(&pos_copy, depth - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
 
             if (stop_search)
                 return 0;
