@@ -52,7 +52,7 @@ bool node_mode;
 int search_nodes;
 bool stop_search;
 
-void init_lmr()
+inline void init_lmr()
 {
     for (int depth = 1; depth < 64; depth++)
     {
