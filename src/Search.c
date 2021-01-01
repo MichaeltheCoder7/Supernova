@@ -780,7 +780,10 @@ skip_pruning:
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
-                    adjustHistory(moves, x, depth, color);
+                    if (quietCount)
+                    {
+                        adjustHistory(moves, x, depth, color);
+                    }
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }
