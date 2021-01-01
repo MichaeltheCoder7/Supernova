@@ -793,14 +793,14 @@ skip_pruning:
 
     if (!moves_made)
     {
-        bm.from = NOMOVE;
         if (isCheck)
         {
+            bm.from = NOMOVE;
             best = -INFINITE + ply; // checkmate
         }
         else
         {
-            best = contempt(pos, ply); // stalemate
+            return contempt(pos, ply); // stalemate
         }
     }
     // draw by fifty moves
@@ -908,7 +908,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     if (!moves_made)
     {
         bm.from = NOMOVE;
-        best = contempt(pos, ply); // stalemate
+        return bm; // stalemate
     }
 
     // transposition table store:  
