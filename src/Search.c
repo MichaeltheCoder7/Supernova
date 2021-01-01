@@ -629,7 +629,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
 skip_pruning:
 
     // internal iterative deepening
-    if (is_PV && depth >= 6 && hash_move.from == NOMOVE)
+    if (is_PV && !isCheck && depth >= 6 && hash_move.from == NOMOVE)
     {
         hash_move = internalID(pos, depth - depth / 4 - 1, ply, color, alpha, beta);
     }
@@ -822,6 +822,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     int length;
     int entryFlag = UPPERBOUND;
     int isTactical, giveCheck;
+    int moves_made = 0, quietCount = 0;
     BOARD pos_copy;
     MOVE bm;
     bm.from = NOMOVE;
@@ -851,6 +852,10 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         {
             continue;
         }
+
+        moves_made++;
+        if (!isTactical)
+            quietCount++;
 
         giveCheck = ifCheck(&pos_copy, -color);
 
@@ -889,12 +894,21 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
-                    adjustHistory(moves, x, depth, color);
+                    if (quietCount)
+                    {
+                        adjustHistory(moves, x, depth, color);
+                    }
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }
             }
         }
+    }
+
+    if (!moves_made)
+    {
+        bm.from = NOMOVE;
+        best = contempt(pos, ply); // stalemate
     }
 
     // transposition table store:  
@@ -911,6 +925,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     struct DataItem *entry;
     int entryFlag = UPPERBOUND;
     int isTactical, giveCheck;
+    int quietCount = 0;
     BOARD pos_copy;
     MOVE bm;
     MOVE hash_move;
@@ -950,6 +965,9 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
             continue;
         }
 
+        if (!isTactical)
+            quietCount++;
+
         giveCheck = ifCheck(&pos_copy, -color);
 
         if (value == -INFINITE)
@@ -987,7 +1005,10 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                         saveCounterMove(pos, moves[x]);
                         saveHistory(moves[x], depth, color);
                     }
-                    adjustHistory(moves, x, depth, color);
+                    if (quietCount)
+                    {
+                        adjustHistory(moves, x, depth, color);
+                    }
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
                 }
