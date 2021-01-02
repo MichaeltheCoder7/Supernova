@@ -405,11 +405,10 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     bool futility = false;
     int moves_made = 0, quietCount = 0;
     int reduction_depth, new_depth;
-    int isTactical, giveCheck;
+    int isTactical, giveCheck, hist_score;
     BOARD pos_copy;
-    MOVE bm;
-    MOVE hash_move;
-    int extension;
+    MOVE bm, hash_move;
+    int extension, hashMoveType;
     int probcutVal, probcutBeta;
     unsigned tbprobe;
     int tbValue, tbBound;
@@ -652,9 +651,12 @@ skip_pruning:
         // generate moves after hash move or if hash move doesn't exist
         if (x == start_moveGen)
         {
+            if (start_moveGen)
+                hashMoveType = moves[0].move_type;
             length = moveGen(pos, moves, scores, ply, color);
-            skipHashMove(moves, scores, length, &hash_move, x);
+            skipHashMove(moves, scores, length, &hash_move, hashMoveType, x);
         }
+
         // find the move with highest score
         if (x >= start_moveGen)
             movesort(moves, scores, length, x);
@@ -725,13 +727,13 @@ skip_pruning:
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
-            int hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
+            hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
 
             // adjust reductions based on history
             if (hist_score < 0)
                 reduction_depth += MIN(hist_score / -500, 2);
 
-            reduction_depth = MIN(new_depth - 1, MAX(reduction_depth, 0)); // do not drop to qsearch or extend
+            reduction_depth = MIN(new_depth - 1, reduction_depth); // do not drop to qsearch
             new_depth -= reduction_depth;
         }
 
@@ -927,8 +929,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     int isTactical, giveCheck;
     int quietCount = 0;
     BOARD pos_copy;
-    MOVE bm;
-    MOVE hash_move;
+    MOVE bm, hash_move;
     bm.from = NOMOVE;
     clear_move(&hash_move);
 

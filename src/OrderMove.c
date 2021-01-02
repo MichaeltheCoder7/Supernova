@@ -43,7 +43,7 @@ inline void movesort(MOVE moves[256], int sort[256], int length, int current)
 }
 
 // find the hash move if it exists and put it at the beginning of the move list to skip it
-inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move, int exist)
+inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_move, unsigned char move_type, int exist)
 {
     if (!exist)
     {
@@ -58,6 +58,7 @@ inline void skipHashMove(MOVE moves[256], int sort[256], int length, MOVE *hash_
                 sort[x] = HASHMOVE;
                 swap(&sort[0], &sort[x]);
                 swapMove(&moves[0], &moves[x]);
+                moves[0].move_type = move_type;
                 return;
             }
         }
