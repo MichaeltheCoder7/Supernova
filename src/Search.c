@@ -400,7 +400,6 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     int length;
     struct DataItem *entry;
     int entryFlag = UPPERBOUND;
-    bool alpha_raised = false;
     int mate_value = INFINITE - ply;
     bool futility = false;
     int moves_made = 0, quietCount = 0;
@@ -737,27 +736,28 @@ skip_pruning:
             new_depth -= reduction_depth;
         }
 
-    search_again:
-
-        if (!alpha_raised)
+        if (moves_made == 1)
         {
+            // full depth normal window search for the 1st move
             value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, is_PV, giveCheck);
         }
         else
         {
+            // null window search
             value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+
+            // search again with null window and full depth if lmr failed
+            if (reduction_depth && value > alpha)
+            {
+                new_depth += reduction_depth;
+                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            }
+
+            // full depth normal window search
             if (value > alpha && value < beta)
             {
                 value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
-        }
-
-        // search again if lmr failed
-        if (reduction_depth && value > alpha)
-        {
-            new_depth += reduction_depth;
-            reduction_depth = 0;
-            goto search_again;
         }
 
         if (stop_search)
@@ -771,7 +771,6 @@ skip_pruning:
             if (value > alpha)
             {
                 alpha = value;
-                alpha_raised = true;
                 entryFlag = EXACT;
 
                 if (value >= beta)
@@ -861,7 +860,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 
         giveCheck = ifCheck(&pos_copy, -color);
 
-        if (value == -INFINITE)
+        if (moves_made == 1)
         {
             value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
         }
