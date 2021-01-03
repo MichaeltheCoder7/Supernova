@@ -299,6 +299,7 @@ void parse_fen(char *position, BOARD *pos)
     sscanf(position, "%s %s", halfmove, fullmove);
     pos->halfmove_counter = atoi(halfmove);
     history_index = pos->halfmove_counter;
+    
     set_piecelists(pos);
     pos->key = getHash(pos, engine_color);
     pos->pawn_key = getPawnHash(pos->board);
