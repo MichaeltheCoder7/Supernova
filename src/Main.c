@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-#ifdef LINUX
+#ifdef __linux__
 #include <unistd.h>
 #else
 #include <windows.h>
@@ -560,7 +560,7 @@ void uci_loop()
         {
             stop = true;
 
-            #ifdef LINUX
+            #ifdef __linux__
             sleep(1);
             #else
             Sleep(300); // wait till all threads are done

@@ -2,30 +2,29 @@
 CC = gcc
 SRC = src/*.c src/Fathom/tbprobe.c
 LIBS = -lpthread -lm
-WEXE = bin/Supernova_dev.exe
+WEXE = bin/Supernova_dev
 LEXE = bin/Supernova_dev_linux
-TEXE = bin/Supernova_test.exe
-WFLAGS = -std=c99 $(LIBS) -static -flto -Ofast
-LFLAGS = -std=c99 $(LIBS) -O3 -DLINUX
-DFLAGS = -std=c99 $(LIBS) -static -g -Wall -Wextra -Wshadow
+TEXE = bin/Supernova_test
+RFLAGS = -std=c99 -static -flto -Ofast
+DFLAGS = -std=c99 -g -Wall -Wextra -Wshadow
 PSRC = $(filter-out src/Main.c, $(wildcard src/*.c tests/Perft.c))
 
 ######################## executables for release ######################
 windows:
-	$(CC) $(WFLAGS) $(SRC) -o $(WEXE)
+	$(CC) $(RFLAGS) $(SRC) $(LIBS) -o $(WEXE)
 
 linux:
-	$(CC) $(LFLAGS) $(SRC) -o $(LEXE)
+	$(CC) $(RFLAGS) $(SRC) $(LIBS) -o $(LEXE)
 
 ######################## executables for testing #######################
 test:
-	$(CC) $(WFLAGS) $(SRC) -o $(TEXE)
+	$(CC) $(RFLAGS) $(SRC) $(LIBS) -o $(TEXE)
 
 debug:
-	$(CC) $(DFLAGS) $(SRC) -o $(TEXE)
+	$(CC) $(DFLAGS) $(SRC) $(LIBS) -o $(TEXE)
 
 perft:
-	$(CC) $(WFLAGS) $(PSRC) -o $(TEXE)
+	$(CC) $(RFLAGS) $(PSRC) -o $(TEXE)
 
 ############################### others #################################
 run:
@@ -36,6 +35,3 @@ run_linux:
 
 run_test:
 	$(TEXE)
-
-clean:
-	rm -rf $(WEXE) $(LEXE) $(TEXE)
