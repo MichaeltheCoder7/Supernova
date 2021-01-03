@@ -719,20 +719,25 @@ skip_pruning:
         if (new_depth >= 2
             && moves_made > 3
             && !isCheck
-            && !extension
-            && !isTactical
-            && scores[x] != KILLER1
-            && scores[x] != KILLER2)
+            && !isTactical)
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
             hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
 
+            // reduce less for pv nodes
+            if (is_PV)
+                reduction_depth--;
+
+            // reduce less for killer and counter moves
+            if (scores[x] == KILLER1 || scores[x] == KILLER2 || scores[x] == COUNTER)
+                reduction_depth--;
+
             // adjust reductions based on history
             if (hist_score < 0)
                 reduction_depth += MIN(hist_score / -500, 2);
 
-            reduction_depth = MIN(new_depth - 1, reduction_depth); // do not drop to qsearch
+            reduction_depth = MIN(new_depth - 1, MAX(0, reduction_depth)); // do not drop to qsearch or extend
             new_depth -= reduction_depth;
         }
 
@@ -822,7 +827,8 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     int best = -INFINITE;
     int length;
     int entryFlag = UPPERBOUND;
-    int isTactical, giveCheck;
+    int reduction_depth, new_depth;
+    int isTactical, giveCheck, hist_score;
     int moves_made = 0, quietCount = 0;
     BOARD pos_copy;
     MOVE bm;
@@ -860,16 +866,55 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 
         giveCheck = ifCheck(&pos_copy, -color);
 
+        // late move reduction
+        reduction_depth = 0;
+        new_depth = depth - 1;
+
+        if (new_depth >= 2
+            && moves_made > 3
+            && !giveCheck
+            && !isTactical)
+        {
+            reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
+
+            hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
+
+            // reduce less for pv nodes
+            reduction_depth--;
+
+            // reduce less for killer and counter moves
+            if (scores[x] == KILLER1 || scores[x] == KILLER2 || scores[x] == COUNTER)
+                reduction_depth--;
+
+            // adjust reductions based on history
+            if (hist_score < 0)
+                reduction_depth += MIN(hist_score / -500, 2);
+
+            reduction_depth = MIN(new_depth - 1, MAX(0, reduction_depth)); // do not drop to qsearch or extend
+            new_depth -= reduction_depth;
+        }
+
         if (moves_made == 1)
         {
-            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
+            // full depth normal window search for the 1st move
+            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
         }
         else
         {
-            value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            // null window search
+            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+
+            // search again with null window and full depth if lmr failed
+            if (reduction_depth && value > alpha)
+            {
+                new_depth += reduction_depth;
+                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            }
+
+            // full depth normal window search
             if (value > alpha && value < beta)
             {
-                value = -pvs(&pos_copy, depth - 1, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
+                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
 
@@ -925,8 +970,9 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     int length;
     struct DataItem *entry;
     int entryFlag = UPPERBOUND;
-    int isTactical, giveCheck;
-    int quietCount = 0;
+    int reduction_depth, new_depth;
+    int isTactical, giveCheck, hist_score;
+    int moves_made = 0, quietCount = 0;
     BOARD pos_copy;
     MOVE bm, hash_move;
     bm.from = NOMOVE;
@@ -965,21 +1011,61 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
             continue;
         }
 
+        moves_made++;
         if (!isTactical)
             quietCount++;
 
         giveCheck = ifCheck(&pos_copy, -color);
 
-        if (value == -INFINITE)
+        // late move reduction at root
+        reduction_depth = 0;
+        new_depth = depth - 1;
+
+        if (new_depth >= 2
+            && moves_made > 5
+            && !giveCheck
+            && !isTactical)
         {
-            value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true, giveCheck);
+            reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
+
+            hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
+
+            // reduce less for pv nodes
+            reduction_depth--;
+
+            // reduce less for killer and counter moves
+            if (scores[x] == KILLER1 || scores[x] == KILLER2 || scores[x] == COUNTER)
+                reduction_depth--;
+
+            // adjust reductions based on history
+            if (hist_score < 0)
+                reduction_depth += MIN(hist_score / -500, 2);
+
+            reduction_depth = MIN(new_depth - 1, MAX(0, reduction_depth)); // do not drop to qsearch or extend
+            new_depth -= reduction_depth;
+        }
+
+        if (moves_made == 1)
+        {
+            // full depth normal window search for the 1st move
+            value = -pvs(&pos_copy, new_depth, 1, -color, -beta, -alpha, true, true, giveCheck);
         }
         else
         {
-            value = -pvs(&pos_copy, depth - 1, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            // null window search
+            value = -pvs(&pos_copy, new_depth, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+
+            // search again with null window and full depth if lmr failed
+            if (reduction_depth && value > alpha)
+            {
+                new_depth += reduction_depth;
+                value = -pvs(&pos_copy, new_depth, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            }
+
+            // full depth normal window search
             if (value > alpha && value < beta)
             {
-                value = -pvs(&pos_copy, depth - 1, 1, -color, -beta, -alpha, true, true, giveCheck);
+                value = -pvs(&pos_copy, new_depth, 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
 
