@@ -16,7 +16,7 @@
 // -1: white
 int evaluate(BOARD *pos, char board[8][8], int color)
 {
-    // tt probe
+    // eval tt probe
     struct Eval *entry = probeEvalTT(pos->key);
     if (entry != NULL)
     {

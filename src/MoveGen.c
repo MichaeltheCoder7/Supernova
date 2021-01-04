@@ -16,7 +16,7 @@ const int king_moves_x[8] = { -1, -1, -1,  0,  0,  1,  1,  1 };
 const int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 // generate all pseudo-legal moves
-// generate scores for each move
+// assign scores for each move
 int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
 {
     int index = 0;

@@ -10,7 +10,7 @@
 
 // 1: white attackers
 // -1: black attackers
-// x and y are the indices of the board
+// x and y are the rank and file of the board
 // return index 0 - 63 of the smallest attacker on the board
 // return -1 if not attacked
 static int get_smallest_attacker(char board[8][8], int x, int y, int color)
