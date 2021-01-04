@@ -515,7 +515,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
         }
     }
 
-    // skip forward prunings when it's a pv node or in check 
+    // skip forward pruning when it's a pv node or in check 
     if (is_PV || isCheck)
         goto skip_pruning;
 

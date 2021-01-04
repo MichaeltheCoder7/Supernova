@@ -72,7 +72,7 @@ inline unsigned long long llrand()
     return r & 0xFFFFFFFFFFFFFFFFULL;
 }
 
-// initialize zobrist hashing
+// initialize Zobrist hashing
 inline void init_zobrist()
 {
     // fill a table of random numbers
@@ -99,7 +99,7 @@ inline void init_zobrist()
     qsbcr = llrand();
 }
 
-// use zobrist hashing to encode chess board
+// use Zobrist hashing to encode chess board
 inline unsigned long long getHash(BOARD *pos, int color)
 {
     unsigned long long h = 0;

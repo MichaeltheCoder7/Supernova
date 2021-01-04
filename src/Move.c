@@ -172,7 +172,7 @@ int makeMove(BOARD *pos, MOVE *move)
         pos->ksb = 0;
     }
 
-    // zobrist key update
+    // Zobrist key update
     pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
 
     if (op_piece != ' ') // capture
@@ -535,7 +535,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     pos->board[new_x][new_y] = piece;
     pos->board[cur_x][cur_y] = ' ';
 
-    // zobrist key update
+    // Zobrist key update
     pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
     if (op_piece != ' ') // capture
     {

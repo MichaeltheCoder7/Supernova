@@ -134,7 +134,7 @@ void handle_options(char *input)
 // some GUIs might not use this command at the beginning
 void handle_newgame()
 {
-    init_zobrist(); // generate random zobrist numbers
+    init_zobrist(); // generate random Zobrist numbers
     clearCounterMoveTable();
     memset(history, 0, sizeof(history)); // clear history heuristic table
     outofbook = 0;
@@ -314,7 +314,7 @@ void handle_position(char *input)
     MOVE smove;
     char own_piece = ' ';
     char op_piece = ' ';
-    // parse the positon input
+    // parse the position input
     char *position = NULL;
     char *move_str = NULL;
     const char s[2] = " ";
@@ -495,7 +495,7 @@ void handle_go(char *input)
 
     if (error)
     {
-        printf("info string Thread error occured: %d.\n", error);
+        printf("info string Thread error occurred: %d.\n", error);
         fflush(stdout);
         exit(1);
     }
