@@ -1323,7 +1323,7 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     char move[6];
     int score;
     // probe Syzygy tablebases at root
-    if (tablebasesProbeDTZ(pos, &probedMove, &score, piece_color))
+    if (!analyze && tablebasesProbeDTZ(pos, &probedMove, &score, piece_color))
     {
         move_to_string(&probedMove, move);
         printf("info depth 1 score cp %d nodes 0 time 0 nps 0 tbhits 1 pv %s\n", score, move);
