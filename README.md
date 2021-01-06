@@ -43,7 +43,7 @@ UCI Options
 * Fixed Search Depth
 * Time per Move
 * Nodes
-* Analyze/Infinite  
+* Analyze / Infinite  
   
 **Hash**  
 Configure the hash table size from 1MB to 4096MB. The default is 32MB. 
@@ -58,7 +58,7 @@ Does not change anything. It's there to notify the GUI that Supernova can ponder
 Path to the directory containing Syzygy tablebases files.  
 
 **SyzygyProbeDepth**  
-The minimum depth which enables Supernova to probe Syzygy tablebases in the search. The default is 1. You may need to increase it if the search speed is too slow.
+The minimum depth that enables Supernova to probe Syzygy tablebases in the search. The default is 1. You may need to increase it if the search speed is too slow.
 
 Details
 -------
