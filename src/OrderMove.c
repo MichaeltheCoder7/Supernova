@@ -26,7 +26,7 @@ static inline void swapMove(MOVE *move1, MOVE *move2)
     *move2 = temp;
 }
 
-// insertion sort
+// selection sort
 inline void movesort(MOVE moves[256], int sort[256], int length, int current)
 {
     // find the move with the highest score
