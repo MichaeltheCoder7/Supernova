@@ -46,7 +46,7 @@ UCI Options
 * Analyze / Infinite  
   
 **Hash**  
-Configure the hash table size from 1MB to 4096MB. The default is 32MB. 
+Configure the hash table size to 1MB-4096MB. The default is 32MB. 
 
 **Clear Hash**  
 Clear the hash tables.  
