@@ -1,22 +1,22 @@
 # Supernova
 
-Supernova is an open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Shredder...) to function properly. Supernova appears on the [CCRL](http://ccrl.chessdom.com/ccrl/404/) rating list. Take a look at its Elo progression [here](http://ccrl.chessdom.com/ccrl/404/cgi/compare_engines.cgi?family=Supernova&print=Rating+list&print=Results+table&print=LOS+table&print=Ponder+hit+table&print=Eval+difference+table&print=Comopp+gamenum+table&print=Overlap+table&print=Score+with+common+opponents).
+Supernova is an open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Cutechess...) to function properly. Supernova appears on the [CCRL](http://ccrl.chessdom.com/ccrl/404/) rating list. Take a look at its Elo progression [here](http://ccrl.chessdom.com/ccrl/404/cgi/compare_engines.cgi?family=Supernova&print=Rating+list&print=Results+table&print=LOS+table&print=Ponder+hit+table&print=Eval+difference+table&print=Comopp+gamenum+table&print=Overlap+table&print=Score+with+common+opponents).
 
 Installation
 ------------
-You can download the Windows and Linux binaries from the latest release. Alternatively, if the binaries are not compatible with your CPU, you can download the compressed source code file provided by the release, go to the Supernova directory that contains src and bin directories, and compile natively using GCC, then the binary should appear in the bin directory. 
+You can download the Windows and Linux binaries from the latest release. Alternatively, if the binaries are not compatible, you can download the compressed source code file provided by the release, go to the Supernova directory that contains src and bin directories, and compile natively using GCC, then the binary should appear in the bin directory. 
 
 Windows:
 ```
-gcc -std=c99 -lpthread -static -flto -Ofast ./src/*.c -o ./bin/Supernova_2.2.1.exe
+gcc -std=c99 -static -flto -Ofast src/*.c src/Fathom/tbprobe.c -lpthread -lm -o bin/Supernova_2.3.exe
 ```
 
 Linux:
 ```
-gcc -std=c99 -lpthread -flto -Ofast -DLINUX ./src/*.c -o ./bin/Supernova_2.2.1_linux
+gcc -std=c99 -static -flto -Ofast src/*.c src/Fathom/tbprobe.c -lpthread -lm -o bin/Supernova_2.3_linux
 ```
 
-Note that GCC version 10 or above is preferable, and compiling might fail for GCC versions below 5. It's recommended to compile the Linux version on your own since the GCC version that was used is outdated.
+Note that GCC version 10 or above is preferable, and compiling might fail for GCC versions below 5.
 
 [**Releases**](https://github.com/MichaeltheCoder7/Supernova/releases)  
 
@@ -35,29 +35,36 @@ Supernova does not have its own opening book so it's recommended to use the book
 
 [**Arena Download**](http://www.playwitharena.de)
 
+UCI Options
+-----------
+**Supported Search Modes**
+* Blitz
+* Tournament
+* Fixed Search Depth
+* Time per Move
+* Nodes
+* Analyze/Infinite  
+  
+**Hash**  
+Configure the hash table size from 1MB to 4096MB. The default is 32MB. 
+
+**Clear Hash**  
+Clear the hash tables.  
+
+**Ponder**  
+Does not change anything. It's there to notify the GUI that Supernova can ponder.  
+
+**SyzygyPath**  
+Path to the directory containing Syzygy tablebases files.  
+
+**SyzygyProbeDepth**  
+The minimum depth which enables Supernova to probe Syzygy tablebases in the search. The default is 1. You may need to increase it if the search speed is too slow.
+
 Details
 -------
-**UCI Features** 
-* Search Mode
-  * Blitz
-  * Tournament
-  * Fixed Search Depth
-  * Time per Move
-  * Nodes
-  * Analyze/Infinite
-* FEN Support
-* Pondering  
-* Configurable Hash Tables from 1MB to 4096MB  
-* Clear Hash Tables Option
-* Search Information and Principal Variation
-
 **Board Representation**
 * 8x8 Board (mailbox)
 * Piece Lists
-
-**Move Generation**  
-* All Pseudo-Legal Moves of Chess (including castling, en passant, queen promotion, and under promotions)
-* Capture and Queen Promotion Generator for Quiescence Search
 
 **Search** 
 * Transposition Table
@@ -96,12 +103,10 @@ Details
   * King Attack
 * Game Phase
 
-Author
-------
-**Minkai Yang**  
-
-Email: mikeyang7@yahoo.com  
-Free free to email me if you have any problems with Supernova.
+Acknowledgements
+----------------
+* Chess Programming Wiki
+* Fathom
 
 License
 -------
