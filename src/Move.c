@@ -132,45 +132,37 @@ int makeMove(BOARD *pos, MOVE *move)
     pos->board[cur_x][cur_y] = ' ';
 
     // castling rights check
-    if (pos->board[7][4] != 'K')
+    if (pos->ksw)
     {
-        if (pos->ksw)
+        if (pos->board[7][4] != 'K' || pos->board[7][7] != 'R')
+        {
             pos->key ^= kswcr;
-        if (pos->qsw)
+            pos->ksw = 0;
+        }
+    }
+    if (pos->qsw)
+    {
+        if (pos->board[7][4] != 'K' || pos->board[7][0] != 'R')
+        {
             pos->key ^= qswcr;
-        pos->ksw = pos->qsw = 0;
+            pos->qsw = 0;
+        }
     }
-    if (pos->board[0][4] != 'k')
+    if (pos->ksb)
     {
-        if (pos->ksb)
+        if (pos->board[0][4] != 'k' || pos->board[0][7] != 'r')
+        {
             pos->key ^= ksbcr;
-        if (pos->qsb)
+            pos->ksb = 0;
+        }
+    }
+    if (pos->qsb)
+    {
+        if (pos->board[0][4] != 'k' || pos->board[0][0] != 'r')
+        {
             pos->key ^= qsbcr;
-        pos->ksb = pos->qsb = 0;
-    }
-    if (pos->board[7][0] != 'R')
-    {
-        if (pos->qsw)
-            pos->key ^= qswcr;
-        pos->qsw = 0;
-    }
-    if (pos->board[7][7] != 'R')
-    {
-        if (pos->ksw)
-            pos->key ^= kswcr;
-        pos->ksw = 0;
-    }
-    if (pos->board[0][0] != 'r')
-    {
-        if (pos->qsb)
-            pos->key ^= qsbcr;
-        pos->qsb = 0;
-    }
-    if (pos->board[0][7] != 'r')
-    {
-        if (pos->ksb)
-            pos->key ^= ksbcr;
-        pos->ksb = 0;
+            pos->qsb = 0;
+        }
     }
 
     // Zobrist key update
