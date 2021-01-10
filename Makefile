@@ -2,8 +2,8 @@
 CC = gcc
 SRC = src/*.c src/Fathom/tbprobe.c
 LIBS = -lpthread -lm
-WEXE = bin/Supernova_2.3.exe
-LEXE = bin/Supernova_2.3_linux
+WEXE = bin/Supernova_dev.exe
+LEXE = bin/Supernova_dev_linux
 TEXE = bin/Supernova_test
 RFLAGS = -std=c99 -static -flto -Ofast
 DFLAGS = -std=c99 -g -Wall -Wextra -Wshadow
