@@ -140,35 +140,10 @@ inline unsigned long long getHash(BOARD *pos, int color)
         h ^= qsbcr;
     }
 
-    // encode en passant
-    switch (pos->ep_file)
+    // encode en passant file
+    if (pos->ep_file != 0)
     {
-        case 0:
-            break;
-        case 1:
-            pos->key ^= ep[0];
-            break;
-        case 2:
-            pos->key ^= ep[1];
-            break;
-        case 3:
-            pos->key ^= ep[2];
-            break;
-        case 4:
-            pos->key ^= ep[3];
-            break;
-        case 5:
-            pos->key ^= ep[4];
-            break;
-        case 6:
-            pos->key ^= ep[5];
-            break;
-        case 7:
-            pos->key ^= ep[6];
-            break;
-        case 8:
-            pos->key ^= ep[7];
-            break;
+        h ^= ep[pos->ep_file - 1];
     }
 
     return h;

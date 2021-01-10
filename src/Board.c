@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <assert.h>
 #include "Board.h"
 #include "Transposition.h"
 
@@ -108,53 +109,13 @@ void displayboard(char board[8][8])
 // get the x index from a position on the board
 inline int position_to_x(char position[3])
 {
-    switch (position[1])
-    {
-        case '8':
-            return 0;
-        case '7':
-            return 1;
-        case '6':
-            return 2;
-        case '5':
-            return 3;
-        case '4':
-            return 4;
-        case '3':
-            return 5;
-        case '2':
-            return 6;
-        case '1':
-            return 7;
-    }
-
-    return -1; // when nothing is matched
+    return 56 - ((int) position[1]);
 }
 
 // get the y index from a position on the board
 inline int position_to_y(char position[3])
 {
-    switch (position[0])
-    {
-        case 'a':
-            return 0;
-        case 'b':
-            return 1;
-        case 'c':
-            return 2;
-        case 'd':
-            return 3;
-        case 'e':
-            return 4;
-        case 'f':
-            return 5;
-        case 'g':
-            return 6;
-        case 'h':
-            return 7;
-    }
-
-    return -1;
+    return ((int) position[0]) - 97;
 }
 
 // initialize board struct to starting position

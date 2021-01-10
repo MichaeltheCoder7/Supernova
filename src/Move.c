@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 #include "Move.h"
 #include "Board.h"
 #include "Transposition.h"
@@ -213,76 +214,18 @@ int makeMove(BOARD *pos, MOVE *move)
         pos->halfmove_counter = 0;
     }
 
-    // encode en passant
-    switch (pos->ep_file)
+    // remove en passant file in the key
+    if (pos->ep_file != 0)
     {
-        case 0:
-            break;
-        case 1:
-            pos->key ^= ep[0];
-            break;
-        case 2:
-            pos->key ^= ep[1];
-            break;
-        case 3:
-            pos->key ^= ep[2];
-            break;
-        case 4:
-            pos->key ^= ep[3];
-            break;
-        case 5:
-            pos->key ^= ep[4];
-            break;
-        case 6:
-            pos->key ^= ep[5];
-            break;
-        case 7:
-            pos->key ^= ep[6];
-            break;
-        case 8:
-            pos->key ^= ep[7];
-            break;
+        pos->key ^= ep[pos->ep_file - 1];
     }
 
-    // update en passant flag
+    // update en passant flag and key
     pos->ep_file = 0;
     if ((toupper(piece) == 'P') && abs(cur_x - new_x) == 2)
     {
-        switch (new_y)
-        {
-            case 0:
-                pos->key ^= ep[0];
-                pos->ep_file = 1;
-                break;
-            case 1:
-                pos->key ^= ep[1];
-                pos->ep_file = 2;
-                break;
-            case 2:
-                pos->key ^= ep[2];
-                pos->ep_file = 3;
-                break;
-            case 3:
-                pos->key ^= ep[3];
-                pos->ep_file = 4;
-                break;
-            case 4:
-                pos->key ^= ep[4];
-                pos->ep_file = 5;
-                break;
-            case 5:
-                pos->key ^= ep[5];
-                pos->ep_file = 6;
-                break;
-            case 6:
-                pos->key ^= ep[6];
-                pos->ep_file = 7;
-                break;
-            case 7:
-                pos->key ^= ep[7];
-                pos->ep_file = 8;
-                break;
-        }
+        pos->key ^= ep[new_y];
+        pos->ep_file = new_y + 1;
     }
 
     pos->pawn_push = false; // detect pawn push to the 7th/2nd rank
@@ -563,36 +506,11 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     index = pos->index_board[cur_64];
     pos->index_board[new_64] = index;
     pos->piece_list[my_piece][index] = new_64;
-
-    // encode en passant
-    switch (pos->ep_file)
+    
+    // remove en passant file in the key
+    if (pos->ep_file != 0)
     {
-        case 0:
-            break;
-        case 1:
-            pos->key ^= ep[0];
-            break;
-        case 2:
-            pos->key ^= ep[1];
-            break;
-        case 3:
-            pos->key ^= ep[2];
-            break;
-        case 4:
-            pos->key ^= ep[3];
-            break;
-        case 5:
-            pos->key ^= ep[4];
-            break;
-        case 6:
-            pos->key ^= ep[5];
-            break;
-        case 7:
-            pos->key ^= ep[6];
-            break;
-        case 8:
-            pos->key ^= ep[7];
-            break;
+        pos->key ^= ep[pos->ep_file - 1];
     }
     pos->ep_file = 0;
 
@@ -692,38 +610,12 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
 // for null move pruning
 inline void make_nullmove(BOARD *pos)
 {
-    int temp_ep = pos->ep_file;
     pos->key ^= turn;
 
-    // encode en passant
-    switch (temp_ep)
+    // remove en passant file in the key
+    if (pos->ep_file != 0)
     {
-        case 0:
-            break;
-        case 1:
-            pos->key ^= ep[0];
-            break;
-        case 2:
-            pos->key ^= ep[1];
-            break;
-        case 3:
-            pos->key ^= ep[2];
-            break;
-        case 4:
-            pos->key ^= ep[3];
-            break;
-        case 5:
-            pos->key ^= ep[4];
-            break;
-        case 6:
-            pos->key ^= ep[5];
-            break;
-        case 7:
-            pos->key ^= ep[6];
-            break;
-        case 8:
-            pos->key ^= ep[7];
-            break;
+        pos->key ^= ep[pos->ep_file - 1];
     }
     pos->ep_file = 0;
 
