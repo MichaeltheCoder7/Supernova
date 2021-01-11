@@ -21,7 +21,7 @@
 #include "syzygy.h"
 #include "Fathom/tbprobe.h"
 
-#define VERSION "test"
+#define VERSION "2.3"
 
 // global variables
 // specify color for engine

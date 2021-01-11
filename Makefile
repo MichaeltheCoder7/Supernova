@@ -1,9 +1,10 @@
 # Makefile
 CC = gcc
+VER = 2.3
 SRC = src/*.c src/Fathom/tbprobe.c
 LIBS = -lpthread -lm
-WEXE = bin/Supernova_2.3.exe
-LEXE = bin/Supernova_2.3_linux
+WEXE = bin/Supernova_$(VER).exe
+LEXE = bin/Supernova_$(VER)_linux
 TEXE = bin/Supernova_test
 RFLAGS = -std=c99 -static -flto -Ofast
 DFLAGS = -std=c99 -g -Wall -Wextra -Wshadow
