@@ -6,20 +6,20 @@ extern int battack_count;
 extern int wattack_weight;
 extern int battack_weight;
 
-int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
+int wknight_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
 
-int bknight_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
+int bknight_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
 
-int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
+int wbishop_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
 
-int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
+int bbishop_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
 
-int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
+int wrook_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
 
-int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
+int brook_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
 
-int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
+int wqueen_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy);
 
-int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
+int bqueen_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy);
 
 #endif

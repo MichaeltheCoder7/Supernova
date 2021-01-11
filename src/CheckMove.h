@@ -1,16 +1,16 @@
 #ifndef CHECKMOVE_H
 #define CHECKMOVE_H
 
-#include "Board.h"
-#include "Move.h"
+#include "board.h"
+#include "move.h"
 
-int isWhitePiece(char piece);
+int isWhitePiece(unsigned char piece);
 
-int isBlackPiece(char piece);
+int isBlackPiece(unsigned char piece);
 
-int isWhitePiece_withKing(char piece);
+int isWhitePiece_withKing(unsigned char piece);
 
-int isBlackPiece_withKing(char piece);
+int isBlackPiece_withKing(unsigned char piece);
 
 int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y);
 

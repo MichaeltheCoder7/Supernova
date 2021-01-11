@@ -4,10 +4,10 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "Board.h"
-#include "Move.h"
-#include "Transposition.h"
-#include "Search.h"
+#include "board.h"
+#include "move.h"
+#include "transposition.h"
+#include "search.h"
 
 #define EMPTY -1
 
@@ -23,41 +23,6 @@ long EVALHASHSIZE;
 struct DataItem *tt;
 struct Eval *Evaltt;
 struct Pawn Pawntt[PAWNHASHSIZE];
-
-inline int piece_code(char piece)
-{
-    switch (piece)
-    {
-        case 'P':
-            return 0;
-        case 'N':
-            return 1;
-        case 'B':
-            return 2;
-        case 'R':
-            return 3;
-        case 'Q':
-            return 4;
-        case 'K':
-            return 5;
-        case 'p':
-            return 6;
-        case 'n':
-            return 7;
-        case 'b':
-            return 8;
-        case 'r':
-            return 9;
-        case 'q':
-            return 10;
-        case 'k':
-            return 11;
-        default:
-            break;
-    }
-
-    return -1;
-}
 
 // return a 64 bit random number
 inline unsigned long long llrand()
@@ -103,16 +68,14 @@ inline void init_zobrist()
 inline unsigned long long getHash(BOARD *pos, int color)
 {
     unsigned long long h = 0;
-    int chess_piece;
 
     for (int x = 0; x < 8; x++)
     {
         for (int y = 0; y < 8; y++)
         {
-            if (pos->board[x][y] != ' ')
+            if (pos->board[x][y] != __)
             {
-                chess_piece = piece_code(pos->board[x][y]);
-                h ^= table[x][y][chess_piece];
+                h ^= table[x][y][pos->board[x][y]];
             }
         }
     }
@@ -270,7 +233,7 @@ inline void clearEvalTT()
 }
 
 // include king positions
-inline unsigned long long getPawnHash(char board[8][8])
+inline unsigned long long getPawnHash(unsigned char board[8][8])
 {
     unsigned long long h = 0;
 
@@ -280,16 +243,16 @@ inline unsigned long long getPawnHash(char board[8][8])
         {
             switch (board[x][y])
             {
-                case 'P':
+                case wP:
                     h ^= table[x][y][wP];
                     break;
-                case 'p':
+                case bP:
                     h ^= table[x][y][bP];
                     break;
-                case 'K':
+                case wK:
                     h ^= table[x][y][wK];
                     break;
-                case 'k':
+                case bK:
                     h ^= table[x][y][bK];
                     break;
                 default:

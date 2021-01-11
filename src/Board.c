@@ -5,8 +5,8 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "Board.h"
-#include "Transposition.h"
+#include "board.h"
+#include "transposition.h"
 
 /*
 black pieces
@@ -35,16 +35,16 @@ white pieces
 */
 
 // starting board
-const char chess_board[8][8] = {
+const unsigned char chess_board[8][8] = {
 
-            { 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' },
-            { 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
-            { 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R' },
+            { bR, bN, bB, bQ, bK, bB, bN, bR },
+            { bP, bP, bP, bP, bP, bP, bP, bP },
+            { __, __, __, __, __, __, __, __ },
+            { __, __, __, __, __, __, __, __ },
+            { __, __, __, __, __, __, __, __ },
+            { __, __, __, __, __, __, __, __ },
+            { wP, wP, wP, wP, wP, wP, wP, wP },
+            { wR, wN, wB, wQ, wK, wB, wN, wR },
 
 };
 
@@ -81,7 +81,7 @@ const int index_board[64] = {
 
 };
 
-void displayboard(char board[8][8])
+void displayboard(unsigned char board[8][8])
 {
     int j = 8; // row numbers
 
@@ -94,9 +94,9 @@ void displayboard(char board[8][8])
         for (int k = 0; k < 8; k++)
         {
             if (k == 7)
-                printf("| %c |", board[i][k]);
+                printf("| %c |", pieceTypes[board[i][k]]);
             else
-                printf("| %c ", board[i][k]);
+                printf("| %c ", pieceTypes[board[i][k]]);
         }
         printf("%d", j);
         printf("\n");
@@ -141,18 +141,18 @@ inline void init_board(BOARD *pos)
     pos->last_move.to = NOMOVE;
 }
 
-inline void clear_board(char board[8][8])
+inline void clear_board(unsigned char board[8][8])
 {
-    const char board_reset[8][8] = {
+    const unsigned char board_reset[8][8] = {
 
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-                { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
+                { __, __, __, __, __, __, __, __ },
 
     };
 
@@ -163,76 +163,23 @@ inline void clear_board(char board[8][8])
 void set_piecelists(BOARD *pos)
 {
     int i;
-    pos->piece_count[wP] = pos->piece_count[wN] = pos->piece_count[wB] = 0;
-    pos->piece_count[wR] = pos->piece_count[wQ] = 0;
-    pos->piece_count[bP] = pos->piece_count[bN] = pos->piece_count[bB] = 0;
-    pos->piece_count[bR] = pos->piece_count[bQ] = 0;
+
+    // clear piece count array
+    for (int piece = wP; piece <= bK; piece++)
+    {
+        pos->piece_count[piece] = 0;
+    }
 
     for (int x = 0; x < 8; x++)
     {
         for (int y = 0; y < 8; y++)
         {
             i = 8 * x + y;
-            switch (pos->board[x][y])
+            if (pos->board[x][y] != __)
             {
-                case 'P':
-                    pos->piece_list[wP][pos->piece_count[wP]] = i;
-                    pos->index_board[i] = pos->piece_count[wP];
-                    pos->piece_count[wP]++;
-                    break;
-                case 'N':
-                    pos->piece_list[wN][pos->piece_count[wN]] = i;
-                    pos->index_board[i] = pos->piece_count[wN];
-                    pos->piece_count[wN]++;
-                    break;
-                case 'B':
-                    pos->piece_list[wB][pos->piece_count[wB]] = i;
-                    pos->index_board[i] = pos->piece_count[wB];
-                    pos->piece_count[wB]++;
-                    break;
-                case 'R':
-                    pos->piece_list[wR][pos->piece_count[wR]] = i;
-                    pos->index_board[i] = pos->piece_count[wR];
-                    pos->piece_count[wR]++;
-                    break;
-                case 'Q':
-                    pos->piece_list[wQ][pos->piece_count[wQ]] = i;
-                    pos->index_board[i] = pos->piece_count[wQ];
-                    pos->piece_count[wQ]++;
-                    break;
-                case 'K':
-                    pos->piece_list[wK][0] = i;
-                    pos->index_board[i] = 0;
-                    break;
-                case 'p':
-                    pos->piece_list[bP][pos->piece_count[bP]] = i;
-                    pos->index_board[i] = pos->piece_count[bP];
-                    pos->piece_count[bP]++;
-                    break;
-                case 'n':
-                    pos->piece_list[bN][pos->piece_count[bN]] = i;
-                    pos->index_board[i] = pos->piece_count[bN];
-                    pos->piece_count[bN]++;
-                    break;
-                case 'b':
-                    pos->piece_list[bB][pos->piece_count[bB]] = i;
-                    pos->index_board[i] = pos->piece_count[bB];
-                    pos->piece_count[bB]++;
-                    break;
-                case 'r':
-                    pos->piece_list[bR][pos->piece_count[bR]] = i;
-                    pos->index_board[i] = pos->piece_count[bR];
-                    pos->piece_count[bR]++;
-                    break;
-                case 'q':
-                    pos->piece_list[bQ][pos->piece_count[bQ]] = i;
-                    pos->index_board[i] = pos->piece_count[bQ];
-                    pos->piece_count[bQ]++;
-                    break;
-                case 'k':
-                    pos->piece_list[bK][0] = i;
-                    pos->index_board[i] = 0;
-                    break;
+                pos->piece_list[pos->board[x][y]][pos->piece_count[pos->board[x][y]]] = i;
+                pos->index_board[i] = pos->piece_count[pos->board[x][y]];
+                pos->piece_count[pos->board[x][y]]++;
             }
         }
     }

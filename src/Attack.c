@@ -3,8 +3,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "Attack.h"
-#include "Board.h"
+#include "attack.h"
+#include "board.h"
 
 // check if a side is in check
 // return 1 if yes
@@ -30,13 +30,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x + i][king_y - i] != ' ')
+                if (pos->board[king_x + i][king_y - i] != __)
                 {
-                    if (i == 1 && (pos->board[king_x + i][king_y - i] == 'P' || pos->board[king_x + i][king_y - i] == 'K'))
+                    if (i == 1 && (pos->board[king_x + i][king_y - i] == wP || pos->board[king_x + i][king_y - i] == wK))
                     {
                         return 1;
                     }
-                    if (pos->board[king_x + i][king_y - i] == 'B' || pos->board[king_x + i][king_y - i] == 'Q')
+                    if (pos->board[king_x + i][king_y - i] == wB || pos->board[king_x + i][king_y - i] == wQ)
                     {
                         return 1;
                     }
@@ -51,13 +51,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x + i][king_y + i] != ' ')
+                if (pos->board[king_x + i][king_y + i] != __)
                 {
-                    if (i == 1 && (pos->board[king_x + i][king_y + i] == 'P' || pos->board[king_x + i][king_y + i] == 'K'))
+                    if (i == 1 && (pos->board[king_x + i][king_y + i] == wP || pos->board[king_x + i][king_y + i] == wK))
                     {
                         return 1;
                     }
-                    if (pos->board[king_x + i][king_y + i] == 'B' || pos->board[king_x + i][king_y + i] == 'Q')
+                    if (pos->board[king_x + i][king_y + i] == wB || pos->board[king_x + i][king_y + i] == wQ)
                     {
                         return 1;
                     }
@@ -68,55 +68,55 @@ int ifCheck(BOARD *pos, int color)
             // knight attacks
             if (king_x + 2 <= 7 && king_y + 1 <= 7)
             {
-                if (pos->board[king_x + 2][king_y + 1] == 'N')
+                if (pos->board[king_x + 2][king_y + 1] == wN)
                     return 1;
             }
             if (king_x + 2 <= 7 && king_y - 1 >= 0)
             {
-                if (pos->board[king_x + 2][king_y - 1] == 'N')
+                if (pos->board[king_x + 2][king_y - 1] == wN)
                     return 1;
             }
             if (king_x + 1 <= 7 && king_y + 2 <= 7)
             {
-                if (pos->board[king_x + 1][king_y + 2] == 'N')
+                if (pos->board[king_x + 1][king_y + 2] == wN)
                     return 1;
             }
             if (king_x + 1 <= 7 && king_y - 2 >= 0)
             {
-                if (pos->board[king_x + 1][king_y - 2] == 'N')
+                if (pos->board[king_x + 1][king_y - 2] == wN)
                     return 1;
             }
             if (king_x - 2 >= 0 && king_y + 1 <= 7)
             {
-                if (pos->board[king_x - 2][king_y + 1] == 'N')
+                if (pos->board[king_x - 2][king_y + 1] == wN)
                     return 1;
             }
             if (king_x - 2 >= 0 && king_y - 1 >= 0)
             {
-                if (pos->board[king_x - 2][king_y - 1] == 'N')
+                if (pos->board[king_x - 2][king_y - 1] == wN)
                     return 1;
             }
             if (king_x - 1 >= 0 && king_y + 2 <= 7)
             {
-                if (pos->board[king_x - 1][king_y + 2] == 'N')
+                if (pos->board[king_x - 1][king_y + 2] == wN)
                     return 1;
             }
             if (king_x - 1 >= 0 && king_y - 2 >= 0)
             {
-                if (pos->board[king_x - 1][king_y - 2] == 'N')
+                if (pos->board[king_x - 1][king_y - 2] == wN)
                     return 1;
             }
 
             // down
             for (int i = king_x + 1; i <= 7; i++)
             {
-                if (pos->board[i][king_y] != ' ')
+                if (pos->board[i][king_y] != __)
                 {
-                    if (i == king_x + 1 && pos->board[i][king_y] == 'K')
+                    if (i == king_x + 1 && pos->board[i][king_y] == wK)
                     {
                         return 1;
                     }
-                    if (pos->board[i][king_y] == 'R' || pos->board[i][king_y] == 'Q')
+                    if (pos->board[i][king_y] == wR || pos->board[i][king_y] == wQ)
                     {
                         return 1;
                     }
@@ -127,13 +127,13 @@ int ifCheck(BOARD *pos, int color)
             // left
             for (int i = king_y - 1; i >= 0; i--)
             {
-                if (pos->board[king_x][i] != ' ')
+                if (pos->board[king_x][i] != __)
                 {
-                    if (i == king_y - 1 && pos->board[king_x][i] == 'K')
+                    if (i == king_y - 1 && pos->board[king_x][i] == wK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x][i] == 'R' || pos->board[king_x][i] == 'Q')
+                    if (pos->board[king_x][i] == wR || pos->board[king_x][i] == wQ)
                     {
                         return 1;
                     }
@@ -144,13 +144,13 @@ int ifCheck(BOARD *pos, int color)
             // right
             for (int i = king_y + 1; i <= 7; i++)
             {
-                if (pos->board[king_x][i] != ' ')
+                if (pos->board[king_x][i] != __)
                 {
-                    if (i == king_y + 1 && pos->board[king_x][i] == 'K')
+                    if (i == king_y + 1 && pos->board[king_x][i] == wK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x][i] == 'R' || pos->board[king_x][i] == 'Q')
+                    if (pos->board[king_x][i] == wR || pos->board[king_x][i] == wQ)
                     {
                         return 1;
                     }
@@ -161,13 +161,13 @@ int ifCheck(BOARD *pos, int color)
             // up
             for (int i = king_x - 1; i >= 0; i--)
             {
-                if (pos->board[i][king_y] != ' ')
+                if (pos->board[i][king_y] != __)
                 {
-                    if (i == king_x - 1 && pos->board[i][king_y] == 'K')
+                    if (i == king_x - 1 && pos->board[i][king_y] == wK)
                     {
                         return 1;
                     }
-                    if (pos->board[i][king_y] == 'R' || pos->board[i][king_y] == 'Q')
+                    if (pos->board[i][king_y] == wR || pos->board[i][king_y] == wQ)
                     {
                         return 1;
                     }
@@ -182,13 +182,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x - i][king_y - i] != ' ')
+                if (pos->board[king_x - i][king_y - i] != __)
                 {
-                    if (i == 1 && pos->board[king_x - i][king_y - i] == 'K')
+                    if (i == 1 && pos->board[king_x - i][king_y - i] == wK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x - i][king_y - i] == 'B' || pos->board[king_x - i][king_y - i] == 'Q')
+                    if (pos->board[king_x - i][king_y - i] == wB || pos->board[king_x - i][king_y - i] == wQ)
                     {
                         return 1;
                     }
@@ -203,13 +203,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x - i][king_y + i] != ' ')
+                if (pos->board[king_x - i][king_y + i] != __)
                 {
-                    if (i == 1 && pos->board[king_x - i][king_y + i] == 'K')
+                    if (i == 1 && pos->board[king_x - i][king_y + i] == wK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x - i][king_y + i] == 'B' || pos->board[king_x - i][king_y + i] == 'Q')
+                    if (pos->board[king_x - i][king_y + i] == wB || pos->board[king_x - i][king_y + i] == wQ)
                     {
                         return 1;
                     }
@@ -230,13 +230,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x - i][king_y - i] != ' ')
+                if (pos->board[king_x - i][king_y - i] != __)
                 {
-                    if (i == 1 && (pos->board[king_x - i][king_y - i] == 'p' || pos->board[king_x - i][king_y - i] == 'k'))
+                    if (i == 1 && (pos->board[king_x - i][king_y - i] == bP || pos->board[king_x - i][king_y - i] == bK))
                     {
                         return 1;
                     }
-                    if (pos->board[king_x - i][king_y - i] == 'b' || pos->board[king_x - i][king_y - i] == 'q')
+                    if (pos->board[king_x - i][king_y - i] == bB || pos->board[king_x - i][king_y - i] == bQ)
                     {
                         return 1;
                     }
@@ -251,13 +251,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x - i][king_y + i] != ' ')
+                if (pos->board[king_x - i][king_y + i] != __)
                 {
-                    if (i == 1 && (pos->board[king_x - i][king_y + i] == 'p' || pos->board[king_x - i][king_y + i] == 'k'))
+                    if (i == 1 && (pos->board[king_x - i][king_y + i] == bP || pos->board[king_x - i][king_y + i] == bK))
                     {
                         return 1;
                     }
-                    if (pos->board[king_x - i][king_y + i] == 'b' || pos->board[king_x - i][king_y + i] == 'q')
+                    if (pos->board[king_x - i][king_y + i] == bB || pos->board[king_x - i][king_y + i] == bQ)
                     {
                         return 1;
                     }
@@ -268,55 +268,55 @@ int ifCheck(BOARD *pos, int color)
             // knight attacks
             if (king_x - 2 >= 0 && king_y + 1 <= 7)
             {
-                if (pos->board[king_x - 2][king_y + 1] == 'n')
+                if (pos->board[king_x - 2][king_y + 1] == bN)
                     return 1;
             }
             if (king_x - 2 >= 0 && king_y - 1 >= 0)
             {
-                if (pos->board[king_x - 2][king_y - 1] == 'n')
+                if (pos->board[king_x - 2][king_y - 1] == bN)
                     return 1;
             }
             if (king_x - 1 >= 0 && king_y + 2 <= 7)
             {
-                if (pos->board[king_x - 1][king_y + 2] == 'n')
+                if (pos->board[king_x - 1][king_y + 2] == bN)
                     return 1;
             }
             if (king_x - 1 >= 0 && king_y - 2 >= 0)
             {
-                if (pos->board[king_x - 1][king_y - 2] == 'n')
+                if (pos->board[king_x - 1][king_y - 2] == bN)
                     return 1;
             }
             if (king_x + 2 <= 7 && king_y + 1 <= 7)
             {
-                if (pos->board[king_x + 2][king_y + 1] == 'n')
+                if (pos->board[king_x + 2][king_y + 1] == bN)
                     return 1;
             }
             if (king_x + 2 <= 7 && king_y - 1 >= 0)
             {
-                if (pos->board[king_x + 2][king_y - 1] == 'n')
+                if (pos->board[king_x + 2][king_y - 1] == bN)
                     return 1;
             }
             if (king_x + 1 <= 7 && king_y + 2 <= 7)
             {
-                if (pos->board[king_x + 1][king_y + 2] == 'n')
+                if (pos->board[king_x + 1][king_y + 2] == bN)
                     return 1;
             }
             if (king_x + 1 <= 7 && king_y - 2 >= 0)
             {
-                if (pos->board[king_x + 1][king_y - 2] == 'n')
+                if (pos->board[king_x + 1][king_y - 2] == bN)
                     return 1;
             }
 
             // up
             for (int i = king_x - 1; i >= 0; i--)
             {
-                if (pos->board[i][king_y] != ' ')
+                if (pos->board[i][king_y] != __)
                 {
-                    if (i == king_x - 1 && pos->board[i][king_y] == 'k')
+                    if (i == king_x - 1 && pos->board[i][king_y] == bK)
                     {
                         return 1;
                     }
-                    if (pos->board[i][king_y] == 'r' || pos->board[i][king_y] == 'q')
+                    if (pos->board[i][king_y] == bR || pos->board[i][king_y] == bQ)
                     {
                         return 1;
                     }
@@ -327,13 +327,13 @@ int ifCheck(BOARD *pos, int color)
             // left
             for (int i = king_y - 1; i >= 0; i--)
             {
-                if (pos->board[king_x][i] != ' ')
+                if (pos->board[king_x][i] != __)
                 {
-                    if (i == king_y - 1 && pos->board[king_x][i] == 'k')
+                    if (i == king_y - 1 && pos->board[king_x][i] == bK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x][i] == 'r' || pos->board[king_x][i] == 'q')
+                    if (pos->board[king_x][i] == bR || pos->board[king_x][i] == bQ)
                     {
                         return 1;
                     }
@@ -344,13 +344,13 @@ int ifCheck(BOARD *pos, int color)
             // right
             for (int i = king_y + 1; i <= 7; i++)
             {
-                if (pos->board[king_x][i] != ' ')
+                if (pos->board[king_x][i] != __)
                 {
-                    if (i == king_y + 1 && pos->board[king_x][i] == 'k')
+                    if (i == king_y + 1 && pos->board[king_x][i] == bK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x][i] == 'r' || pos->board[king_x][i] == 'q')
+                    if (pos->board[king_x][i] == bR || pos->board[king_x][i] == bQ)
                     {
                         return 1;
                     }
@@ -361,13 +361,13 @@ int ifCheck(BOARD *pos, int color)
             // down
             for (int i = king_x + 1; i <= 7; i++)
             {
-                if (pos->board[i][king_y] != ' ')
+                if (pos->board[i][king_y] != __)
                 {
-                    if (i == king_x + 1 && pos->board[i][king_y] == 'k')
+                    if (i == king_x + 1 && pos->board[i][king_y] == bK)
                     {
                         return 1;
                     }
-                    if (pos->board[i][king_y] == 'r' || pos->board[i][king_y] == 'q')
+                    if (pos->board[i][king_y] == bR || pos->board[i][king_y] == bQ)
                     {
                         return 1;
                     }
@@ -382,13 +382,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x + i][king_y - i] != ' ')
+                if (pos->board[king_x + i][king_y - i] != __)
                 {
-                    if (i == 1 && pos->board[king_x + i][king_y - i] == 'k')
+                    if (i == 1 && pos->board[king_x + i][king_y - i] == bK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x + i][king_y - i] == 'b' || pos->board[king_x + i][king_y - i] == 'q')
+                    if (pos->board[king_x + i][king_y - i] == bB || pos->board[king_x + i][king_y - i] == bQ)
                     {
                         return 1;
                     }
@@ -403,13 +403,13 @@ int ifCheck(BOARD *pos, int color)
                 {
                     break;
                 }
-                if (pos->board[king_x + i][king_y + i] != ' ')
+                if (pos->board[king_x + i][king_y + i] != __)
                 {
-                    if (i == 1 && pos->board[king_x + i][king_y + i] == 'k')
+                    if (i == 1 && pos->board[king_x + i][king_y + i] == bK)
                     {
                         return 1;
                     }
-                    if (pos->board[king_x + i][king_y + i] == 'b' || pos->board[king_x + i][king_y + i] == 'q')
+                    if (pos->board[king_x + i][king_y + i] == bB || pos->board[king_x + i][king_y + i] == bQ)
                     {
                         return 1;
                     }
@@ -429,7 +429,7 @@ int ifCheck(BOARD *pos, int color)
 // return 0 if no
 // color = 1: threatened by white pieces
 // color = -1: threatened by black pieces
-int isThreatened(char board[8][8], int x, int y, int color)
+int isThreatened(unsigned char board[8][8], int x, int y, int color)
 {
     switch (color)
     {
@@ -442,13 +442,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y - i] != ' ')
+                if (board[x + i][y - i] != __)
                 {
-                    if (i == 1 && (board[x + i][y - i] == 'P' || board[x + i][y - i] == 'K'))
+                    if (i == 1 && (board[x + i][y - i] == wP || board[x + i][y - i] == wK))
                     {
                         return 1;
                     }
-                    if (board[x + i][y - i] == 'B' || board[x + i][y - i] == 'Q')
+                    if (board[x + i][y - i] == wB || board[x + i][y - i] == wQ)
                     {
                         return 1;
                     }
@@ -463,13 +463,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y + i] != ' ')
+                if (board[x + i][y + i] != __)
                 {
-                    if (i == 1 && (board[x + i][y + i] == 'P' || board[x + i][y + i] == 'K'))
+                    if (i == 1 && (board[x + i][y + i] == wP || board[x + i][y + i] == wK))
                     {
                         return 1;
                     }
-                    if (board[x + i][y + i] == 'B' || board[x + i][y + i] == 'Q')
+                    if (board[x + i][y + i] == wB || board[x + i][y + i] == wQ)
                     {
                         return 1;
                     }
@@ -480,55 +480,55 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // knight attacks
             if (x - 2 >= 0 && y + 1 <= 7)
             {
-                if (board[x - 2][y + 1] == 'N')
+                if (board[x - 2][y + 1] == wN)
                     return 1;
             }
             if (x - 2 >= 0 && y - 1 >= 0)
             {
-                if (board[x - 2][y - 1] == 'N')
+                if (board[x - 2][y - 1] == wN)
                     return 1;
             }
             if (x - 1 >= 0 && y + 2 <= 7)
             {
-                if (board[x - 1][y + 2] == 'N')
+                if (board[x - 1][y + 2] == wN)
                     return 1;
             }
             if (x - 1 >= 0 && y - 2 >= 0)
             {
-                if (board[x - 1][y - 2] == 'N')
+                if (board[x - 1][y - 2] == wN)
                     return 1;
             }
             if (x + 2 <= 7 && y + 1 <= 7)
             {
-                if (board[x + 2][y + 1] == 'N')
+                if (board[x + 2][y + 1] == wN)
                     return 1;
             }
             if (x + 2 <= 7 && y - 1 >= 0)
             {
-                if (board[x + 2][y - 1] == 'N')
+                if (board[x + 2][y - 1] == wN)
                     return 1;
             }
             if (x + 1 <= 7 && y + 2 <= 7)
             {
-                if (board[x + 1][y + 2] == 'N')
+                if (board[x + 1][y + 2] == wN)
                     return 1;
             }
             if (x + 1 <= 7 && y - 2 >= 0)
             {
-                if (board[x + 1][y - 2] == 'N')
+                if (board[x + 1][y - 2] == wN)
                     return 1;
             }
 
             // left
             for (int i = y - 1; i >= 0; i--)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (i == y - 1 && board[x][i] == 'K')
+                    if (i == y - 1 && board[x][i] == wK)
                     {
                         return 1;
                     }
-                    if (board[x][i] == 'R' || board[x][i] == 'Q')
+                    if (board[x][i] == wR || board[x][i] == wQ)
                     {
                         return 1;
                     }
@@ -539,13 +539,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // right
             for (int i = y + 1; i <= 7; i++)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (i == y + 1 && board[x][i] == 'K')
+                    if (i == y + 1 && board[x][i] == wK)
                     {
                         return 1;
                     }
-                    if (board[x][i] == 'R' || board[x][i] == 'Q')
+                    if (board[x][i] == wR || board[x][i] == wQ)
                     {
                         return 1;
                     }
@@ -556,13 +556,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // up
             for (int i = x - 1; i >= 0; i--)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (i == x - 1 && board[i][y] == 'K')
+                    if (i == x - 1 && board[i][y] == wK)
                     {
                         return 1;
                     }
-                    if (board[i][y] == 'R' || board[i][y] == 'Q')
+                    if (board[i][y] == wR || board[i][y] == wQ)
                     {
                         return 1;
                     }
@@ -573,13 +573,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // down
             for (int i = x + 1; i <= 7; i++)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (i == x + 1 && board[i][y] == 'K')
+                    if (i == x + 1 && board[i][y] == wK)
                     {
                         return 1;
                     }
-                    if (board[i][y] == 'R' || board[i][y] == 'Q')
+                    if (board[i][y] == wR || board[i][y] == wQ)
                     {
                         return 1;
                     }
@@ -594,13 +594,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y - i] != ' ')
+                if (board[x - i][y - i] != __)
                 {
-                    if (i == 1 && board[x - i][y - i] == 'K')
+                    if (i == 1 && board[x - i][y - i] == wK)
                     {
                         return 1;
                     }
-                    if (board[x - i][y - i] == 'B' || board[x - i][y - i] == 'Q')
+                    if (board[x - i][y - i] == wB || board[x - i][y - i] == wQ)
                     {
                         return 1;
                     }
@@ -615,13 +615,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y + i] != ' ')
+                if (board[x - i][y + i] != __)
                 {
-                    if (i == 1 && board[x - i][y + i] == 'K')
+                    if (i == 1 && board[x - i][y + i] == wK)
                     {
                         return 1;
                     }
-                    if (board[x - i][y + i] == 'B' || board[x - i][y + i] == 'Q')
+                    if (board[x - i][y + i] == wB || board[x - i][y + i] == wQ)
                     {
                         return 1;
                     }
@@ -639,13 +639,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y - i] != ' ')
+                if (board[x - i][y - i] != __)
                 {
-                    if (i == 1 && (board[x - i][y - i] == 'p' || board[x - i][y - i] == 'k'))
+                    if (i == 1 && (board[x - i][y - i] == bP || board[x - i][y - i] == bK))
                     {
                         return 1;
                     }
-                    if (board[x - i][y - i] == 'b' || board[x - i][y - i] == 'q')
+                    if (board[x - i][y - i] == bB || board[x - i][y - i] == bQ)
                     {
                         return 1;
                     }
@@ -660,13 +660,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y + i] != ' ')
+                if (board[x - i][y + i] != __)
                 {
-                    if (i == 1 && (board[x - i][y + i] == 'p' || board[x - i][y + i] == 'k'))
+                    if (i == 1 && (board[x - i][y + i] == bP || board[x - i][y + i] == bK))
                     {
                         return 1;
                     }
-                    if (board[x - i][y + i] == 'b' || board[x - i][y + i] == 'q')
+                    if (board[x - i][y + i] == bB || board[x - i][y + i] == bQ)
                     {
                         return 1;
                     }
@@ -677,55 +677,55 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // knight attacks
             if (x - 2 >= 0 && y + 1 <= 7)
             {
-                if (board[x - 2][y + 1] == 'n')
+                if (board[x - 2][y + 1] == bN)
                     return 1;
             }
             if (x - 2 >= 0 && y - 1 >= 0)
             {
-                if (board[x - 2][y - 1] == 'n')
+                if (board[x - 2][y - 1] == bN)
                     return 1;
             }
             if (x - 1 >= 0 && y + 2 <= 7)
             {
-                if (board[x - 1][y + 2] == 'n')
+                if (board[x - 1][y + 2] == bN)
                     return 1;
             }
             if (x - 1 >= 0 && y - 2 >= 0)
             {
-                if (board[x - 1][y - 2] == 'n')
+                if (board[x - 1][y - 2] == bN)
                     return 1;
             }
             if (x + 2 <= 7 && y + 1 <= 7)
             {
-                if (board[x + 2][y + 1] == 'n')
+                if (board[x + 2][y + 1] == bN)
                     return 1;
             }
             if (x + 2 <= 7 && y - 1 >= 0)
             {
-                if (board[x + 2][y - 1] == 'n')
+                if (board[x + 2][y - 1] == bN)
                     return 1;
             }
             if (x + 1 <= 7 && y + 2 <= 7)
             {
-                if (board[x + 1][y + 2] == 'n')
+                if (board[x + 1][y + 2] == bN)
                     return 1;
             }
             if (x + 1 <= 7 && y - 2 >= 0)
             {
-                if (board[x + 1][y - 2] == 'n')
+                if (board[x + 1][y - 2] == bN)
                     return 1;
             }
 
             // left
             for (int i = y - 1; i >= 0; i--)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (i == y - 1 && board[x][i] == 'k')
+                    if (i == y - 1 && board[x][i] == bK)
                     {
                         return 1;
                     }
-                    if (board[x][i] == 'r' || board[x][i] == 'q')
+                    if (board[x][i] == bR || board[x][i] == bQ)
                     {
                         return 1;
                     }
@@ -736,13 +736,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // right
             for (int i = y + 1; i <= 7; i++)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (i == y + 1 && board[x][i] == 'k')
+                    if (i == y + 1 && board[x][i] == bK)
                     {
                         return 1;
                     }
-                    if (board[x][i] == 'r' || board[x][i] == 'q')
+                    if (board[x][i] == bR || board[x][i] == bQ)
                     {
                         return 1;
                     }
@@ -753,13 +753,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // up
             for (int i = x - 1; i >= 0; i--)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (i == x - 1 && board[i][y] == 'k')
+                    if (i == x - 1 && board[i][y] == bK)
                     {
                         return 1;
                     }
-                    if (board[i][y] == 'r' || board[i][y] == 'q')
+                    if (board[i][y] == bR || board[i][y] == bQ)
                     {
                         return 1;
                     }
@@ -770,13 +770,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
             // down
             for (int i = x + 1; i <= 7; i++)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (i == x + 1 && board[i][y] == 'k')
+                    if (i == x + 1 && board[i][y] == bK)
                     {
                         return 1;
                     }
-                    if (board[i][y] == 'r' || board[i][y] == 'q')
+                    if (board[i][y] == bR || board[i][y] == bQ)
                     {
                         return 1;
                     }
@@ -791,13 +791,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y - i] != ' ')
+                if (board[x + i][y - i] != __)
                 {
-                    if (i == 1 && board[x + i][y - i] == 'k')
+                    if (i == 1 && board[x + i][y - i] == bK)
                     {
                         return 1;
                     }
-                    if (board[x + i][y - i] == 'b' || board[x + i][y - i] == 'q')
+                    if (board[x + i][y - i] == bB || board[x + i][y - i] == bQ)
                     {
                         return 1;
                     }
@@ -812,13 +812,13 @@ int isThreatened(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y + i] != ' ')
+                if (board[x + i][y + i] != __)
                 {
-                    if (i == 1 && board[x + i][y + i] == 'k')
+                    if (i == 1 && board[x + i][y + i] == bK)
                     {
                         return 1;
                     }
-                    if (board[x + i][y + i] == 'b' || board[x + i][y + i] == 'q')
+                    if (board[x + i][y + i] == bB || board[x + i][y + i] == bQ)
                     {
                         return 1;
                     }

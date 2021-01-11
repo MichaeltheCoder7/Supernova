@@ -1,8 +1,8 @@
 #ifndef CAPTUREGEN_H
 #define CAPTUREGEN_H
 
-#include "Board.h"
-#include "Move.h"
+#include "board.h"
+#include "move.h"
 
 int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color);
 

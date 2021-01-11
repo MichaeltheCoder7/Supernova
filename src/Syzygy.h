@@ -1,8 +1,8 @@
 #ifndef SYZYGY_H
 #define SYZYGY_H
 
-#include "Board.h"
-#include "Move.h"
+#include "board.h"
+#include "move.h"
 #include "Fathom/tbprobe.h"
 
 extern int TB_DEPTH;

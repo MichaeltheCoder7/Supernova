@@ -13,14 +13,15 @@
 #include <windows.h>
 #endif
 
-#include "Board.h"
-#include "Move.h"
-#include "Search.h"
-#include "Transposition.h"
-#include "Syzygy.h"
+#include "board.h"
+#include "move.h"
+#include "checkmove.h"
+#include "search.h"
+#include "transposition.h"
+#include "syzygy.h"
 #include "Fathom/tbprobe.h"
 
-#define VERSION "2.3"
+#define VERSION "test"
 
 // global variables
 // specify color for engine
@@ -161,62 +162,62 @@ void parse_fen(char *position, BOARD *pos)
         switch (*position)
         {
             case 'p':
-                pos->board[x][y] = 'p';
+                pos->board[x][y] = bP;
                 y++;
                 piece_count++;
                 break;
             case 'n':
-                pos->board[x][y] = 'n';
+                pos->board[x][y] = bN;
                 y++;
                 piece_count++;
                 break;
             case 'b':
-                pos->board[x][y] = 'b';
+                pos->board[x][y] = bB;
                 y++;
                 piece_count++;
                 break;
             case 'r':
-                pos->board[x][y] = 'r';
+                pos->board[x][y] = bR;
                 y++;
                 piece_count++;
                 break;
             case 'q':
-                pos->board[x][y] = 'q';
+                pos->board[x][y] = bQ;
                 y++;
                 piece_count++;
                 break;
             case 'k':
-                pos->board[x][y] = 'k';
+                pos->board[x][y] = bK;
                 y++;
                 piece_count++;
                 break;
             case 'P':
-                pos->board[x][y] = 'P';
+                pos->board[x][y] = wP;
                 y++;
                 piece_count++;
                 break;
             case 'N':
-                pos->board[x][y] = 'N';
+                pos->board[x][y] = wN;
                 y++;
                 piece_count++;
                 break;
             case 'B':
-                pos->board[x][y] = 'B';
+                pos->board[x][y] = wB;
                 y++;
                 piece_count++;
                 break;
             case 'R':
-                pos->board[x][y] = 'R';
+                pos->board[x][y] = wR;
                 y++;
                 piece_count++;
                 break;
             case 'Q':
-                pos->board[x][y] = 'Q';
+                pos->board[x][y] = wQ;
                 y++;
                 piece_count++;
                 break;
             case 'K':
-                pos->board[x][y] = 'K';
+                pos->board[x][y] = wK;
                 y++;
                 piece_count++;
                 break;
@@ -312,8 +313,8 @@ void handle_position(char *input)
 {
     char move[6] = "";
     MOVE smove;
-    char own_piece = ' ';
-    char op_piece = ' ';
+    unsigned char own_piece;
+    unsigned char op_piece;
     // parse the position input
     char *position = NULL;
     char *move_str = NULL;
@@ -361,13 +362,13 @@ void handle_position(char *input)
         }
         // get opponent's move for time management
         // only when it's a capture, including en passant
-        if (op_piece != ' ' || (toupper(own_piece) == 'P' && abs(smove.to % 8 - smove.from % 8) == 1))
+        if (op_piece != __ || ((own_piece == wP || own_piece == bP) && abs(smove.to % 8 - smove.from % 8) == 1))
         {
             strncpy(op_move, move, 6);
             op_move[5] = '\0';
         }
         // assign color to the engine based on the command from GUI
-        if (islower(own_piece))
+        if (isBlackPiece_withKing(own_piece))
         {
             engine_color = -1; // white
         }

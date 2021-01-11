@@ -3,9 +3,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "Syzygy.h"
-#include "Board.h"
-#include "Move.h"
+#include "syzygy.h"
+#include "board.h"
+#include "move.h"
 #include "Fathom/tbprobe.h"
 
 int TB_DEPTH;
@@ -231,7 +231,6 @@ inline int tablebasesProbeDTZ(BOARD *pos, MOVE *bestMove, int *score, int color)
     unsigned tb_from = TB_GET_FROM(probe_result);
     unsigned tb_to = TB_GET_TO(probe_result);
     unsigned tb_promo = TB_GET_PROMOTES(probe_result);
-    char promotions[5] = { ' ', 'q', 'r', 'b', 'n' };
 
     bestMove->from = (56 - 16 * (tb_from / 8)) + tb_from;
     bestMove->to = (56 - 16 * (tb_to / 8)) + tb_to;

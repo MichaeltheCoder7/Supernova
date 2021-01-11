@@ -4,16 +4,16 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "SEE.h"
-#include "Move.h"
-#include "OrderMove.h"
+#include "see.h"
+#include "move.h"
+#include "ordermove.h"
 
 // 1: white attackers
 // -1: black attackers
 // x and y are the rank and file of the board
 // return index 0 - 63 of the smallest attacker on the board
 // return -1 if not attacked
-static int get_smallest_attacker(char board[8][8], int x, int y, int color)
+static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int color)
 {
     int attackers_index[2] = { -2, -2 }; // for queen and king
 
@@ -24,14 +24,14 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // pawn attack
             if (x + 1 <= 7 && y - 1 >= 0)
             {
-                if (board[x + 1][y - 1] == 'P')
+                if (board[x + 1][y - 1] == wP)
                 {
                     return 8 * (x + 1) + (y - 1);
                 }
             }
             if (x + 1 <= 7 && y + 1 <= 7)
             {
-                if (board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y + 1] == wP)
                 {
                     return 8 * (x + 1) + (y + 1);
                 }
@@ -40,42 +40,42 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // knight attacks
             if (x + 2 <= 7 && y + 1 <= 7)
             {
-                if (board[x + 2][y + 1] == 'N')
+                if (board[x + 2][y + 1] == wN)
                     return 8 * (x + 2) + (y + 1);
             }
             if (x + 2 <= 7 && y - 1 >= 0)
             {
-                if (board[x + 2][y - 1] == 'N')
+                if (board[x + 2][y - 1] == wN)
                     return 8 * (x + 2) + (y - 1);
             }
             if (x + 1 <= 7 && y + 2 <= 7)
             {
-                if (board[x + 1][y + 2] == 'N')
+                if (board[x + 1][y + 2] == wN)
                     return 8 * (x + 1) + (y + 2);
             }
             if (x + 1 <= 7 && y - 2 >= 0)
             {
-                if (board[x + 1][y - 2] == 'N')
+                if (board[x + 1][y - 2] == wN)
                     return 8 * (x + 1) + (y - 2);
             }
             if (x - 2 >= 0 && y + 1 <= 7)
             {
-                if (board[x - 2][y + 1] == 'N')
+                if (board[x - 2][y + 1] == wN)
                     return 8 * (x - 2) + (y + 1);
             }
             if (x - 2 >= 0 && y - 1 >= 0)
             {
-                if (board[x - 2][y - 1] == 'N')
+                if (board[x - 2][y - 1] == wN)
                     return 8 * (x - 2) + (y - 1);
             }
             if (x - 1 >= 0 && y + 2 <= 7)
             {
-                if (board[x - 1][y + 2] == 'N')
+                if (board[x - 1][y + 2] == wN)
                     return 8 * (x - 1) + (y + 2);
             }
             if (x - 1 >= 0 && y - 2 >= 0)
             {
-                if (board[x - 1][y - 2] == 'N')
+                if (board[x - 1][y - 2] == wN)
                     return 8 * (x - 1) + (y - 2);
             }
 
@@ -86,17 +86,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y - i] != ' ')
+                if (board[x + i][y - i] != __)
                 {
-                    if (board[x + i][y - i] == 'B')
+                    if (board[x + i][y - i] == wB)
                     {
                         return 8 * (x + i) + (y - i);
                     }
-                    else if (board[x + i][y - i] == 'Q')
+                    else if (board[x + i][y - i] == wQ)
                     {
                         attackers_index[0] = 8 * (x + i) + (y - i);
                     }
-                    else if (i == 1 && board[x + i][y - i] == 'K')
+                    else if (i == 1 && board[x + i][y - i] == wK)
                     {
                         attackers_index[1] = 8 * (x + i) + (y - i);
                     }
@@ -111,17 +111,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y + i] != ' ')
+                if (board[x + i][y + i] != __)
                 {
-                    if (board[x + i][y + i] == 'B')
+                    if (board[x + i][y + i] == wB)
                     {
                         return 8 * (x + i) + (y + i);
                     }
-                    else if (board[x + i][y + i] == 'Q')
+                    else if (board[x + i][y + i] == wQ)
                     {
                         attackers_index[0] = 8 * (x + i) + (y + i);
                     }
-                    else if (i == 1 && board[x + i][y + i] == 'K')
+                    else if (i == 1 && board[x + i][y + i] == wK)
                     {
                         attackers_index[1] = 8 * (x + i) + (y + i);
                     }
@@ -136,17 +136,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y - i] != ' ')
+                if (board[x - i][y - i] != __)
                 {
-                    if (board[x - i][y - i] == 'B')
+                    if (board[x - i][y - i] == wB)
                     {
                         return 8 * (x - i) + (y - i);
                     }
-                    else if (board[x - i][y - i] == 'Q')
+                    else if (board[x - i][y - i] == wQ)
                     {
                         attackers_index[0] = 8 * (x - i) + (y - i);
                     }
-                    else if (i == 1 && board[x - i][y - i] == 'K')
+                    else if (i == 1 && board[x - i][y - i] == wK)
                     {
                         attackers_index[1] = 8 * (x - i) + (y - i);
                     }
@@ -161,17 +161,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y + i] != ' ')
+                if (board[x - i][y + i] != __)
                 {
-                    if (board[x - i][y + i] == 'B')
+                    if (board[x - i][y + i] == wB)
                     {
                         return 8 * (x - i) + (y + i);
                     }
-                    else if (board[x - i][y + i] == 'Q')
+                    else if (board[x - i][y + i] == wQ)
                     {
                         attackers_index[0] = 8 * (x - i) + (y + i);
                     }
-                    else if (i == 1 && board[x - i][y + i] == 'K')
+                    else if (i == 1 && board[x - i][y + i] == wK)
                     {
                         attackers_index[1] = 8 * (x - i) + (y + i);
                     }
@@ -182,17 +182,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // down
             for (int i = x + 1; i <= 7; i++)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (board[i][y] == 'R')
+                    if (board[i][y] == wR)
                     {
                         return 8 * i + y;
                     }
-                    else if (board[i][y] == 'Q')
+                    else if (board[i][y] == wQ)
                     {
                         attackers_index[0] = 8 * i + y;
                     }
-                    else if (i == x + 1 && board[i][y] == 'K')
+                    else if (i == x + 1 && board[i][y] == wK)
                     {
                         attackers_index[1] = 8 * i + y;
                     }
@@ -203,17 +203,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // left
             for (int i = y - 1; i >= 0; i--)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (board[x][i] == 'R')
+                    if (board[x][i] == wR)
                     {
                         return 8 * x + i;
                     }
-                    else if (board[x][i] == 'Q')
+                    else if (board[x][i] == wQ)
                     {
                         attackers_index[0] = 8 * x + i;
                     }
-                    else if (i == y - 1 && board[x][i] == 'K')
+                    else if (i == y - 1 && board[x][i] == wK)
                     {
                         attackers_index[1] = 8 * x + i;
                     }
@@ -225,17 +225,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // right
             for (int i = y + 1; i <= 7; i++)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (board[x][i] == 'R')
+                    if (board[x][i] == wR)
                     {
                         return 8 * x + i;
                     }
-                    else if (board[x][i] == 'Q')
+                    else if (board[x][i] == wQ)
                     {
                         attackers_index[0] = 8 * x + i;
                     }
-                    else if (i == y + 1 && board[x][i] == 'K')
+                    else if (i == y + 1 && board[x][i] == wK)
                     {
                         attackers_index[1] = 8 * x + i;
                     }
@@ -246,17 +246,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // up
             for (int i = x - 1; i >= 0; i--)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (board[i][y] == 'R')
+                    if (board[i][y] == wR)
                     {
                         return 8 * i + y;
                     }
-                    else if (board[i][y] == 'Q')
+                    else if (board[i][y] == wQ)
                     {
                         attackers_index[0] = 8 * i + y;
                     }
-                    else if (i == x - 1 && board[i][y] == 'K')
+                    else if (i == x - 1 && board[i][y] == wK)
                     {
                         attackers_index[1] = 8 * i + y;
                     }
@@ -270,14 +270,14 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // pawn attack
             if (x - 1 >= 0 && y - 1 >= 0)
             {
-                if (board[x - 1][y - 1] == 'p')
+                if (board[x - 1][y - 1] == bP)
                 {
                     return 8 * (x - 1) + (y - 1);
                 }
             }
             if (x - 1 >= 0 && y + 1 <= 7)
             {
-                if (board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y + 1] == bP)
                 {
                     return 8 * (x - 1) + (y + 1);
                 }
@@ -286,42 +286,42 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // knight attacks
             if (x - 2 >= 0 && y + 1 <= 7)
             {
-                if (board[x - 2][y + 1] == 'n')
+                if (board[x - 2][y + 1] == bN)
                     return 8 * (x - 2) + (y + 1);
             }
             if (x - 2 >= 0 && y - 1 >= 0)
             {
-                if (board[x - 2][y - 1] == 'n')
+                if (board[x - 2][y - 1] == bN)
                     return 8 * (x - 2) + (y - 1);
             }
             if (x - 1 >= 0 && y + 2 <= 7)
             {
-                if (board[x - 1][y + 2] == 'n')
+                if (board[x - 1][y + 2] == bN)
                     return 8 * (x - 1) + (y + 2);
             }
             if (x - 1 >= 0 && y - 2 >= 0)
             {
-                if (board[x - 1][y - 2] == 'n')
+                if (board[x - 1][y - 2] == bN)
                     return 8 * (x - 1) + (y - 2);
             }
             if (x + 2 <= 7 && y + 1 <= 7)
             {
-                if (board[x + 2][y + 1] == 'n')
+                if (board[x + 2][y + 1] == bN)
                     return 8 * (x + 2) + (y + 1);
             }
             if (x + 2 <= 7 && y - 1 >= 0)
             {
-                if (board[x + 2][y - 1] == 'n')
+                if (board[x + 2][y - 1] == bN)
                     return 8 * (x + 2) + (y - 1);
             }
             if (x + 1 <= 7 && y + 2 <= 7)
             {
-                if (board[x + 1][y + 2] == 'n')
+                if (board[x + 1][y + 2] == bN)
                     return 8 * (x + 1) + (y + 2);
             }
             if (x + 1 <= 7 && y - 2 >= 0)
             {
-                if (board[x + 1][y - 2] == 'n')
+                if (board[x + 1][y - 2] == bN)
                     return 8 * (x + 1) + (y - 2);
             }
 
@@ -332,17 +332,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y - i] != ' ')
+                if (board[x - i][y - i] != __)
                 {
-                    if (board[x - i][y - i] == 'b')
+                    if (board[x - i][y - i] == bB)
                     {
                         return 8 * (x - i) + (y - i);
                     }
-                    else if (board[x - i][y - i] == 'q')
+                    else if (board[x - i][y - i] == bQ)
                     {
                         attackers_index[0] = 8 * (x - i) + (y - i);
                     }
-                    else if (i == 1 && board[x - i][y - i] == 'k')
+                    else if (i == 1 && board[x - i][y - i] == bK)
                     {
                         attackers_index[1] = 8 * (x - i) + (y - i);
                     }
@@ -357,17 +357,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x - i][y + i] != ' ')
+                if (board[x - i][y + i] != __)
                 {
-                    if (board[x - i][y + i] == 'b')
+                    if (board[x - i][y + i] == bB)
                     {
                         return 8 * (x - i) + (y + i);
                     }
-                    else if (board[x - i][y + i] == 'q')
+                    else if (board[x - i][y + i] == bQ)
                     {
                         attackers_index[0] = 8 * (x - i) + (y + i);
                     }
-                    else if (i == 1 && board[x - i][y + i] == 'k')
+                    else if (i == 1 && board[x - i][y + i] == bK)
                     {
                         attackers_index[1] = 8 * (x - i) + (y + i);
                     }
@@ -382,17 +382,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y - i] != ' ')
+                if (board[x + i][y - i] != __)
                 {
-                    if (board[x + i][y - i] == 'b')
+                    if (board[x + i][y - i] == bB)
                     {
                         return 8 * (x + i) + (y - i);
                     }
-                    else if (board[x + i][y - i] == 'q')
+                    else if (board[x + i][y - i] == bQ)
                     {
                         attackers_index[0] = 8 * (x + i) + (y - i);
                     }
-                    else if (i == 1 && board[x + i][y - i] == 'k')
+                    else if (i == 1 && board[x + i][y - i] == bK)
                     {
                         attackers_index[1] = 8 * (x + i) + (y - i);
                     }
@@ -407,17 +407,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
                 {
                     break;
                 }
-                if (board[x + i][y + i] != ' ')
+                if (board[x + i][y + i] != __)
                 {
-                    if (board[x + i][y + i] == 'b')
+                    if (board[x + i][y + i] == bB)
                     {
                         return 8 * (x + i) + (y + i);
                     }
-                    else if (board[x + i][y + i] == 'q')
+                    else if (board[x + i][y + i] == bQ)
                     {
                         attackers_index[0] = 8 * (x + i) + (y + i);
                     }
-                    else if (i == 1 && board[x + i][y + i] == 'k')
+                    else if (i == 1 && board[x + i][y + i] == bK)
                     {
                         attackers_index[1] = 8 * (x + i) + (y + i);
                     }
@@ -428,17 +428,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // up
             for (int i = x - 1; i >= 0; i--)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (board[i][y] == 'r')
+                    if (board[i][y] == bR)
                     {
                         return 8 * i + y;
                     }
-                    else if (board[i][y] == 'q')
+                    else if (board[i][y] == bQ)
                     {
                         attackers_index[0] = 8 * i + y;
                     }
-                    else if (i == x - 1 && board[i][y] == 'k')
+                    else if (i == x - 1 && board[i][y] == bK)
                     {
                         attackers_index[1] = 8 * i + y;
                     }
@@ -449,17 +449,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // left
             for (int i = y - 1; i >= 0; i--)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (board[x][i] == 'r')
+                    if (board[x][i] == bR)
                     {
                         return 8 * x + i;
                     }
-                    else if (board[x][i] == 'q')
+                    else if (board[x][i] == bQ)
                     {
                         attackers_index[0] = 8 * x + i;
                     }
-                    else if (i == y - 1 && board[x][i] == 'k')
+                    else if (i == y - 1 && board[x][i] == bK)
                     {
                         attackers_index[1] = 8 * x + i;
                     }
@@ -471,17 +471,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // right
             for (int i = y + 1; i <= 7; i++)
             {
-                if (board[x][i] != ' ')
+                if (board[x][i] != __)
                 {
-                    if (board[x][i] == 'r')
+                    if (board[x][i] == bR)
                     {
                         return 8 * x + i;
                     }
-                    else if (board[x][i] == 'q')
+                    else if (board[x][i] == bQ)
                     {
                         attackers_index[0] = 8 * x + i;
                     }
-                    else if (i == y + 1 && board[x][i] == 'k')
+                    else if (i == y + 1 && board[x][i] == bK)
                     {
                         attackers_index[1] = 8 * x + i;
                     }
@@ -492,17 +492,17 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
             // down
             for (int i = x + 1; i <= 7; i++)
             {
-                if (board[i][y] != ' ')
+                if (board[i][y] != __)
                 {
-                    if (board[i][y] == 'r')
+                    if (board[i][y] == bR)
                     {
                         return 8 * i + y;
                     }
-                    else if (board[i][y] == 'q')
+                    else if (board[i][y] == bQ)
                     {
                         attackers_index[0] = 8 * i + y;
                     }
-                    else if (i == x + 1 && board[i][y] == 'k')
+                    else if (i == x + 1 && board[i][y] == bK)
                     {
                         attackers_index[1] = 8 * i + y;
                     }
@@ -526,15 +526,15 @@ static int get_smallest_attacker(char board[8][8], int x, int y, int color)
 }
 
 // static exchange evaluation for quiescence search
-inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
+inline int SEE(unsigned char board[8][8], int new_x, int new_y, int target, int color)
 {
     int attacker_index = get_smallest_attacker(board, new_x, new_y, color);
     // exit if no attackers found
     if (attacker_index == -1)
         return target;
-    char board_copy[8][8];
+    unsigned char board_copy[8][8];
     int x, y;
-    char piece;
+    unsigned char piece;
     bool king_attack = false;
     int gain[32];
     int d = 0;
@@ -548,7 +548,7 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
         x = attacker_index / 8;
         y = attacker_index % 8;
 
-        if (toupper(board_copy[x][y]) == 'K')
+        if (board_copy[x][y] == wK || board_copy[x][y] == bK)
             king_attack = true;
 
         piece = board_copy[new_x][new_y];
@@ -564,7 +564,7 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
             break;
         }
 
-        gain[d] = piece_value(piece) - gain[d - 1];
+        gain[d] = piece_value[piece] - gain[d - 1];
 
         // pruning that won't change the sign of the result
         if (((-gain[d - 1] >= gain[d]) ? -gain[d - 1] : gain[d]) < 0)
@@ -585,9 +585,9 @@ inline int SEE(char board[8][8], int new_x, int new_y, int target, int color)
 }
 
 // static exchange evaluation for move ordering
-inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, int target, int color)
+inline int SEE_MO(unsigned char board[8][8], int att_x, int att_y, int new_x, int new_y, int target, int color)
 {
-    char board_copy[8][8];
+    unsigned char board_copy[8][8];
     int x = att_x;
     int y = att_y;
     int attacker_index;
@@ -600,9 +600,9 @@ inline int SEE_MO(char board[8][8], int att_x, int att_y, int new_x, int new_y, 
     do
     {
         d++;
-        gain[d] = piece_value(board_copy[x][y]) - gain[d - 1];
+        gain[d] = piece_value[board_copy[x][y]] - gain[d - 1];
 
-        if (toupper(board_copy[x][y]) == 'K')
+        if (board_copy[x][y] == wK || board_copy[x][y] == bK)
             king_attack = true;
 
         // pruning

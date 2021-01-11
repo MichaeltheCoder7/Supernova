@@ -5,11 +5,11 @@
 #include <stdbool.h>
 #include <time.h>
 #include <assert.h>
-#include "EvalHelpers.h"
-#include "Board.h"
+#include "evalhelpers.h"
+#include "board.h"
 
 // return how many white pawns are attacking this square
-inline int wpawn_controlled(char board[8][8], int x, int y)
+inline int wpawn_controlled(unsigned char board[8][8], int x, int y)
 {
     int squares = 0;
 
@@ -18,23 +18,23 @@ inline int wpawn_controlled(char board[8][8], int x, int y)
         switch (y)
         {
             case 0:
-                if (board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y + 1] == wP)
                 {
                     squares++;
                 }
                 break;
             case 7:
-                if (board[x + 1][y - 1] == 'P')
+                if (board[x + 1][y - 1] == wP)
                 {
                     squares++;
                 }
                 break;
             default:
-                if (board[x + 1][y - 1] == 'P')
+                if (board[x + 1][y - 1] == wP)
                 {
                     squares++;
                 }
-                if (board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y + 1] == wP)
                 {
                     squares++;
                 }
@@ -46,7 +46,7 @@ inline int wpawn_controlled(char board[8][8], int x, int y)
 }
 
 // return how many black pawns are attacking this square
-inline int bpawn_controlled(char board[8][8], int x, int y)
+inline int bpawn_controlled(unsigned char board[8][8], int x, int y)
 {
     int squares = 0;
 
@@ -55,23 +55,23 @@ inline int bpawn_controlled(char board[8][8], int x, int y)
         switch (y)
         {
             case 0:
-                if (board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y + 1] == bP)
                 {
                     squares++;;
                 }
                 break;
             case 7:
-                if (board[x - 1][y - 1] == 'p')
+                if (board[x - 1][y - 1] == bP)
                 {
                     squares++;;
                 }
                 break;
             default:
-                if (board[x - 1][y - 1] == 'p')
+                if (board[x - 1][y - 1] == bP)
                 {
                     squares++;
                 }
-                if (board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y + 1] == bP)
                 {
                     squares++;
                 }
@@ -85,11 +85,11 @@ inline int bpawn_controlled(char board[8][8], int x, int y)
 // count as candidate passed pawn if no enemy pawn is in the path
 // and no square in the path is controlled by more enemy pawns than own pawns
 // don't count as passed when there's a doubled pawn in the path
-inline bool candidate_passed_white(char board[8][8], int x, int y)
+inline bool candidate_passed_white(unsigned char board[8][8], int x, int y)
 {
     for (int rank = 1; rank < x; rank++)
     {
-        if (toupper(board[rank][y]) == 'P')
+        if (board[rank][y] == wP || board[rank][y] == bP)
         {
             return false;
         }
@@ -102,11 +102,11 @@ inline bool candidate_passed_white(char board[8][8], int x, int y)
     return true;
 }
 
-inline bool candidate_passed_black(char board[8][8], int x, int y)
+inline bool candidate_passed_black(unsigned char board[8][8], int x, int y)
 {
     for (int rank = 6; rank > x; rank--)
     {
-        if (toupper(board[rank][y]) == 'P')
+        if (board[rank][y] == wP || board[rank][y] == bP)
         {
             return false;
         }
@@ -120,24 +120,24 @@ inline bool candidate_passed_black(char board[8][8], int x, int y)
 }
 
 // check if this pawn is supported by own pawns
-inline bool connected_white(char board[8][8], int x, int y)
+inline bool connected_white(unsigned char board[8][8], int x, int y)
 {
     switch (y)
     {
         case 0:
-            if (board[x + 1][y + 1] == 'P')
+            if (board[x + 1][y + 1] == wP)
             {
                 return true;
             }
             break;
         case 7:
-            if (board[x + 1][y - 1] == 'P')
+            if (board[x + 1][y - 1] == wP)
             {
                 return true;
             }
             break;
         default:
-            if (board[x + 1][y - 1] == 'P' || board[x + 1][y + 1] == 'P')
+            if (board[x + 1][y - 1] == wP || board[x + 1][y + 1] == wP)
             {
                 return true;
             }
@@ -147,24 +147,24 @@ inline bool connected_white(char board[8][8], int x, int y)
     return false;
 }
 
-inline bool connected_black(char board[8][8], int x, int y)
+inline bool connected_black(unsigned char board[8][8], int x, int y)
 {
     switch (y)
     {
         case 0:
-            if (board[x - 1][y + 1] == 'p')
+            if (board[x - 1][y + 1] == bP)
             {
                 return true;
             }
             break;
         case 7:
-            if (board[x - 1][y - 1] == 'p')
+            if (board[x - 1][y - 1] == bP)
             {
                 return true;
             }
             break;
         default:
-            if (board[x - 1][y + 1] == 'p' || board[x - 1][y - 1] == 'p')
+            if (board[x - 1][y + 1] == bP || board[x - 1][y - 1] == bP)
             {
                 return true;
             }
@@ -175,51 +175,24 @@ inline bool connected_black(char board[8][8], int x, int y)
 }
 
 // check if a friendly pawn is next to this pawn
-inline bool phalanx_white(char board[8][8], int x, int y)
+inline bool phalanx_white(unsigned char board[8][8], int x, int y)
 {
     switch (y)
     {
         case 0:
-            if (board[x][y + 1] == 'P')
+            if (board[x][y + 1] == wP)
             {
                 return true;
             }
             break;
         case 7:
-            if (board[x][y - 1] == 'P')
+            if (board[x][y - 1] == wP)
             {
                 return true;
             }
             break;
         default:
-            if (board[x][y - 1] == 'P' || board[x][y + 1] == 'P')
-            {
-                return true;
-            }
-            break;
-    }
-
-    return false;
-}
-
-inline bool phalanx_black(char board[8][8], int x, int y)
-{
-    switch (y)
-    {
-        case 0:
-            if (board[x][y + 1] == 'p')
-            {
-                return true;
-            }
-            break;
-        case 7:
-            if (board[x][y - 1] == 'p')
-            {
-                return true;
-            }
-            break;
-        default:
-            if (board[x][y + 1] == 'p' || board[x][y - 1] == 'p')
+            if (board[x][y - 1] == wP || board[x][y + 1] == wP)
             {
                 return true;
             }
@@ -229,14 +202,41 @@ inline bool phalanx_black(char board[8][8], int x, int y)
     return false;
 }
 
-inline bool isolated_white(char board[8][8], int y)
+inline bool phalanx_black(unsigned char board[8][8], int x, int y)
+{
+    switch (y)
+    {
+        case 0:
+            if (board[x][y + 1] == bP)
+            {
+                return true;
+            }
+            break;
+        case 7:
+            if (board[x][y - 1] == bP)
+            {
+                return true;
+            }
+            break;
+        default:
+            if (board[x][y + 1] == bP || board[x][y - 1] == bP)
+            {
+                return true;
+            }
+            break;
+    }
+
+    return false;
+}
+
+inline bool isolated_white(unsigned char board[8][8], int y)
 {
     switch (y)
     {
         case 0:
             for (int rank = 6; rank > 0; rank--)
             {
-                if (board[rank][1] == 'P')
+                if (board[rank][1] == wP)
                 {
                     return false;
                 }
@@ -245,7 +245,7 @@ inline bool isolated_white(char board[8][8], int y)
         case 7:
             for (int rank = 6; rank > 0; rank--)
             {
-                if (board[rank][6] == 'P')
+                if (board[rank][6] == wP)
                 {
                     return false;
                 }
@@ -254,11 +254,11 @@ inline bool isolated_white(char board[8][8], int y)
         default:
             for (int rank = 6; rank > 0; rank--)
             {
-                if (board[rank][y - 1] == 'P')
+                if (board[rank][y - 1] == wP)
                 {
                     return false;
                 }
-                if (board[rank][y + 1] == 'P')
+                if (board[rank][y + 1] == wP)
                 {
                     return false;
                 }
@@ -269,14 +269,14 @@ inline bool isolated_white(char board[8][8], int y)
     return true;
 }
 
-inline bool isolated_black(char board[8][8], int y)
+inline bool isolated_black(unsigned char board[8][8], int y)
 {
     switch (y)
     {
         case 0:
             for (int rank = 1; rank < 7; rank++)
             {
-                if (board[rank][1] == 'p')
+                if (board[rank][1] == bP)
                 {
                     return false;
                 }
@@ -285,7 +285,7 @@ inline bool isolated_black(char board[8][8], int y)
         case 7:
             for (int rank = 1; rank < 7; rank++)
             {
-                if (board[rank][6] == 'p')
+                if (board[rank][6] == bP)
                 {
                     return false;
                 }
@@ -294,11 +294,11 @@ inline bool isolated_black(char board[8][8], int y)
         default:
             for (int rank = 1; rank < 7; rank++)
             {
-                if (board[rank][y - 1] == 'p')
+                if (board[rank][y - 1] == bP)
                 {
                     return false;
                 }
-                if (board[rank][y + 1] == 'p')
+                if (board[rank][y + 1] == bP)
                 {
                     return false;
                 }
@@ -309,14 +309,14 @@ inline bool isolated_black(char board[8][8], int y)
     return true;
 }
 
-inline bool backward_white(char board[8][8], int x, int y)
+inline bool backward_white(unsigned char board[8][8], int x, int y)
 {
     switch (y)
     {
         case 0:
             for (int rank = 6; rank >= x; rank--)
             {
-                if (board[rank][1] == 'P')
+                if (board[rank][1] == wP)
                 {
                     return false;
                 }
@@ -325,7 +325,7 @@ inline bool backward_white(char board[8][8], int x, int y)
         case 7:
             for (int rank = 6; rank >= x; rank--)
             {
-                if (board[rank][6] == 'P')
+                if (board[rank][6] == wP)
                 {
                     return false;
                 }
@@ -334,11 +334,11 @@ inline bool backward_white(char board[8][8], int x, int y)
         default:
             for (int rank = 6; rank >= x; rank--)
             {
-                if (board[rank][y - 1] == 'P')
+                if (board[rank][y - 1] == wP)
                 {
                     return false;
                 }
-                if (board[rank][y + 1] == 'P')
+                if (board[rank][y + 1] == wP)
                 {
                     return false;
                 }
@@ -349,14 +349,14 @@ inline bool backward_white(char board[8][8], int x, int y)
     return true;
 }
 
-inline bool backward_black(char board[8][8], int x, int y)
+inline bool backward_black(unsigned char board[8][8], int x, int y)
 {
     switch (y)
     {
         case 0:
             for (int rank = 1; rank <= x; rank++)
             {
-                if (board[rank][1] == 'p')
+                if (board[rank][1] == bP)
                 {
                     return false;
                 }
@@ -365,7 +365,7 @@ inline bool backward_black(char board[8][8], int x, int y)
         case 7:
             for (int rank = 1; rank <= x; rank++)
             {
-                if (board[rank][6] == 'p')
+                if (board[rank][6] == bP)
                 {
                     return false;
                 }
@@ -374,11 +374,11 @@ inline bool backward_black(char board[8][8], int x, int y)
         default:
             for (int rank = 1; rank <= x; rank++)
             {
-                if (board[rank][y - 1] == 'p')
+                if (board[rank][y - 1] == bP)
                 {
                     return false;
                 }
-                if (board[rank][y + 1] == 'p')
+                if (board[rank][y + 1] == bP)
                 {
                     return false;
                 }
@@ -389,11 +389,11 @@ inline bool backward_black(char board[8][8], int x, int y)
     return true;
 }
 
-inline bool openFile(char board[8][8], int y)
+inline bool openFile(unsigned char board[8][8], int y)
 {
     for (int x = 1; x < 7; x++)
     {
-        if (tolower(board[x][y]) == 'p')
+        if (board[x][y] == wP || board[x][y] == bP)
         {
             return false;
         }
@@ -422,11 +422,11 @@ inline bool queenFile(BOARD *pos, int y)
     return false;
 }
 
-inline bool semiOpenFile_white(char board[8][8], int y)
+inline bool semiOpenFile_white(unsigned char board[8][8], int y)
 {
     for (int x = 6; x > 0; x--)
     {
-        if (board[x][y] == 'P')
+        if (board[x][y] == wP)
         {
             return false;
         }
@@ -435,11 +435,11 @@ inline bool semiOpenFile_white(char board[8][8], int y)
     return true;
 }
 
-inline bool semiOpenFile_black(char board[8][8], int y)
+inline bool semiOpenFile_black(unsigned char board[8][8], int y)
 {
     for (int x = 1; x < 7; x++)
     {
-        if (board[x][y] == 'p')
+        if (board[x][y] == bP)
         {
             return false;
         }
@@ -449,26 +449,26 @@ inline bool semiOpenFile_black(char board[8][8], int y)
 }
 
 // only on rank 4, 5, 6 for white, 5, 4, 3 for black
-inline bool outpost_white(char board[8][8], int x, int y)
+inline bool outpost_white(unsigned char board[8][8], int x, int y)
 {
     if (x < 5 && x > 1)
     {
         switch (y)
         {
             case 0:
-                if (board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y + 1] == wP)
                 {
                     return true;
                 }
                 break;
             case 7:
-                if (board[x + 1][y - 1] == 'P')
+                if (board[x + 1][y - 1] == wP)
                 {
                     return true;
                 }
                 break;
             default:
-                if (board[x + 1][y - 1] == 'P' || board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y - 1] == wP || board[x + 1][y + 1] == wP)
                 {
                     return true;
                 }
@@ -479,26 +479,26 @@ inline bool outpost_white(char board[8][8], int x, int y)
     return false;
 }
 
-inline bool outpost_black(char board[8][8], int x, int y)
+inline bool outpost_black(unsigned char board[8][8], int x, int y)
 {
     if (x > 2 && x < 6)
     {
         switch (y)
         {
             case 0:
-                if (board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y + 1] == bP)
                 {
                     return true;
                 }
                 break;
             case 7:
-                if (board[x - 1][y - 1] == 'p')
+                if (board[x - 1][y - 1] == bP)
                 {
                     return true;
                 }
                 break;
             default:
-                if (board[x - 1][y - 1] == 'p' || board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y - 1] == bP || board[x - 1][y + 1] == bP)
                 {
                     return true;
                 }
@@ -510,26 +510,26 @@ inline bool outpost_black(char board[8][8], int x, int y)
 }
 
 // bad bishop when its forward mobility is blocked by own pawn
-inline bool badBishop_white(char board[8][8], int x, int y)
+inline bool badBishop_white(unsigned char board[8][8], int x, int y)
 {
     if (x > 1)
     {
         switch (y)
         {
             case 0:
-                if (board[x - 1][y + 1] == 'P')
+                if (board[x - 1][y + 1] == wP)
                 {
                     return true;
                 }
                 break;
             case 7:
-                if (board[x - 1][y - 1] == 'P')
+                if (board[x - 1][y - 1] == wP)
                 {
                     return true;
                 }
                 break;
             default:
-                if (board[x - 1][y - 1] == 'P' || board[x - 1][y + 1] == 'P')
+                if (board[x - 1][y - 1] == wP || board[x - 1][y + 1] == wP)
                 {
                     return true;
                 }
@@ -540,26 +540,26 @@ inline bool badBishop_white(char board[8][8], int x, int y)
     return false;
 }
 
-inline bool badBishop_black(char board[8][8], int x, int y)
+inline bool badBishop_black(unsigned char board[8][8], int x, int y)
 {
     if (x < 6)
     {
         switch (y)
         {
             case 0:
-                if (board[x + 1][y + 1] == 'p')
+                if (board[x + 1][y + 1] == bP)
                 {
                     return true;
                 }
                 break;
             case 7:
-                if (board[x + 1][y - 1] == 'p')
+                if (board[x + 1][y - 1] == bP)
                 {
                     return true;
                 }
                 break;
             default:
-                if (board[x + 1][y - 1] == 'p' || board[x + 1][y + 1] == 'p')
+                if (board[x + 1][y - 1] == bP || board[x + 1][y + 1] == bP)
                 {
                     return true;
                 }
@@ -571,7 +571,7 @@ inline bool badBishop_black(char board[8][8], int x, int y)
 }
 
 // penalty for semi-open files around king
-inline int wking_file(char board[8][8], int y)
+inline int wking_file(unsigned char board[8][8], int y)
 {
     int result = 0;
 
@@ -616,7 +616,7 @@ inline int wking_file(char board[8][8], int y)
     return result;
 }
 
-inline int bking_file(char board[8][8], int y)
+inline int bking_file(unsigned char board[8][8], int y)
 {
     int result = 0;
 

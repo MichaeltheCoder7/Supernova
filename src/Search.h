@@ -2,8 +2,8 @@
 #define SEARCH_H
 
 #include <stdbool.h>
-#include "Board.h"
-#include "Move.h"
+#include "board.h"
+#include "move.h"
 
 #define MAXDEPTH 100
 

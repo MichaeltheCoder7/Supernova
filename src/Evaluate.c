@@ -5,16 +5,16 @@
 #include <stdbool.h>
 #include <time.h>
 #include <assert.h>
-#include "Evaluate.h"
-#include "Board.h"
-#include "Mobility.h"
-#include "EvalHelpers.h"
-#include "PSQT.h"
-#include "Transposition.h"
+#include "evaluate.h"
+#include "board.h"
+#include "mobility.h"
+#include "evalhelpers.h"
+#include "psqt.h"
+#include "transposition.h"
 
 // 1: black
 // -1: white
-int evaluate(BOARD *pos, char board[8][8], int color)
+int evaluate(BOARD *pos, unsigned char board[8][8], int color)
 {
     // eval tt probe
     struct Eval *entry = probeEvalTT(pos->key);
@@ -94,7 +94,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 }
             }
             // doubled pawn penalty 
-            else if (board[x + 1][y] == 'P')
+            else if (board[x + 1][y] == wP)
             {
                 wpawn_mg -= DOUBLEDPAWNMG;
                 wpawn_eg -= DOUBLEDPAWNEG;
@@ -155,7 +155,7 @@ int evaluate(BOARD *pos, char board[8][8], int color)
                 }
             }
             // doubled pawn penalty
-            else if (board[x - 1][y] == 'p')
+            else if (board[x - 1][y] == bP)
             {
                 bpawn_mg -= DOUBLEDPAWNMG;
                 bpawn_eg -= DOUBLEDPAWNEG;
@@ -177,131 +177,131 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         // pawn shield bonus and pawn storm penalty
         if (white_king_x > 5 && white_king_y > 4)
         {
-            if (board[6][5] == 'P')
+            if (board[6][5] == wP)
                 wpawn_mg += 15;
-            else if (board[5][5] == 'P')
+            else if (board[5][5] == wP)
                 wpawn_mg += 10;
 
-            if (board[5][5] == 'p')
+            if (board[5][5] == bP)
                 wpawn_mg -= 10;
-            else if (board[4][5] == 'p')
+            else if (board[4][5] == bP)
                 wpawn_mg -= 5;
 
-            if (board[6][6] == 'P')
+            if (board[6][6] == wP)
                 wpawn_mg += 15;
-            else if (board[5][6] == 'P')
+            else if (board[5][6] == wP)
                 wpawn_mg += 10;
 
-            if (board[5][6] == 'p')
+            if (board[5][6] == bP)
                 wpawn_mg -= 10;
-            else if (board[4][6] == 'p')
+            else if (board[4][6] == bP)
                 wpawn_mg -= 5;
 
-            if (board[6][7] == 'P')
+            if (board[6][7] == wP)
                 wpawn_mg += 15;
-            else if (board[5][7] == 'P')
+            else if (board[5][7] == wP)
                 wpawn_mg += 10;
 
-            if (board[5][7] == 'p')
+            if (board[5][7] == bP)
                 wpawn_mg -= 10;
-            else if (board[4][7] == 'p')
+            else if (board[4][7] == bP)
                 wpawn_mg -= 5;
         }
         else if (white_king_x > 5 && white_king_y < 3)
         {
-            if (board[6][0] == 'P')
+            if (board[6][0] == wP)
                 wpawn_mg += 15;
-            else if (board[5][0] == 'P')
+            else if (board[5][0] == wP)
                 wpawn_mg += 10;
 
-            if (board[5][0] == 'p')
+            if (board[5][0] == bP)
                 wpawn_mg -= 10;
-            else if (board[4][0] == 'p')
+            else if (board[4][0] == bP)
                 wpawn_mg -= 5;
 
-            if (board[6][1] == 'P')
+            if (board[6][1] == wP)
                 wpawn_mg += 15;
-            else if (board[5][1] == 'P')
+            else if (board[5][1] == wP)
                 wpawn_mg += 10;
 
-            if (board[5][1] == 'p')
+            if (board[5][1] == bP)
                 wpawn_mg -= 10;
-            else if (board[4][1] == 'p')
+            else if (board[4][1] == bP)
                 wpawn_mg -= 5;
 
-            if (board[6][2] == 'P')
+            if (board[6][2] == wP)
                 wpawn_mg += 15;
-            else if (board[5][2] == 'P')
+            else if (board[5][2] == wP)
                 wpawn_mg += 10;
 
-            if (board[5][2] == 'p')
+            if (board[5][2] == bP)
                 wpawn_mg -= 10;
-            else if (board[4][2] == 'p')
+            else if (board[4][2] == bP)
                 wpawn_mg -= 5;
         }
 
         if (black_king_x < 2 && black_king_y > 4)
         {
-            if (board[1][5] == 'p')
+            if (board[1][5] == bP)
                 bpawn_mg += 15;
-            else if (board[2][5] == 'p')
+            else if (board[2][5] == bP)
                 bpawn_mg += 10;
 
-            if (board[2][5] == 'P')
+            if (board[2][5] == wP)
                 bpawn_mg -= 10;
-            else if (board[3][5] == 'P')
+            else if (board[3][5] == wP)
                 bpawn_mg -= 5;
 
-            if (board[1][6] == 'p')
+            if (board[1][6] == bP)
                 bpawn_mg += 15;
-            else if (board[2][6] == 'p')
+            else if (board[2][6] == bP)
                 bpawn_mg += 10;
 
-            if (board[2][6] == 'P')
+            if (board[2][6] == wP)
                 bpawn_mg -= 10;
-            else if (board[3][6] == 'P')
+            else if (board[3][6] == wP)
                 bpawn_mg -= 5;
 
-            if (board[1][7] == 'p')
+            if (board[1][7] == bP)
                 bpawn_mg += 15;
-            else if (board[2][7] == 'p')
+            else if (board[2][7] == bP)
                 bpawn_mg += 10;
 
-            if (board[2][7] == 'P')
+            if (board[2][7] == wP)
                 bpawn_mg -= 10;
-            else if (board[3][7] == 'P')
+            else if (board[3][7] == wP)
                 bpawn_mg -= 5;
         }
         else if (black_king_x < 2 && black_king_y < 3)
         {
-            if (board[1][0] == 'p')
+            if (board[1][0] == bP)
                 bpawn_mg += 15;
-            else if (board[2][0] == 'p')
+            else if (board[2][0] == bP)
                 bpawn_mg += 10;
 
-            if (board[2][0] == 'P')
+            if (board[2][0] == wP)
                 bpawn_mg -= 10;
-            else if (board[3][0] == 'P')
+            else if (board[3][0] == wP)
                 bpawn_mg -= 5;
 
-            if (board[1][1] == 'p')
+            if (board[1][1] == bP)
                 bpawn_mg += 15;
-            else if (board[2][1] == 'p')
+            else if (board[2][1] == bP)
                 bpawn_mg += 10;
 
-            if (board[2][1] == 'P')
+            if (board[2][1] == wP)
                 bpawn_mg -= 10;
-            else if (board[3][1] == 'P')
+            else if (board[3][1] == wP)
                 bpawn_mg -= 5;
 
-            if (board[1][2] == 'p')
+            if (board[1][2] == bP)
                 bpawn_mg += 15;
-            else if (board[2][2] == 'p')
+            else if (board[2][2] == bP)
                 bpawn_mg += 10;
 
-            if (board[2][2] == 'P')
+            if (board[2][2] == wP)
                 bpawn_mg -= 10;
-            else if (board[3][2] == 'P')
+            else if (board[3][2] == wP)
                 bpawn_mg -= 5;
         }
 
@@ -415,31 +415,31 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         switch (pos->piece_list[wN][i])
         {
             case a8:
-                if (board[1][0] == 'p' || board[1][2] == 'p')
+                if (board[1][0] == bP || board[1][2] == bP)
                 {
                     other_bonus_white -= 100;
                 }
                 break;
             case h8:
-                if (board[1][7] == 'p' || board[1][5] == 'p')
+                if (board[1][7] == bP || board[1][5] == bP)
                 {
                     other_bonus_white -= 100;
                 }
                 break;
             case a7:
-                if (board[2][0] == 'p' && board[1][1] == 'p')
+                if (board[2][0] == bP && board[1][1] == bP)
                 {
                     other_bonus_white -= 100;
                 }
                 break;
             case h7:
-                if (board[2][7] == 'p' && board[1][6] == 'p')
+                if (board[2][7] == bP && board[1][6] == bP)
                 {
                     other_bonus_white -= 100;
                 }
                 break;
             case c3:
-                if (board[6][2] == 'P' && board[4][3] == 'P' && board[4][4] != 'P')
+                if (board[6][2] == wP && board[4][3] == wP && board[4][4] != wP)
                 {
                     other_bonus_white -= 5; // c3 knight penalty
                 }
@@ -475,45 +475,45 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         switch (pos->piece_list[wB][i])
         {
             case a7:
-                if (board[2][1] == 'p' && board[1][2] == 'p')
+                if (board[2][1] == bP && board[1][2] == bP)
                 {
                     other_bonus_white -= 100;
                 }
                 break;
             case h7:
-                if (board[2][6] == 'p' && board[1][5] == 'p')
+                if (board[2][6] == bP && board[1][5] == bP)
                 {
                     other_bonus_white -= 100;
                 }
                 break;
             case a6:
-                if (board[3][1] == 'p' && board[2][2] == 'p')
+                if (board[3][1] == bP && board[2][2] == bP)
                 {
                     other_bonus_white -= 50;
                 }
                 break;
             case h6:
-                if (board[3][6] == 'p' && board[2][5] == 'p')
+                if (board[3][6] == bP && board[2][5] == bP)
                 {
                     other_bonus_white -= 50;
                 }
                 break;
             case f1:
-                if (board[7][6] == 'K')
+                if (board[7][6] == wK)
                 {
                     other_bonus_white += RETURNINGBISHOP;
                 }
-                if (board[6][4] == 'P' && board[5][4] != ' ')
+                if (board[6][4] == wP && board[5][4] != __)
                 {
                     other_bonus_white -= 20; // bishop no development penalty
                 }
                 break;
             case c1:
-                if (board[7][1] == 'K')
+                if (board[7][1] == wK)
                 {
                     other_bonus_white += RETURNINGBISHOP;
                 }
-                if (board[6][3] == 'P' && board[5][3] != ' ')
+                if (board[6][3] == wP && board[5][3] != __)
                 {
                     other_bonus_white -= 20; // bishop no development penalty
                 }
@@ -532,19 +532,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         // queen early development penalty
         if (x < 6)
         {
-            if (board[7][1] == 'N')
+            if (board[7][1] == wN)
             {
                 other_bonus_white -= 4;
             }
-            if (board[7][2] == 'B')
+            if (board[7][2] == wB)
             {
                 other_bonus_white -= 4;
             }
-            if (board[7][5] == 'B')
+            if (board[7][5] == wB)
             {
                 other_bonus_white -= 4;
             }
-            if (board[7][6] == 'N')
+            if (board[7][6] == wN)
             {
                 other_bonus_white -= 4;
             }
@@ -652,31 +652,31 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         switch (pos->piece_list[bN][i])
         {
             case a1:
-                if (board[6][0] == 'P' || board[6][2] == 'P')
+                if (board[6][0] == wP || board[6][2] == wP)
                 {
                     other_bonus_black -= 100;
                 }
                 break;
             case h1:
-                if (board[6][7] == 'P' || board[6][5] == 'P')
+                if (board[6][7] == wP || board[6][5] == wP)
                 {
                     other_bonus_black -= 100;
                 }
                 break;
             case a2:
-                if (board[5][0] == 'P' && board[6][1] == 'P')
+                if (board[5][0] == wP && board[6][1] == wP)
                 {
                     other_bonus_black -= 100;
                 }
                 break;
             case h2:
-                if (board[5][7] == 'P' && board[6][6] == 'P')
+                if (board[5][7] == wP && board[6][6] == wP)
                 {
                     other_bonus_black -= 100;
                 }
                 break;
             case c6:
-                if (board[1][2] == 'p' && board[3][3] == 'p' && board[3][4] != 'p')
+                if (board[1][2] == bP && board[3][3] == bP && board[3][4] != bP)
                 {
                     other_bonus_black -= 5; // c6 knight penalty
                 }
@@ -712,45 +712,45 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         switch (pos->piece_list[bB][i])
         {
             case a2:
-                if (board[5][1] == 'P' && board[6][2] == 'P')
+                if (board[5][1] == wP && board[6][2] == wP)
                 {
                     other_bonus_black -= 100;
                 }
                 break;
             case h2:
-                if (board[5][6] == 'P' && board[6][5] == 'P')
+                if (board[5][6] == wP && board[6][5] == wP)
                 {
                     other_bonus_black -= 100;
                 }
                 break;
             case a3:
-                if (board[4][1] == 'P' && board[5][2] == 'P')
+                if (board[4][1] == wP && board[5][2] == wP)
                 {
                     other_bonus_black -= 50;
                 }
                 break;
             case h3:
-                if (board[4][6] == 'P' && board[5][5] == 'P')
+                if (board[4][6] == wP && board[5][5] == wP)
                 {
                     other_bonus_black -= 50;
                 }
                 break;
             case f8:
-                if (board[0][6] == 'k')
+                if (board[0][6] == bK)
                 {
                     other_bonus_black += RETURNINGBISHOP;
                 }
-                if (board[1][4] == 'p' && board[2][4] != ' ')
+                if (board[1][4] == bP && board[2][4] != __)
                 {
                     other_bonus_black -= 20; // bishop no development penalty
                 }
                 break;
             case c8:
-                if (board[0][1] == 'k')
+                if (board[0][1] == bK)
                 {
                     other_bonus_black += RETURNINGBISHOP;
                 }
-                if (board[1][3] == 'p' && board[2][3] != ' ')
+                if (board[1][3] == bP && board[2][3] != __)
                 {
                     other_bonus_black -= 20; // bishop no development penalty
                 }
@@ -769,19 +769,19 @@ int evaluate(BOARD *pos, char board[8][8], int color)
         // queen early development penalty
         if (x > 1)
         {
-            if (board[0][1] == 'n')
+            if (board[0][1] == bN)
             {
                 other_bonus_black -= 4;
             }
-            if (board[0][2] == 'b')
+            if (board[0][2] == bB)
             {
                 other_bonus_black -= 4;
             }
-            if (board[0][5] == 'b')
+            if (board[0][5] == bB)
             {
                 other_bonus_black -= 4;
             }
-            if (board[0][6] == 'n')
+            if (board[0][6] == bN)
             {
                 other_bonus_black -= 4;
             }

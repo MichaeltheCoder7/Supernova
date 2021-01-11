@@ -1,7 +1,7 @@
 #ifndef MOVE_H
 #define MOVE_H
 
-#include "Board.h"
+#include "board.h"
 
 #define NOMOVE 100
 
@@ -9,10 +9,12 @@ typedef struct {
 
     unsigned char from;
     unsigned char to;
-    char promotion;
+    char promotion; // ' ': not promotion 'q': queen 'r': rook 'b': bishop 'n': knight 
     unsigned char move_type; // 0: quiet 1: capture 2: promotion 3: castling
 
 } MOVE;
+
+static const char promotions[5] = { ' ', 'q', 'r', 'b', 'n' };
 
 void print_move(MOVE move);
 
@@ -30,6 +32,6 @@ int makeMove_qsearch(BOARD *pos, MOVE *move);
 
 void make_nullmove(BOARD *pos);
 
-void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y);
+void makeMove_SEE(unsigned char board[8][8], int cur_x, int cur_y, int new_x, int new_y);
 
 #endif

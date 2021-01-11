@@ -1,7 +1,7 @@
 #ifndef ORDERMOVE_H
 #define ORDERMOVE_H
 
-#include "Move.h"
+#include "move.h"
 
 #define BESTMOVE    100000000
 #define HASHMOVE    90000000
@@ -15,17 +15,15 @@
 #define UNDERPROM   80000520
 #define LCAPTURE    80000000
 
-int wCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2);
+static const int piece_value[13] = { 100, 325, 335, 500, 975, 20000, 100, 325, 335, 500, 975, 20000, 100 };
+static const int lva_score[12] = { 5, 4, 3, 2, 1, 0, 5, 4, 3, 2, 1, 0 };
+static const int mvv_score[13] = { 100, 200, 300, 400, 500, 0, 100, 200, 300, 400, 500, 0, 100 }; // empty square is worth 100 for en passant
 
-int bCapMove_score(char piece, char op_piece, char board[8][8], int x1, int y1, int x2, int y2);
+int capMove_score(unsigned char piece, unsigned char op_piece, unsigned char board[8][8], int x1, int y1, int x2, int y2, int color);
 
 int quietMove_score(BOARD *pos, MOVE *move, int origin, int x, int y, int ply, int color);
 
-int wCapQsearch_score(char piece, char op_piece);
-
-int bCapQsearch_score(char piece, char op_piece);
-
-int piece_value(char piece);
+int capQsearch_score(unsigned char piece, unsigned char op_piece);
 
 void movesort(MOVE moves[256], int sort[256], int length, int current);
 

@@ -7,18 +7,18 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
-#include "Attack.h"
-#include "Search.h"
-#include "Board.h"
-#include "Move.h"
-#include "MoveGen.h"
-#include "CaptureGen.h"
-#include "CheckMove.h"
-#include "OrderMove.h"
-#include "Evaluate.h"
-#include "Transposition.h"
-#include "SEE.h"
-#include "Syzygy.h"
+#include "attack.h"
+#include "search.h"
+#include "board.h"
+#include "move.h"
+#include "movegen.h"
+#include "capturegen.h"
+#include "checkmove.h"
+#include "ordermove.h"
+#include "evaluate.h"
+#include "transposition.h"
+#include "see.h"
+#include "syzygy.h"
 
 #define LOWERBOUND  0
 #define EXACT       1
@@ -90,7 +90,7 @@ static inline void saveCounterMove(BOARD *pos, MOVE move)
 {
     if (pos->last_move.piece != NOMOVE)
     {
-        counterMoves[pos->last_move.piece][pos->last_move.to].piece = piece_code(pos->board[move.from / 8][move.from % 8]);
+        counterMoves[pos->last_move.piece][pos->last_move.to].piece = pos->board[move.from / 8][move.from % 8];
         counterMoves[pos->last_move.piece][pos->last_move.to].to = move.to;
     }
 }
@@ -259,7 +259,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
     int value = -INFINITE;
     int length;
     int isprom;
-    char moved_piece, piece;
+    unsigned char moved_piece, piece;
     int moved_piece_value;
     int cap_piece_value;
     int new_x, new_y;
@@ -347,7 +347,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
         new_x = moves[x].to / 8;
         new_y = moves[x].to % 8;
         piece = pos->board[new_x][new_y];
-        cap_piece_value = piece_value(piece);
+        cap_piece_value = piece_value[piece];
 
         // futility pruning
         if ((standing_pat + cap_piece_value + 200) < alpha && !isprom)
@@ -357,7 +357,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
         }
 
         moved_piece = pos_copy.board[new_x][new_y];
-        moved_piece_value = piece_value(moved_piece);
+        moved_piece_value = piece_value[moved_piece];
 
         // SEE pruning
         // only check when higher takes lower
@@ -592,8 +592,8 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             // get piece value
             new_x = moves[x].to / 8;
             new_y = moves[x].to % 8;
-            cap_piece_value = piece_value(pos->board[new_x][new_y]);
-            moved_piece_value = piece_value(pos_copy.board[new_x][new_y]);
+            cap_piece_value = piece_value[pos->board[new_x][new_y]];
+            moved_piece_value = piece_value[pos_copy.board[new_x][new_y]];
 
             // skip moves with SEE < 0
             if (moved_piece_value > cap_piece_value && moved_piece_value != INFINITE && isTactical != 2)

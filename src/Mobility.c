@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <time.h>
 #include <assert.h>
-#include "Mobility.h"
-#include "MoveGen.h"
+#include "mobility.h"
+#include "movegen.h"
 
 int wattack_count;
 int battack_count;
@@ -14,26 +14,26 @@ int wattack_weight;
 int battack_weight;
 
 // check if this square is defended by pawns
-static inline bool defended_by_wpawn(char board[8][8], int x, int y)
+static inline bool defended_by_wpawn(unsigned char board[8][8], int x, int y)
 {
     if (x < 6)
     {
         switch (y)
         {
             case 0:
-                if (board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y + 1] == wP)
                 {
                     return true;
                 }
                 break;
             case 7:
-                if (board[x + 1][y - 1] == 'P')
+                if (board[x + 1][y - 1] == wP)
                 {
                     return true;
                 }
                 break;
             default:
-                if (board[x + 1][y - 1] == 'P' || board[x + 1][y + 1] == 'P')
+                if (board[x + 1][y - 1] == wP || board[x + 1][y + 1] == wP)
                 {
                     return true;
                 }
@@ -44,26 +44,26 @@ static inline bool defended_by_wpawn(char board[8][8], int x, int y)
     return false;
 }
 
-static inline bool defended_by_bpawn(char board[8][8], int x, int y)
+static inline bool defended_by_bpawn(unsigned char board[8][8], int x, int y)
 {
     if (x > 1)
     {
         switch (y)
         {
             case 0:
-                if (board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y + 1] == bP)
                 {
                     return true;
                 }
                 break;
             case 7:
-                if (board[x - 1][y - 1] == 'p')
+                if (board[x - 1][y - 1] == bP)
                 {
                     return true;
                 }
                 break;
             default:
-                if (board[x - 1][y - 1] == 'p' || board[x - 1][y + 1] == 'p')
+                if (board[x - 1][y - 1] == bP || board[x - 1][y + 1] == bP)
                 {
                     return true;
                 }
@@ -102,7 +102,7 @@ static inline bool bking_zone(int bkingx, int bkingy, int x, int y)
 // exclude own blocked pawns and own pawns on rank 2 and 3
 // exclude own king
 // also consider attack on enemy king
-inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wknight_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -116,7 +116,7 @@ inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             continue;
         }
-        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && board[x][y] != wQ && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             if (!defended_by_bpawn(board, x, y))
                 move_count++;
@@ -136,7 +136,7 @@ inline int wknight_mobility(char board[8][8], int index_x, int index_y, int bkin
     return 4 * (move_count - 4);
 }
 
-inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int bknight_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -150,7 +150,7 @@ inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             continue;
         }
-        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && board[x][y] != bQ && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             if (!defended_by_wpawn(board, x, y))
                 move_count++;
@@ -170,7 +170,7 @@ inline int bknight_mobility(char board[8][8], int index_x, int index_y, int wkin
     return 4 * (move_count - 4);
 }
 
-inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wbishop_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -185,7 +185,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             break;
         }
-        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && board[x][y] != wQ && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             if (!defended_by_bpawn(board, x, y))
                 move_count++;
@@ -194,7 +194,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -208,7 +208,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             break;
         }
-        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && board[x][y] != wQ && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             if (!defended_by_bpawn(board, x, y))
                 move_count++;
@@ -217,7 +217,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -231,7 +231,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             break;
         }
-        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && board[x][y] != wQ && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             if (!defended_by_bpawn(board, x, y))
                 move_count++;
@@ -240,7 +240,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -254,7 +254,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             break;
         }
-        if (board[x][y] != 'K' && board[x][y] != 'Q' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && board[x][y] != wQ && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             if (!defended_by_bpawn(board, x, y))
                 move_count++;
@@ -263,7 +263,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -278,7 +278,7 @@ inline int wbishop_mobility(char board[8][8], int index_x, int index_y, int bkin
     return 3 * (move_count - 7);
 }
 
-inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int bbishop_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -293,7 +293,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             break;
         }
-        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && board[x][y] != bQ && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             if (!defended_by_wpawn(board, x, y))
                 move_count++;
@@ -302,7 +302,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -316,7 +316,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             break;
         }
-        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && board[x][y] != bQ && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             if (!defended_by_wpawn(board, x, y))
                 move_count++;
@@ -325,7 +325,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -339,7 +339,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             break;
         }
-        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && board[x][y] != bQ && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             if (!defended_by_wpawn(board, x, y))
                 move_count++;
@@ -348,7 +348,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -362,7 +362,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             break;
         }
-        if (board[x][y] != 'k' && board[x][y] != 'q' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && board[x][y] != bQ && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             if (!defended_by_wpawn(board, x, y))
                 move_count++;
@@ -371,7 +371,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -386,7 +386,7 @@ inline int bbishop_mobility(char board[8][8], int index_x, int index_y, int wkin
     return 3 * (move_count - 7);
 }
 
-inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wrook_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -397,7 +397,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -405,7 +405,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -415,7 +415,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -423,7 +423,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -433,7 +433,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -441,7 +441,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -451,7 +451,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -459,7 +459,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -474,7 +474,7 @@ inline int wrook_mobility(char board[8][8], int index_x, int index_y, int bkingx
     return 2 * (move_count - 7);
 }
 
-inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int brook_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -485,7 +485,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -493,7 +493,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -503,7 +503,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -511,7 +511,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -521,7 +521,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -529,7 +529,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -539,7 +539,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -547,7 +547,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -562,7 +562,7 @@ inline int brook_mobility(char board[8][8], int index_x, int index_y, int wkingx
     return 2 * (move_count - 7);
 }
 
-inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
+inline int wqueen_mobility(unsigned char board[8][8], int index_x, int index_y, int bkingx, int bkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -577,7 +577,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             break;
         }
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -585,7 +585,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -595,7 +595,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -603,7 +603,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -617,7 +617,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             break;
         }
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -625,7 +625,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -635,7 +635,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -643,7 +643,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -653,7 +653,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -661,7 +661,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -675,7 +675,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             break;
         }
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -683,7 +683,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -693,7 +693,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -701,7 +701,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -715,7 +715,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             break;
         }
-        if (board[x][y] != 'K' && (board[x][y] != 'P' || (x < 5 && board[x - 1][y] == ' ')))
+        if (board[x][y] != wK && (board[x][y] != wP || (x < 5 && board[x - 1][y] == __)))
         {
             move_count++;
         }
@@ -723,7 +723,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -738,7 +738,7 @@ inline int wqueen_mobility(char board[8][8], int index_x, int index_y, int bking
     return 1 * (move_count - 14);
 }
 
-inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
+inline int bqueen_mobility(unsigned char board[8][8], int index_x, int index_y, int wkingx, int wkingy)
 {
     int attack = 0;
     int move_count = 0;
@@ -753,7 +753,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             break;
         }
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -761,7 +761,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -771,7 +771,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -779,7 +779,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -793,7 +793,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             break;
         }
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -801,7 +801,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -811,7 +811,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -819,7 +819,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -829,7 +829,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
     {
         x = index_x;
         y = j;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -837,7 +837,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -851,7 +851,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             break;
         }
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -859,7 +859,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -869,7 +869,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
     {
         x = j;
         y = index_y;
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -877,7 +877,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }
@@ -891,7 +891,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             break;
         }
-        if (board[x][y] != 'k' && (board[x][y] != 'p' || (x > 2 && board[x + 1][y] == ' ')))
+        if (board[x][y] != bK && (board[x][y] != bP || (x > 2 && board[x + 1][y] == __)))
         {
             move_count++;
         }
@@ -899,7 +899,7 @@ inline int bqueen_mobility(char board[8][8], int index_x, int index_y, int wking
         {
             attack++;
         }
-        if (board[x][y] != ' ')
+        if (board[x][y] != __)
         {
             break;
         }

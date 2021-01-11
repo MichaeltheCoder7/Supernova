@@ -4,9 +4,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "Move.h"
-#include "Board.h"
-#include "Transposition.h"
+#include "move.h"
+#include "board.h"
+#include "transposition.h"
 
 const char positions[64][3] = {
 
@@ -117,24 +117,23 @@ int makeMove(BOARD *pos, MOVE *move)
     int cur_y = cur_64 % 8;
     int new_x = new_64 / 8;
     int new_y = new_64 % 8;
-    char piece = pos->board[cur_x][cur_y];
-    char op_piece = pos->board[new_x][new_y];
-    int my_piece = piece_code(piece);
+    unsigned char piece = pos->board[cur_x][cur_y];
+    unsigned char op_piece = pos->board[new_x][new_y];
     int isCapture = 0;
     int index, square;
 
     // update previous move
-    pos->last_move.piece = my_piece;
+    pos->last_move.piece = piece;
     pos->last_move.to = new_64;
 
     // update board
     pos->board[new_x][new_y] = piece;
-    pos->board[cur_x][cur_y] = ' ';
+    pos->board[cur_x][cur_y] = __;
 
     // castling rights check
     if (pos->ksw)
     {
-        if (pos->board[7][4] != 'K' || pos->board[7][7] != 'R')
+        if (pos->board[7][4] != wK || pos->board[7][7] != wR)
         {
             pos->key ^= kswcr;
             pos->ksw = 0;
@@ -142,7 +141,7 @@ int makeMove(BOARD *pos, MOVE *move)
     }
     if (pos->qsw)
     {
-        if (pos->board[7][4] != 'K' || pos->board[7][0] != 'R')
+        if (pos->board[7][4] != wK || pos->board[7][0] != wR)
         {
             pos->key ^= qswcr;
             pos->qsw = 0;
@@ -150,7 +149,7 @@ int makeMove(BOARD *pos, MOVE *move)
     }
     if (pos->ksb)
     {
-        if (pos->board[0][4] != 'k' || pos->board[0][7] != 'r')
+        if (pos->board[0][4] != bK || pos->board[0][7] != bR)
         {
             pos->key ^= ksbcr;
             pos->ksb = 0;
@@ -158,7 +157,7 @@ int makeMove(BOARD *pos, MOVE *move)
     }
     if (pos->qsb)
     {
-        if (pos->board[0][4] != 'k' || pos->board[0][0] != 'r')
+        if (pos->board[0][4] != bK || pos->board[0][0] != bR)
         {
             pos->key ^= qsbcr;
             pos->qsb = 0;
@@ -166,26 +165,25 @@ int makeMove(BOARD *pos, MOVE *move)
     }
 
     // Zobrist key update
-    pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
+    pos->key = pos->key ^ table[cur_x][cur_y][piece] ^ table[new_x][new_y][piece] ^ turn;
 
-    if (op_piece != ' ') // capture
+    if (op_piece != __) // capture
     {
-        int enemy_piece = piece_code(op_piece);
-        pos->key ^= table[new_x][new_y][enemy_piece];
+        pos->key ^= table[new_x][new_y][op_piece];
         pos->piece_num--;
         isCapture = 1;
         // piece list capture
-        pos->piece_count[enemy_piece]--;
+        pos->piece_count[op_piece]--;
         index = pos->index_board[new_64];
-        square = pos->piece_list[enemy_piece][pos->piece_count[enemy_piece]];
-        pos->piece_list[enemy_piece][index] = square;
+        square = pos->piece_list[op_piece][pos->piece_count[op_piece]];
+        pos->piece_list[op_piece][index] = square;
         pos->index_board[square] = index;
         // pawn hash update when pawn is captured
-        if (op_piece == 'p')
+        if (op_piece == bP)
         {
             pos->pawn_key ^= table[new_x][new_y][bP];
         }
-        else if (op_piece == 'P')
+        else if (op_piece == wP)
         {
             pos->pawn_key ^= table[new_x][new_y][wP];
         }
@@ -194,10 +192,10 @@ int makeMove(BOARD *pos, MOVE *move)
     // piece list update
     index = pos->index_board[cur_64];
     pos->index_board[new_64] = index;
-    pos->piece_list[my_piece][index] = new_64;
+    pos->piece_list[piece][index] = new_64;
 
     // fifty moves rule counter update
-    if (op_piece == ' ' && toupper(piece) != 'P')
+    if (op_piece == __ && piece != wP && piece != bP)
     {
         pos->halfmove_counter++;
     }
@@ -214,7 +212,7 @@ int makeMove(BOARD *pos, MOVE *move)
 
     // update en passant flag and key
     pos->ep_file = 0;
-    if ((toupper(piece) == 'P') && abs(cur_x - new_x) == 2)
+    if ((piece == wP || piece == bP) && abs(cur_x - new_x) == 2)
     {
         pos->key ^= ep[new_y];
         pos->ep_file = new_y + 1;
@@ -223,7 +221,7 @@ int makeMove(BOARD *pos, MOVE *move)
     pos->pawn_push = false; // detect pawn push to the 7th/2nd rank
     switch (piece)
     {
-        case 'P':
+        case wP:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][wP] ^ table[new_x][new_y][wP];
             if (new_x == 0)
@@ -243,7 +241,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 switch (move->promotion)
                 {
                     case 'r':
-                        pos->board[0][new_y] = 'R';
+                        pos->board[0][new_y] = wR;
                         pos->key ^= table[0][new_y][wR];
                         // add piece
                         pos->piece_list[wR][pos->piece_count[wR]] = new_64;
@@ -251,7 +249,7 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[wR]++;
                         break;
                     case 'b':
-                        pos->board[0][new_y] = 'B';
+                        pos->board[0][new_y] = wB;
                         pos->key ^= table[0][new_y][wB];
                         // add piece
                         pos->piece_list[wB][pos->piece_count[wB]] = new_64;
@@ -259,7 +257,7 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[wB]++;
                         break;
                     case 'n':
-                        pos->board[0][new_y] = 'N';
+                        pos->board[0][new_y] = wN;
                         pos->key ^= table[0][new_y][wN];
                         // add piece
                         pos->piece_list[wN][pos->piece_count[wN]] = new_64;
@@ -267,7 +265,7 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[wN]++;
                         break;
                     default:
-                        pos->board[0][new_y] = 'Q';
+                        pos->board[0][new_y] = wQ;
                         pos->key ^= table[0][new_y][wQ];
                         // add piece
                         pos->piece_list[wQ][pos->piece_count[wQ]] = new_64;
@@ -279,10 +277,10 @@ int makeMove(BOARD *pos, MOVE *move)
                 move->move_type = 2;
                 return 2;
             }
-            else if (abs(new_y - cur_y) == 1 && op_piece == ' ')
+            else if (abs(new_y - cur_y) == 1 && op_piece == __)
             {
                 // en passant
-                pos->board[cur_x][new_y] = ' ';
+                pos->board[cur_x][new_y] = __;
                 pos->key ^= table[cur_x][new_y][bP];
                 pos->pawn_key ^= table[cur_x][new_y][bP];
                 pos->piece_num--;
@@ -300,7 +298,7 @@ int makeMove(BOARD *pos, MOVE *move)
             if (new_x == 1)
                 pos->pawn_push = true;
             break;
-        case 'p':
+        case bP:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][bP] ^ table[new_x][new_y][bP];
             if (new_x == 7)
@@ -320,7 +318,7 @@ int makeMove(BOARD *pos, MOVE *move)
                 switch (move->promotion)
                 {
                     case 'r':
-                        pos->board[7][new_y] = 'r';
+                        pos->board[7][new_y] = bR;
                         pos->key ^= table[7][new_y][bR];
                         // add piece
                         pos->piece_list[bR][pos->piece_count[bR]] = new_64;
@@ -328,7 +326,7 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[bR]++;
                         break;
                     case 'b':
-                        pos->board[7][new_y] = 'b';
+                        pos->board[7][new_y] = bB;
                         pos->key ^= table[7][new_y][bB];
                         // add piece
                         pos->piece_list[bB][pos->piece_count[bB]] = new_64;
@@ -336,7 +334,7 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[bB]++;
                         break;
                     case 'n':
-                        pos->board[7][new_y] = 'n';
+                        pos->board[7][new_y] = bN;
                         pos->key ^= table[7][new_y][bN];
                         // add piece
                         pos->piece_list[bN][pos->piece_count[bN]] = new_64;
@@ -344,7 +342,7 @@ int makeMove(BOARD *pos, MOVE *move)
                         pos->piece_count[bN]++;
                         break;
                     default:
-                        pos->board[7][new_y] = 'q';
+                        pos->board[7][new_y] = bQ;
                         pos->key ^= table[7][new_y][bQ];
                         // add piece
                         pos->piece_list[bQ][pos->piece_count[bQ]] = new_64;
@@ -356,10 +354,10 @@ int makeMove(BOARD *pos, MOVE *move)
                 move->move_type = 2;
                 return 2;
             }
-            else if (abs(new_y - cur_y) == 1 && op_piece == ' ')
+            else if (abs(new_y - cur_y) == 1 && op_piece == __)
             {
                 // en passant
-                pos->board[cur_x][new_y] = ' ';
+                pos->board[cur_x][new_y] = __;
                 pos->key ^= table[cur_x][new_y][wP];
                 pos->pawn_key ^= table[cur_x][new_y][wP];
                 pos->piece_num--;
@@ -377,14 +375,14 @@ int makeMove(BOARD *pos, MOVE *move)
             if (new_x == 6)
                 pos->pawn_push = true;
             break;
-        case 'K':
+        case wK:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][wK] ^ table[new_x][new_y][wK];
             // castling
             if (cur_64 == 60 && new_64 == 62)
             {
-                pos->board[7][5] = 'R';
-                pos->board[7][7] = ' ';
+                pos->board[7][5] = wR;
+                pos->board[7][7] = __;
                 pos->key ^= table[7][7][3];
                 pos->key ^= table[7][5][3];
                 // piece list update
@@ -397,8 +395,8 @@ int makeMove(BOARD *pos, MOVE *move)
             }
             else if (cur_64 == 60 && new_64 == 58)
             {
-                pos->board[7][3] = 'R';
-                pos->board[7][0] = ' ';
+                pos->board[7][3] = wR;
+                pos->board[7][0] = __;
                 pos->key ^= table[7][0][3];
                 pos->key ^= table[7][3][3];
                 // piece list update
@@ -410,14 +408,14 @@ int makeMove(BOARD *pos, MOVE *move)
                 return 3;
             }
             break;
-        case 'k':
+        case bK:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][bK] ^ table[new_x][new_y][bK];
             // castling
             if (cur_64 == 4 && new_64 == 6)
             {
-                pos->board[0][5] = 'r';
-                pos->board[0][7] = ' ';
+                pos->board[0][5] = bR;
+                pos->board[0][7] = __;
                 pos->key ^= table[0][7][9];
                 pos->key ^= table[0][5][9];
                 // piece list update
@@ -430,8 +428,8 @@ int makeMove(BOARD *pos, MOVE *move)
             }
             else if (cur_64 == 4 && new_64 == 2)
             {
-                pos->board[0][3] = 'r';
-                pos->board[0][0] = ' ';
+                pos->board[0][3] = bR;
+                pos->board[0][0] = __;
                 pos->key ^= table[0][0][9];
                 pos->key ^= table[0][3][9];
                 // piece list update
@@ -461,34 +459,32 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     int cur_y = cur_64 % 8;
     int new_x = new_64 / 8;
     int new_y = new_64 % 8;
-    char piece = pos->board[cur_x][cur_y];
-    char op_piece = pos->board[new_x][new_y];
-    int my_piece = piece_code(piece);
+    unsigned char piece = pos->board[cur_x][cur_y];
+    unsigned char op_piece = pos->board[new_x][new_y];
     int index, square;
 
     // update board
     pos->board[new_x][new_y] = piece;
-    pos->board[cur_x][cur_y] = ' ';
+    pos->board[cur_x][cur_y] = __;
 
     // Zobrist key update
-    pos->key = pos->key ^ table[cur_x][cur_y][my_piece] ^ table[new_x][new_y][my_piece] ^ turn;
-    if (op_piece != ' ') // capture
+    pos->key = pos->key ^ table[cur_x][cur_y][piece] ^ table[new_x][new_y][piece] ^ turn;
+    if (op_piece != __) // capture
     {
-        int enemy_piece = piece_code(op_piece);
-        pos->key ^= table[new_x][new_y][enemy_piece];
+        pos->key ^= table[new_x][new_y][op_piece];
         pos->piece_num--;
         // piece list capture
-        pos->piece_count[enemy_piece]--;
+        pos->piece_count[op_piece]--;
         index = pos->index_board[new_64];
-        square = pos->piece_list[enemy_piece][pos->piece_count[enemy_piece]];
-        pos->piece_list[enemy_piece][index] = square;
+        square = pos->piece_list[op_piece][pos->piece_count[op_piece]];
+        pos->piece_list[op_piece][index] = square;
         pos->index_board[square] = index;
         // pawn hash update when pawn is captured
-        if (op_piece == 'p')
+        if (op_piece == bP)
         {
             pos->pawn_key ^= table[new_x][new_y][bP];
         }
-        else if (op_piece == 'P')
+        else if (op_piece == wP)
         {
             pos->pawn_key ^= table[new_x][new_y][wP];
         }
@@ -497,7 +493,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     // piece list update
     index = pos->index_board[cur_64];
     pos->index_board[new_64] = index;
-    pos->piece_list[my_piece][index] = new_64;
+    pos->piece_list[piece][index] = new_64;
     
     // remove en passant file in the key
     if (pos->ep_file != 0)
@@ -508,7 +504,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
 
     switch (piece)
     {
-        case 'P':
+        case wP:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][wP] ^ table[new_x][new_y][wP];
             if (new_x == 0)
@@ -525,16 +521,16 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
                 pos->index_board[new_64] = pos->piece_count[wQ];
                 pos->piece_count[wQ]++;
                 // white pawn promotion
-                pos->board[0][new_y] = 'Q';
+                pos->board[0][new_y] = wQ;
                 pos->key ^= table[0][new_y][wP];
                 pos->key ^= table[0][new_y][wQ];
                 pos->pawn_key ^= table[0][new_y][wP];
                 return 1;
             }
-            else if (abs(new_y - cur_y) == 1 && op_piece == ' ')
+            else if (abs(new_y - cur_y) == 1 && op_piece == __)
             {
                 // en passant
-                pos->board[cur_x][new_y] = ' ';
+                pos->board[cur_x][new_y] = __;
                 pos->key ^= table[cur_x][new_y][bP];
                 pos->pawn_key ^= table[cur_x][new_y][bP];
                 pos->piece_num--;
@@ -547,7 +543,7 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
                 pos->index_board[square] = index;
             }
             break;
-        case 'p':
+        case bP:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][bP] ^ table[new_x][new_y][bP];
             if (new_x == 7)
@@ -564,16 +560,16 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
                 pos->index_board[new_64] = pos->piece_count[bQ];
                 pos->piece_count[bQ]++;
                 // black pawn promotion 
-                pos->board[7][new_y] = 'q';
+                pos->board[7][new_y] = bQ;
                 pos->key ^= table[7][new_y][bP];
                 pos->key ^= table[7][new_y][bQ];
                 pos->pawn_key ^= table[7][new_y][bP];
                 return 1;
             }
-            else if (abs(new_y - cur_y) == 1 && op_piece == ' ')
+            else if (abs(new_y - cur_y) == 1 && op_piece == __)
             {
                 // en passant
-                pos->board[cur_x][new_y] = ' ';
+                pos->board[cur_x][new_y] = __;
                 pos->key ^= table[cur_x][new_y][wP];
                 pos->pawn_key ^= table[cur_x][new_y][wP];
                 pos->piece_num--;
@@ -586,11 +582,11 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
                 pos->index_board[square] = index;
             }
             break;
-        case 'K':
+        case wK:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][wK] ^ table[new_x][new_y][wK];
             break;
-        case 'k':
+        case bK:
             // pawn hash update
             pos->pawn_key = pos->pawn_key ^ table[cur_x][cur_y][bK] ^ table[new_x][new_y][bK];
             break;
@@ -616,30 +612,18 @@ inline void make_nullmove(BOARD *pos)
 }
 
 // for static exchange evaluation
-inline void makeMove_SEE(char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
+// don't change pawn to queen when promotion occurs for simplicity
+inline void makeMove_SEE(unsigned char board[8][8], int cur_x, int cur_y, int new_x, int new_y)
 {
-    char piece = board[cur_x][cur_y];
-    char op_piece = board[new_x][new_y];
+    unsigned char piece = board[cur_x][cur_y];
+    unsigned char op_piece = board[new_x][new_y];
     board[new_x][new_y] = piece;
-    board[cur_x][cur_y] = ' ';
+    board[cur_x][cur_y] = __;
 
-    if (piece == 'P' || piece == 'p')
+    if (piece == wP || piece == bP)
     {
-        switch (new_x)
-        {
-            case '0':
-                // white pawn promotion 
-                board[0][new_y] = 'Q';
-                break;
-            case '7':
-                // black pawn promotion 
-                board[7][new_y] = 'q';
-                break;
-            default:
-                break;
-        }
         // en passant
-        if (op_piece == ' ')
-            board[cur_x][new_y] = ' ';
+        if (op_piece == __)
+            board[cur_x][new_y] = __;
     }
 }

@@ -6,7 +6,7 @@
 #define GET_RANK(INDEX) INDEX / 8 // convert 0 - 63 index to rank
 #define GET_FILE(INDEX) INDEX % 8 // convert 0 - 63 index to file
 
-enum pieces { wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
+enum pieces { wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, __ }; // __ means empty square
 
 enum positions {
 
@@ -35,7 +35,7 @@ typedef struct {
 
     unsigned long long key;
     unsigned long long pawn_key;
-    char board[8][8];
+    unsigned char board[8][8];
     int ksw; // white king side castling right
     int qsw; // white queen side castling right
     int ksb;
@@ -51,9 +51,9 @@ typedef struct {
 
 } BOARD;
 
-static const int pieceValues[12] = { 100, 325, 335, 500, 975, 20000, 100, 325, 335, 500, 975, 20000 };
+static const char pieceTypes[13] = { 'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', ' ' };
 
-void displayboard(char board[8][8]);
+void displayboard(unsigned char board[8][8]);
 
 int position_to_x(char position[3]);
 
@@ -61,7 +61,7 @@ int position_to_y(char position[3]);
 
 void init_board(BOARD *pos);
 
-void clear_board(char board[8][8]);
+void clear_board(unsigned char board[8][8]);
 
 void set_piecelists(BOARD *pos);
 

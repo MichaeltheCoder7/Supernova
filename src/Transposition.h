@@ -2,8 +2,8 @@
 #define TRANSPOSITION_H
 
 #include <stdbool.h>
-#include "Board.h"
-#include "Move.h"
+#include "board.h"
+#include "move.h"
 
 #define PAWNHASHSIZE 667013 // ~10MB
 #define VALUENONE -20100
@@ -48,8 +48,6 @@ extern struct DataItem *tt;
 extern struct Eval *Evaltt;
 extern struct Pawn Pawntt[PAWNHASHSIZE];
 
-int piece_code(char piece);
-
 unsigned long long llrand();
 
 void init_zobrist();
@@ -74,7 +72,7 @@ void storeEvalTT(unsigned long long key, int evaluation);
 
 void clearEvalTT();
 
-unsigned long long getPawnHash(char board[8][8]);
+unsigned long long getPawnHash(unsigned char board[8][8]);
 
 struct Pawn *probePawnTT(unsigned long long key);
 
