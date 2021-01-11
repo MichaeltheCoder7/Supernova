@@ -5,26 +5,26 @@
 #include <time.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "../src/Move.h"
-#include "../src/Board.h"
-#include "../src/MoveGen.h"
-#include "../src/Attack.h"
-#include "../src/Transposition.h"
-#include "../src/CheckMove.h"
+#include "../src/move.h"
+#include "../src/board.h"
+#include "../src/movegen.h"
+#include "../src/attack.h"
+#include "../src/transposition.h"
+#include "../src/checkmove.h"
 
 // position 1
 // depth 5: 4865609 nodes
 // depth 6: 119060324 nodes
-const char board1[8][8] = {
+const unsigned char board1[8][8] = {
 
-            { 'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r' },
-            { 'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
-            { 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P' },
-            { 'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R' },
+            { bR, bN, bB, bQ, bK, bB, bN, bR },
+            { bP, bP, bP, bP, bP, bP, bP, bP },
+            { __, __, __, __, __, __, __, __ },
+            { __, __, __, __, __, __, __, __ },
+            { __, __, __, __, __, __, __, __ },
+            { __, __, __, __, __, __, __, __ },
+            { wP, wP, wP, wP, wP, wP, wP, wP },
+            { wR, wN, wB, wQ, wK, wB, wN, wR },
 
 };
 
@@ -63,16 +63,16 @@ const int index_board1[64] = {
 // position 2
 // depth 4: 4085603 nodes
 // depth 5: 193690690 nodes
-const char board2[8][8] = {
+const unsigned char board2[8][8] = {
 
-            { 'r', ' ', ' ', ' ', 'k', ' ', ' ', 'r' },
-            { 'p', ' ', 'p', 'p', 'q', 'p', 'b', ' ' },
-            { 'b', 'n', ' ', ' ', 'p', 'n', 'p', ' ' },
-            { ' ', ' ', ' ', 'P', 'N', ' ', ' ', ' ' },
-            { ' ', 'p', ' ', ' ', 'P', ' ', ' ', ' ' },
-            { ' ', ' ', 'N', ' ', ' ', 'Q', ' ', 'p' },
-            { 'P', 'P', 'P', 'B', 'B', 'P', 'P', 'P' },
-            { 'R', ' ', ' ', ' ', 'K', ' ', ' ', 'R' },
+            { bR, __, __, __, bK, __, __, bR },
+            { bP, __, bP, bP, bQ, bP, bB, __ },
+            { bB, bN, __, __, bP, bN, bP, __ },
+            { __, __, __, wP, wN, __, __, __ },
+            { __, bP, __, __, wP, __, __, __ },
+            { __, __, wN, __, __, wQ, __, bP },
+            { wP, wP, wP, wB, wB, wP, wP, wP },
+            { wR, __, __, __, wK, __, __, wR },
 
 };
 
