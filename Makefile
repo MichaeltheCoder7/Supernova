@@ -7,7 +7,7 @@ LEXE = bin/Supernova_2.3_linux
 TEXE = bin/Supernova_test
 RFLAGS = -std=c99 -static -flto -Ofast
 DFLAGS = -std=c99 -g -Wall -Wextra -Wshadow
-PSRC = $(filter-out src/Main.c, $(wildcard src/*.c tests/Perft.c))
+PSRC = $(filter-out src/main.c, $(wildcard src/*.c tests/perft.c))
 
 ######################## executables for release ######################
 windows:
