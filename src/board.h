@@ -36,13 +36,13 @@ typedef struct {
     unsigned long long key;
     unsigned long long pawn_key;
     unsigned char board[8][8];
-    int ksw; // white king side castling right
-    int qsw; // white queen side castling right
-    int ksb;
-    int qsb;
-    int ep_file; // 0: no ep file, 1: file A, 2: file B...
-    int piece_num;
-    int halfmove_counter;
+    bool ksw; // white king side castling right
+    bool qsw; // white queen side castling right
+    bool ksb;
+    bool qsb;
+    unsigned char ep_file; // 0: no ep file, 1: file A, 2: file B...
+    unsigned char piece_num;
+    unsigned char halfmove_counter;
     int piece_list[12][10];
     int piece_count[12];
     int index_board[64];
