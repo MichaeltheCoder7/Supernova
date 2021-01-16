@@ -1,6 +1,6 @@
 # Makefile
 CC = gcc
-VER = 2.3
+VER = 2.4dev
 SRC = src/*.c src/Fathom/tbprobe.c
 LIBS = -lpthread -lm
 WEXE = bin/Supernova_$(VER).exe
