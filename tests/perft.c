@@ -28,7 +28,7 @@ const unsigned char board1[8][8] = {
 
 };
 
-const int piece_list1[12][10] = {
+const unsigned char piece_list1[12][10] = {
 
             { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, // wP
             { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wN
@@ -45,9 +45,9 @@ const int piece_list1[12][10] = {
 
 };
 
-const int piece_count1[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
+const unsigned char piece_count1[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
 
-const int index_board1[64] = {
+const unsigned char index_board1[64] = {
 
              0,   0,   0,   0,   0,   1,   1,   1,
              0,   1,   2,   3,   4,   5,   6,   7,
@@ -76,7 +76,7 @@ const unsigned char board2[8][8] = {
 
 };
 
-const int piece_list2[12][10] = {
+const unsigned char piece_list2[12][10] = {
 
             { a2, b2, c2, d5, e4, f2, g2, h2, -1, -1 }, // wP
             { c3, e5, -1, -1, -1, -1, -1, -1, -1, -1 }, // wN
@@ -93,9 +93,9 @@ const int piece_list2[12][10] = {
 
 };
 
-const int piece_count2[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
+const unsigned char piece_count2[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
 
-const int index_board2[64] = {
+const unsigned char index_board2[64] = {
 
              0,  -1,  -1,  -1,   0,  -1,  -1,   1,
              0,  -1,   2,   3,   0,   5,   1,  -1,

@@ -43,9 +43,9 @@ typedef struct {
     unsigned char ep_file; // 0: no ep file, 1: file A, 2: file B...
     unsigned char piece_num;
     unsigned char halfmove_counter;
-    int piece_list[12][10];
-    int piece_count[12];
-    int index_board[64];
+    unsigned char piece_list[12][10];
+    unsigned char piece_count[12];
+    unsigned char index_board[64];
     bool pawn_push;
     COUNTERMOVE last_move;
 

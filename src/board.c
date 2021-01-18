@@ -49,7 +49,9 @@ const unsigned char chess_board[8][8] = {
 };
 
 // starting piece list
-const int piece_list[12][10] = {
+// -1 is 255 in unsigned char
+// it means no square
+const unsigned char piece_list[12][10] = {
 
             { a2, b2, c2, d2, e2, f2, g2, h2, -1, -1 }, // wP
             { b1, g1, -1, -1, -1, -1, -1, -1, -1, -1 }, // wN
@@ -66,9 +68,9 @@ const int piece_list[12][10] = {
 
 };
 
-const int piece_count[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
+const unsigned char piece_count[12] = { 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1 };
 
-const int index_board[64] = {
+const unsigned char index_board[64] = {
 
             0,   0,   0,   0,   0,   1,   1,   1,
             0,   1,   2,   3,   4,   5,   6,   7,
