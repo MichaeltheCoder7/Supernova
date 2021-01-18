@@ -1,12 +1,12 @@
 #ifndef PSQT_H
 #define PSQT_H
 
-static const int PawnPassed_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 };
-static const int PawnPassed_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 };
+static const int passedpawn_black[8] = { 0, 15, 20, 32, 56, 92, 140, 0 };
+static const int passedpawn_white[8] = { 0, 140, 92, 56, 32, 20, 15, 0 };
 static const int knight_val[9] = { -20, -16, -12, -8, -4,  0,  4,  8, 10 };
 static const int rook_val[9] = { 15, 12,  9,  6,  3,  0, -3, -6, -9 };
 
-static const int SafetyTable[100] = {
+static const int safety_table[100] = {
 
                     0,   0,   1,   2,   3,   4,   6,   8,  10,  12,
                     15,  18,  21,  24,  28,  32,  36,  40,  45,  50,

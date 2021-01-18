@@ -32,7 +32,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 origin = pos->piece_list[bP][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                if ((index_y - 1) >= 0 && CheckCapture_bpawn(pos, index_x + 1, index_y - 1))
+                if ((index_y - 1) >= 0 && checkCapture_bpawn(pos, index_x + 1, index_y - 1))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x + 1) + index_y - 1;
@@ -50,7 +50,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     sort[index] = 1000;
                     index++;
                 }
-                if ((index_y + 1) <= 7 && CheckCapture_bpawn(pos, index_x + 1, index_y + 1))
+                if ((index_y + 1) <= 7 && checkCapture_bpawn(pos, index_x + 1, index_y + 1))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x + 1) + index_y + 1;
@@ -429,7 +429,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 origin = pos->piece_list[wP][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                if ((index_y - 1) >= 0 && CheckCapture_wpawn(pos, index_x - 1, index_y - 1))
+                if ((index_y - 1) >= 0 && checkCapture_wpawn(pos, index_x - 1, index_y - 1))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x - 1) + index_y - 1;
@@ -447,7 +447,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     sort[index] = 1000;
                     index++;
                 }
-                if ((index_y + 1) <= 7 && CheckCapture_wpawn(pos, index_x - 1, index_y + 1))
+                if ((index_y + 1) <= 7 && checkCapture_wpawn(pos, index_x - 1, index_y + 1))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x - 1) + index_y + 1;

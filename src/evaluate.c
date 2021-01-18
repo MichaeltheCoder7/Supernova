@@ -62,8 +62,8 @@ int evaluate(BOARD *pos, unsigned char board[8][8], int color)
             if (candidate_passed_white(board, x, y))
             {
                 passed = true;
-                wpawn_mg += PawnPassed_white[x];
-                wpawn_eg += PawnPassed_white[x];
+                wpawn_mg += passedpawn_white[x];
+                wpawn_eg += passedpawn_white[x];
                 if (phalanx_white(board, x, y))
                 {
                     wpawn_mg += PHALANX;
@@ -123,8 +123,8 @@ int evaluate(BOARD *pos, unsigned char board[8][8], int color)
             if (candidate_passed_black(board, x, y))
             {
                 passed = true;
-                bpawn_mg += PawnPassed_black[x];
-                bpawn_eg += PawnPassed_black[x];
+                bpawn_mg += passedpawn_black[x];
+                bpawn_eg += passedpawn_black[x];
                 if (phalanx_black(board, x, y))
                 {
                     bpawn_mg += PHALANX;
@@ -823,8 +823,8 @@ int evaluate(BOARD *pos, unsigned char board[8][8], int color)
         wattack_weight = 0;
     if (battack_count < 2 || !q_count)
         battack_weight = 0;
-    points += SafetyTable[battack_weight];
-    points -= SafetyTable[wattack_weight];
+    points += safety_table[battack_weight];
+    points -= safety_table[wattack_weight];
 
     // material draw
     // score as 0 for insufficient bishops and knights

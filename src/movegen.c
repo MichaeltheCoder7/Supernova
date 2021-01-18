@@ -43,7 +43,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     {
                         continue;
                     }
-                    if (CheckCapture_bpawn(pos, index_x + 1, y))
+                    if (checkCapture_bpawn(pos, index_x + 1, y))
                     {
                         // promotions
                         if (index_x == 6)
@@ -625,7 +625,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
             // castling
             if (origin == e8)
             {
-                if (CheckMove_bkingside(pos))
+                if (checkMove_bkingside(pos))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = g8;
@@ -633,7 +633,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     sort[index] = CASTLING;
                     index++;
                 }
-                if (CheckMove_bqueenside(pos))
+                if (checkMove_bqueenside(pos))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = c8;
@@ -684,7 +684,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     {
                         continue;
                     }
-                    if (CheckCapture_wpawn(pos, index_x - 1, y))
+                    if (checkCapture_wpawn(pos, index_x - 1, y))
                     {
                         // promotions
                         if (index_x == 1)
@@ -1266,7 +1266,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
             // castling
             if (origin == e1)
             {
-                if (CheckMove_wkingside(pos))
+                if (checkMove_wkingside(pos))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = g1;
@@ -1274,7 +1274,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     sort[index] = CASTLING;
                     index++;
                 }
-                if (CheckMove_wqueenside(pos))
+                if (checkMove_wqueenside(pos))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = c1;

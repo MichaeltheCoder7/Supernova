@@ -42,7 +42,7 @@ inline int isBlackPiece_withKing(unsigned char piece)
 
 // 1 for legal move, 0 for illegal move
 // captures for white pawn
-inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
+inline int checkCapture_wpawn(BOARD *pos, int new_x, int new_y)
 {
     if (pos->board[new_x][new_y] == __)
     {
@@ -60,7 +60,7 @@ inline int CheckCapture_wpawn(BOARD *pos, int new_x, int new_y)
 }
 
 // captures for black pawn
-inline int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
+inline int checkCapture_bpawn(BOARD *pos, int new_x, int new_y)
 {
     if (pos->board[new_x][new_y] == __)
     {
@@ -78,7 +78,7 @@ inline int CheckCapture_bpawn(BOARD *pos, int new_x, int new_y)
 }
 
 // king side castling for white king
-inline int CheckMove_wkingside(BOARD *pos)
+inline int checkMove_wkingside(BOARD *pos)
 {
     // check if king and rook have been moved
     if (pos->ksw)
@@ -98,7 +98,7 @@ inline int CheckMove_wkingside(BOARD *pos)
 }
 
 // queen side castling for white king
-inline int CheckMove_wqueenside(BOARD *pos)
+inline int checkMove_wqueenside(BOARD *pos)
 {
     // check if king and rook have been moved
     if (pos->qsw)
@@ -118,7 +118,7 @@ inline int CheckMove_wqueenside(BOARD *pos)
 }
 
 // king side castling for black king
-inline int CheckMove_bkingside(BOARD *pos)
+inline int checkMove_bkingside(BOARD *pos)
 {
     // check if king and rook have been moved
     if (pos->ksb)
@@ -138,7 +138,7 @@ inline int CheckMove_bkingside(BOARD *pos)
 }
 
 // queen side castling for black king
-inline int CheckMove_bqueenside(BOARD *pos)
+inline int checkMove_bqueenside(BOARD *pos)
 {
     // check if king and rook have been moved
     if (pos->qsb)
@@ -495,12 +495,12 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
             // castling
             if (cur_64 == e1 && new_64 == g1)
             {
-                if (CheckMove_wkingside(pos))
+                if (checkMove_wkingside(pos))
                     return 1;
             }
             else if (cur_64 == e1 && new_64 == c1)
             {
-                if (CheckMove_wqueenside(pos))
+                if (checkMove_wqueenside(pos))
                     return 1;
             }
             else if ((abs(cur_x - new_x) == 1 && abs(cur_y - new_y) == 1) || (abs(cur_x - new_x) == 1 && cur_y == new_y)
@@ -513,12 +513,12 @@ int isPseudoLegal(BOARD *pos, MOVE *move, int color)
             // castling
             if (cur_64 == e8 && new_64 == g8)
             {
-                if (CheckMove_bkingside(pos))
+                if (checkMove_bkingside(pos))
                     return 1;
             }
             else if (cur_64 == e8 && new_64 == c8)
             {
-                if (CheckMove_bqueenside(pos))
+                if (checkMove_bqueenside(pos))
                     return 1;
             }
             else if ((abs(cur_x - new_x) == 1 && abs(cur_y - new_y) == 1) || (abs(cur_x - new_x) == 1 && cur_y == new_y)
