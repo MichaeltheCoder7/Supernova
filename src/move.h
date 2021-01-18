@@ -9,8 +9,8 @@ typedef struct {
 
     unsigned char from;
     unsigned char to;
-    char promotion; // ' ': not promotion 'q': queen 'r': rook 'b': bishop 'n': knight 
-    unsigned char move_type; // 0: quiet 1: capture 2: promotion 3: castling
+    char promotion; // ' ': not promotion, 'q': queen, 'r': rook, 'b': bishop, 'n': knight 
+    unsigned char move_type; // 0: quiet, 1: capture, 2: promotion, 3: castling
 
 } MOVE;
 

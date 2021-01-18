@@ -25,7 +25,7 @@ struct DataItem
     short statEval;
     char depth;
     MOVE bestmove;
-    char flag;
+    char flag; // -1: empty, 0: lowerbound, 1: exact, 2: upperbound
     bool age;
 };
 
