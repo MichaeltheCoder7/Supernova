@@ -23,6 +23,7 @@ enum positions {
 
 enum ranks { Rank8, Rank7, Rank6, Rank5, Rank4, Rank3, Rank2, Rank1 };
 enum files { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
+enum castling { KSW = 1, QSW = 2, KSB = 4, QSB = 8 };
 
 typedef struct {
 
@@ -31,16 +32,18 @@ typedef struct {
 
 } COUNTERMOVE;
 
+// castle flag: (encode into 4 bits)
+// 0: no rights, xxx1: white king side, xx1x: white queen side
+// x1xx: black king side, 1xxx: black queen side
+// ep file:
+// 0: no ep file, 1: file A, 2: file B...
 typedef struct {
 
     unsigned long long key;
     unsigned long long pawn_key;
     unsigned char board[8][8];
-    bool ksw; // white king side castling right
-    bool qsw; // white queen side castling right
-    bool ksb;
-    bool qsb;
-    unsigned char ep_file; // 0: no ep file, 1: file A, 2: file B...
+    unsigned char castle_flag;
+    unsigned char ep_file;
     unsigned char piece_num;
     unsigned char halfmove_counter;
     unsigned char piece_list[12][10];

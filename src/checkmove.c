@@ -81,7 +81,7 @@ inline int checkCapture_bpawn(BOARD *pos, int new_x, int new_y)
 inline int checkMove_wkingside(BOARD *pos)
 {
     // check if king and rook have been moved
-    if (pos->ksw)
+    if (pos->castle_flag & KSW)
     {
         // check if positions between king and rook are empty
         if (pos->board[7][5] == __ && pos->board[7][6] == __)
@@ -101,7 +101,7 @@ inline int checkMove_wkingside(BOARD *pos)
 inline int checkMove_wqueenside(BOARD *pos)
 {
     // check if king and rook have been moved
-    if (pos->qsw)
+    if (pos->castle_flag & QSW)
     {
         // check if positions between king and rook are empty
         if (pos->board[7][1] == __ && pos->board[7][2] == __ && pos->board[7][3] == __)
@@ -121,7 +121,7 @@ inline int checkMove_wqueenside(BOARD *pos)
 inline int checkMove_bkingside(BOARD *pos)
 {
     // check if king and rook have been moved
-    if (pos->ksb)
+    if (pos->castle_flag & KSB)
     {
         // check if positions between king and rook are empty
         if (pos->board[0][5] == __ && pos->board[0][6] == __)
@@ -141,7 +141,7 @@ inline int checkMove_bkingside(BOARD *pos)
 inline int checkMove_bqueenside(BOARD *pos)
 {
     // check if king and rook have been moved
-    if (pos->qsb)
+    if (pos->castle_flag & QSB)
     {
         // check if positions between king and rook are empty
         if (pos->board[0][1] == __ && pos->board[0][2] == __ && pos->board[0][3] == __)

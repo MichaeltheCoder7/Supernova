@@ -258,25 +258,22 @@ void parse_fen(char *position, BOARD *pos)
     
     // castling rights
     position += 2;
-    pos->ksb = 0;
-    pos->qsb = 0;
-    pos->ksw = 0;
-    pos->qsw = 0;
+    pos->castle_flag = 0;
     for (int i = 0; i < 4; i++)
     {
         switch (*position)
         {
             case 'K':
-                pos->ksw = 1;
+                pos->castle_flag |= KSW;
                 break;
             case 'Q':
-                pos->qsw = 1;
+                pos->castle_flag |= QSW;
                 break;
             case 'k':
-                pos->ksb = 1;
+                pos->castle_flag |= KSB;
                 break;
             case 'q':
-                pos->qsb = 1;
+                pos->castle_flag |= QSB;
                 break;
             case '-':
                 break;

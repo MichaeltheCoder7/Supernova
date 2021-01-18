@@ -31,8 +31,7 @@ inline unsigned tablebasesProbeWDL(BOARD *pos, int depth, int color)
     // do not probe when # of pieces is greater than TB_LARGEST
     // or half move counter is not zero
     // or with castling rights
-    if ((unsigned int) pos->piece_num > TB_LARGEST || pos->halfmove_counter
-        || pos->ksw || pos->ksb || pos->qsw || pos->qsb)
+    if ((unsigned int) pos->piece_num > TB_LARGEST || pos->halfmove_counter || pos->castle_flag)
         return TB_RESULT_FAILED;
 
     // do not probe when depth is less than probe depth
@@ -122,8 +121,7 @@ inline int tablebasesProbeDTZ(BOARD *pos, MOVE *bestMove, int *score, int color)
 {
     // do not probe when # of pieces is greater than TB_LARGEST
     // or with castling rights
-    if ((unsigned int) pos->piece_num > TB_LARGEST
-        || pos->ksw || pos->ksb || pos->qsw || pos->qsb)
+    if ((unsigned int) pos->piece_num > TB_LARGEST || pos->castle_flag)
         return 0;
 
     // get en passant square

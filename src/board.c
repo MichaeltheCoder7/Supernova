@@ -124,11 +124,8 @@ inline int position_to_y(char position[3])
 inline void init_board(BOARD *pos)
 {
     memcpy(pos->board, chess_board, sizeof(pos->board));
-    // set the castling flags
-    pos->ksb = 1;
-    pos->qsb = 1;
-    pos->ksw = 1;
-    pos->qsw = 1;
+    // set the castling flag to 1111
+    pos->castle_flag = 15;
     // set en passant files
     pos->ep_file = 0;
     pos->halfmove_counter = 0;

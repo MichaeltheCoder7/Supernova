@@ -131,36 +131,39 @@ int makeMove(BOARD *pos, MOVE *move)
     pos->board[cur_x][cur_y] = __;
 
     // castling rights check
-    if (pos->ksw)
+    if (pos->castle_flag)
     {
-        if (pos->board[7][4] != wK || pos->board[7][7] != wR)
+        if (pos->castle_flag & KSW)
         {
-            pos->key ^= kswcr;
-            pos->ksw = 0;
+            if (pos->board[7][4] != wK || pos->board[7][7] != wR)
+            {
+                pos->key ^= kswcr;
+                pos->castle_flag &= ~KSW;
+            }
         }
-    }
-    if (pos->qsw)
-    {
-        if (pos->board[7][4] != wK || pos->board[7][0] != wR)
+        if (pos->castle_flag & QSW)
         {
-            pos->key ^= qswcr;
-            pos->qsw = 0;
+            if (pos->board[7][4] != wK || pos->board[7][0] != wR)
+            {
+                pos->key ^= qswcr;
+                pos->castle_flag &= ~QSW;
+            }
         }
-    }
-    if (pos->ksb)
-    {
-        if (pos->board[0][4] != bK || pos->board[0][7] != bR)
+        if (pos->castle_flag & KSB)
         {
-            pos->key ^= ksbcr;
-            pos->ksb = 0;
+            if (pos->board[0][4] != bK || pos->board[0][7] != bR)
+            {
+                pos->key ^= ksbcr;
+                pos->castle_flag &= ~KSB;
+            }
         }
-    }
-    if (pos->qsb)
-    {
-        if (pos->board[0][4] != bK || pos->board[0][0] != bR)
+        if (pos->castle_flag & QSB)
         {
-            pos->key ^= qsbcr;
-            pos->qsb = 0;
+            if (pos->board[0][4] != bK || pos->board[0][0] != bR)
+            {
+                pos->key ^= qsbcr;
+                pos->castle_flag &= ~QSB;
+            }
         }
     }
 

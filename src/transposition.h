@@ -32,7 +32,7 @@ struct DataItem
 struct Eval
 {
     unsigned long long key;
-    int evaluation;
+    short evaluation;
     bool valid;
 };
 

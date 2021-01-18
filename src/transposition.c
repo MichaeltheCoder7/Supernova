@@ -86,19 +86,19 @@ inline unsigned long long getHash(BOARD *pos, int color)
         h ^= turn;
     }
     // encode castling rights
-    if (pos->ksw)
+    if (pos->castle_flag & KSW)
     {
         h ^= kswcr;
     }
-    if (pos->qsw)
+    if (pos->castle_flag & QSW)
     {
         h ^= qswcr;
     }
-    if (pos->ksb)
+    if (pos->castle_flag & KSB)
     {
         h ^= ksbcr;
     }
-    if (pos->qsb)
+    if (pos->castle_flag & QSB)
     {
         h ^= qsbcr;
     }

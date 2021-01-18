@@ -144,11 +144,8 @@ static unsigned long long perft(BOARD *pos, int depth, int color)
 void init_board1(BOARD *pos)
 {
     memcpy(pos->board, board1, sizeof(pos->board));
-    // set the castling flags
-    pos->ksb = 1;
-    pos->qsb = 1;
-    pos->ksw = 1;
-    pos->qsw = 1;
+    // set the castling flag to 1111
+    pos->castle_flag = 15;
     // set en passant files
     pos->ep_file = 0;
     pos->halfmove_counter = 0;
@@ -164,11 +161,8 @@ void init_board1(BOARD *pos)
 void init_board2(BOARD *pos)
 {
     memcpy(pos->board, board2, sizeof(pos->board));
-    // set the castling flags
-    pos->ksb = 1;
-    pos->qsb = 1;
-    pos->ksw = 1;
-    pos->qsw = 1;
+    // set the castling flag to 1111
+    pos->castle_flag = 15;
     // set en passant files
     pos->ep_file = 0;
     pos->halfmove_counter = 0;
