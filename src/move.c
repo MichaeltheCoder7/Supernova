@@ -208,13 +208,13 @@ int makeMove(BOARD *pos, MOVE *move)
     }
 
     // remove en passant file in the key
-    if (pos->ep_file != 0)
+    if (pos->ep_file)
     {
         pos->key ^= ep[pos->ep_file - 1];
+        pos->ep_file = 0;
     }
 
     // update en passant flag and key
-    pos->ep_file = 0;
     if ((piece == wP || piece == bP) && abs(cur_x - new_x) == 2)
     {
         pos->key ^= ep[new_y];
@@ -499,11 +499,11 @@ int makeMove_qsearch(BOARD *pos, MOVE *move)
     pos->piece_list[piece][index] = new_64;
     
     // remove en passant file in the key
-    if (pos->ep_file != 0)
+    if (pos->ep_file)
     {
         pos->key ^= ep[pos->ep_file - 1];
+        pos->ep_file = 0;
     }
-    pos->ep_file = 0;
 
     switch (piece)
     {
@@ -604,11 +604,11 @@ inline void make_nullmove(BOARD *pos)
     pos->key ^= turn;
 
     // remove en passant file in the key
-    if (pos->ep_file != 0)
+    if (pos->ep_file)
     {
         pos->key ^= ep[pos->ep_file - 1];
+        pos->ep_file = 0;
     }
-    pos->ep_file = 0;
 
     // change last move to no move
     pos->last_move.piece = NOMOVE;

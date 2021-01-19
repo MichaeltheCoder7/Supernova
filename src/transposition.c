@@ -104,7 +104,7 @@ inline unsigned long long getHash(BOARD *pos, int color)
     }
 
     // encode en passant file
-    if (pos->ep_file != 0)
+    if (pos->ep_file)
     {
         h ^= ep[pos->ep_file - 1];
     }
