@@ -583,6 +583,13 @@ void uci_loop()
             }
             break;
         }
+        // non-UCI command
+        // test speed with start position to depth 20
+        else if (!strncmp("bench", string, 5))
+        {
+            handle_position("position startpos\n");
+            handle_go("go depth 20\n");
+        }
     }
 }
 
