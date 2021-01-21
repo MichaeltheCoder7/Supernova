@@ -43,7 +43,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     {
                         continue;
                     }
-                    if (checkCapture_bpawn(pos, index_x + 1, y))
+                    if (isWhitePiece(pos->board[index_x + 1][y]))
                     {
                         // promotions
                         if (index_x == 6)
@@ -77,6 +77,26 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                             sort[index] = capMove_score(bP, pos->board[index_x + 1][y], pos->board, index_x, index_y, index_x + 1, y, color);
                             index++;
                         }
+                    }
+                }
+                // en passant
+                if (pos->ep_file)
+                {
+                    if (pos->ep_file == index_y && index_x == Rank4 && pos->board[Rank3][index_y - 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank3 + index_y - 1;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = capMove_score(bP, pos->board[Rank3][index_y - 1], pos->board, index_x, index_y, Rank3, index_y - 1, color);
+                        index++;
+                    }
+                    else if (pos->ep_file == index_y + 2 && index_x == Rank4 && pos->board[Rank3][index_y + 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank3 + index_y + 1;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = capMove_score(bP, pos->board[Rank3][index_y + 1], pos->board, index_x, index_y, Rank3, index_y + 1, color);
+                        index++;
                     }
                 }
                 // 1 step
@@ -684,7 +704,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     {
                         continue;
                     }
-                    if (checkCapture_wpawn(pos, index_x - 1, y))
+                    if (isBlackPiece(pos->board[index_x - 1][y]))
                     {
                         // promotions
                         if (index_x == 1)
@@ -718,6 +738,26 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                             sort[index] = capMove_score(wP, pos->board[index_x - 1][y], pos->board, index_x, index_y, index_x - 1, y, color);
                             index++;
                         }
+                    }
+                }
+                // en passant
+                if (pos->ep_file)
+                {
+                    if (pos->ep_file == index_y && index_x == Rank5 && pos->board[Rank6][index_y - 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank6 + index_y - 1;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = capMove_score(wP, pos->board[Rank6][index_y - 1], pos->board, index_x, index_y, Rank6, index_y - 1, color);
+                        index++;
+                    }
+                    else if (pos->ep_file == index_y + 2 && index_x == Rank5 && pos->board[Rank6][index_y + 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank6 + index_y + 1;
+                        all_moves[index].promotion = ' ';
+                        sort[index] = capMove_score(wP, pos->board[Rank6][index_y + 1], pos->board, index_x, index_y, Rank6, index_y + 1, color);
+                        index++;
                     }
                 }
                 // 1 step

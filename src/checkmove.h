@@ -12,10 +12,6 @@ int isWhitePiece_withKing(unsigned char piece);
 
 int isBlackPiece_withKing(unsigned char piece);
 
-int checkCapture_wpawn(BOARD *pos, int new_x, int new_y);
-
-int checkCapture_bpawn(BOARD *pos, int new_x, int new_y);
-
 int checkMove_wkingside(BOARD *pos);
 
 int checkMove_wqueenside(BOARD *pos);

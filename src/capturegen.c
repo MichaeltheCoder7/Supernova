@@ -32,7 +32,16 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 origin = pos->piece_list[bP][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                if ((index_y - 1) >= 0 && checkCapture_bpawn(pos, index_x + 1, index_y - 1))
+                // promotion
+                if (index_x == 6 && pos->board[7][index_y] == __)
+                {
+                    all_moves[index].from = origin;
+                    all_moves[index].to = 56 + index_y;
+                    sort[index] = 1000;
+                    index++;
+                }
+                // captures
+                if ((index_y - 1) >= 0 && isWhitePiece(pos->board[index_x + 1][index_y - 1]))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x + 1) + index_y - 1;
@@ -42,15 +51,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         sort[index] += 500;
                     index++;
                 }
-                // promotion
-                if (index_x == 6 && pos->board[7][index_y] == __)
-                {
-                    all_moves[index].from = origin;
-                    all_moves[index].to = 56 + index_y;
-                    sort[index] = 1000;
-                    index++;
-                }
-                if ((index_y + 1) <= 7 && checkCapture_bpawn(pos, index_x + 1, index_y + 1))
+                if ((index_y + 1) <= 7 && isWhitePiece(pos->board[index_x + 1][index_y + 1]))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x + 1) + index_y + 1;
@@ -59,6 +60,24 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     if (index_x == 6)
                         sort[index] += 500;
                     index++;
+                }
+                // en passant
+                if (pos->ep_file)
+                {
+                    if (pos->ep_file == index_y && index_x == Rank4 && pos->board[Rank3][index_y - 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank3 + index_y - 1;
+                        sort[index] = capQsearch_score(bP, pos->board[Rank3][index_y - 1]);
+                        index++;
+                    }
+                    else if (pos->ep_file == index_y + 2 && index_x == Rank4 && pos->board[Rank3][index_y + 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank3 + index_y + 1;
+                        sort[index] = capQsearch_score(bP, pos->board[Rank3][index_y + 1]);
+                        index++;
+                    }
                 }
             }
 
@@ -429,7 +448,16 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                 origin = pos->piece_list[wP][i];
                 index_x = origin / 8;
                 index_y = origin % 8;
-                if ((index_y - 1) >= 0 && checkCapture_wpawn(pos, index_x - 1, index_y - 1))
+                // promotion
+                if (index_x == 1 && pos->board[0][index_y] == __)
+                {
+                    all_moves[index].from = origin;
+                    all_moves[index].to = index_y;
+                    sort[index] = 1000;
+                    index++;
+                }
+                // captures
+                if ((index_y - 1) >= 0 && isBlackPiece(pos->board[index_x - 1][index_y - 1]))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x - 1) + index_y - 1;
@@ -439,15 +467,7 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                         sort[index] += 500;
                     index++;
                 }
-                // promotion
-                if (index_x == 1 && pos->board[0][index_y] == __)
-                {
-                    all_moves[index].from = origin;
-                    all_moves[index].to = index_y;
-                    sort[index] = 1000;
-                    index++;
-                }
-                if ((index_y + 1) <= 7 && checkCapture_wpawn(pos, index_x - 1, index_y + 1))
+                if ((index_y + 1) <= 7 && isBlackPiece(pos->board[index_x - 1][index_y + 1]))
                 {
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * (index_x - 1) + index_y + 1;
@@ -456,6 +476,24 @@ int captureGen(BOARD *pos, MOVE all_moves[256], int sort[256], int color)
                     if (index_x == 1)
                         sort[index] += 500;
                     index++;
+                }
+                // en passant
+                if (pos->ep_file)
+                {
+                    if (pos->ep_file == index_y && index_x == Rank5 && pos->board[Rank6][index_y - 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank6 + index_y - 1;
+                        sort[index] = capQsearch_score(wP, pos->board[Rank6][index_y - 1]);
+                        index++;
+                    }
+                    else if (pos->ep_file == index_y + 2 && index_x == Rank5 && pos->board[Rank6][index_y + 1] == __)
+                    {
+                        all_moves[index].from = origin;
+                        all_moves[index].to = 8 * Rank6 + index_y + 1;
+                        sort[index] = capQsearch_score(wP, pos->board[Rank6][index_y + 1]);
+                        index++;
+                    }
                 }
             }
 
