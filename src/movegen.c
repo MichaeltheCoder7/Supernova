@@ -212,8 +212,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -242,8 +243,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -272,8 +274,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -302,8 +305,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -334,8 +338,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bR, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -358,8 +363,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bR, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -382,8 +388,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bR, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -406,8 +413,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bR, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -444,8 +452,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -468,8 +477,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -498,8 +508,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -522,8 +533,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -546,8 +558,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -576,8 +589,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -600,8 +614,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -630,8 +645,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(bQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -873,8 +889,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -903,8 +920,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -933,8 +951,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -963,8 +982,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wB, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -995,8 +1015,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wR, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -1019,8 +1040,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wR, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -1043,8 +1065,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wR, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -1067,8 +1090,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wR, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -1105,8 +1129,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -1129,8 +1154,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -1159,8 +1185,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -1183,8 +1210,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -1207,8 +1235,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[index_x][j], pos->board, index_x, index_y, index_x, j, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[index_x][j] != __)
+                    else
                     {
                         break;
                     }
@@ -1237,8 +1266,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
@@ -1261,8 +1291,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[j][index_y], pos->board, index_x, index_y, j, index_y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[j][index_y] != __)
+                    else
                     {
                         break;
                     }
@@ -1291,8 +1322,9 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].promotion = ' ';
                         sort[index] = capMove_score(wQ, pos->board[x][y], pos->board, index_x, index_y, x, y, color);
                         index++;
+                        break;
                     }
-                    if (pos->board[x][y] != __)
+                    else
                     {
                         break;
                     }
