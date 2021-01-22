@@ -33,7 +33,7 @@ inline void clear_move(MOVE *move)
 {
     move->from = NOMOVE;
     move->to = NOMOVE;
-    move->promotion = ' ';
+    move->promotion = NONE;
     move->move_type = NOMOVE;
 }
 
@@ -68,7 +68,7 @@ inline MOVE string_to_move(char move[6])
     }
     else
     {
-        smove.promotion = ' ';
+        smove.promotion = NONE;
     }
 
     return smove;

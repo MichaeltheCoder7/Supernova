@@ -3,18 +3,19 @@
 
 #include "board.h"
 
-#define NOMOVE 100
+#define NOMOVE  100
+#define NONE    0
 
 typedef struct {
 
     unsigned char from;
     unsigned char to;
-    char promotion; // ' ': not promotion, 'q': queen, 'r': rook, 'b': bishop, 'n': knight 
+    char promotion; // NONE: not promotion, 'q': queen, 'r': rook, 'b': bishop, 'n': knight 
     unsigned char move_type; // 0: quiet, 1: capture, 2: promotion, 3: castling
 
 } MOVE;
 
-static const char promotions[5] = { ' ', 'q', 'r', 'b', 'n' };
+static const char promotions[5] = { NONE, 'q', 'r', 'b', 'n' };
 
 void print_move(MOVE move);
 
