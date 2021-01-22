@@ -88,17 +88,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x + i][y - i] != __)
                 {
-                    if (board[x + i][y - i] == wB)
+                    switch (board[x + i][y - i])
                     {
-                        return 8 * (x + i) + (y - i);
-                    }
-                    else if (board[x + i][y - i] == wQ)
-                    {
-                        attackers_index[0] = 8 * (x + i) + (y - i);
-                    }
-                    else if (i == 1 && board[x + i][y - i] == wK)
-                    {
-                        attackers_index[1] = 8 * (x + i) + (y - i);
+                        case wB:
+                            return 8 * (x + i) + (y - i);
+                        case wQ:
+                            attackers_index[0] = 8 * (x + i) + (y - i);
+                            break;
+                        case wK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x + i) + (y - i);
+                            break;
                     }
                     break;
                 }
@@ -113,17 +113,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x + i][y + i] != __)
                 {
-                    if (board[x + i][y + i] == wB)
+                    switch (board[x + i][y + i])
                     {
-                        return 8 * (x + i) + (y + i);
-                    }
-                    else if (board[x + i][y + i] == wQ)
-                    {
-                        attackers_index[0] = 8 * (x + i) + (y + i);
-                    }
-                    else if (i == 1 && board[x + i][y + i] == wK)
-                    {
-                        attackers_index[1] = 8 * (x + i) + (y + i);
+                        case wB:
+                            return 8 * (x + i) + (y + i);
+                        case wQ:
+                            attackers_index[0] = 8 * (x + i) + (y + i);
+                            break;
+                        case wK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x + i) + (y + i);
+                            break;
                     }
                     break;
                 }
@@ -138,17 +138,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x - i][y - i] != __)
                 {
-                    if (board[x - i][y - i] == wB)
+                    switch (board[x - i][y - i])
                     {
-                        return 8 * (x - i) + (y - i);
-                    }
-                    else if (board[x - i][y - i] == wQ)
-                    {
-                        attackers_index[0] = 8 * (x - i) + (y - i);
-                    }
-                    else if (i == 1 && board[x - i][y - i] == wK)
-                    {
-                        attackers_index[1] = 8 * (x - i) + (y - i);
+                        case wB:
+                            return 8 * (x - i) + (y - i);
+                        case wQ:
+                            attackers_index[0] = 8 * (x - i) + (y - i);
+                            break;
+                        case wK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x - i) + (y - i);
+                            break;
                     }
                     break;
                 }
@@ -163,17 +163,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x - i][y + i] != __)
                 {
-                    if (board[x - i][y + i] == wB)
+                    switch (board[x - i][y + i])
                     {
-                        return 8 * (x - i) + (y + i);
-                    }
-                    else if (board[x - i][y + i] == wQ)
-                    {
-                        attackers_index[0] = 8 * (x - i) + (y + i);
-                    }
-                    else if (i == 1 && board[x - i][y + i] == wK)
-                    {
-                        attackers_index[1] = 8 * (x - i) + (y + i);
+                        case wB:
+                            return 8 * (x - i) + (y + i);
+                        case wQ:
+                            attackers_index[0] = 8 * (x - i) + (y + i);
+                            break;
+                        case wK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x - i) + (y + i);
+                            break;
                     }
                     break;
                 }
@@ -184,17 +184,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[i][y] != __)
                 {
-                    if (board[i][y] == wR)
+                    switch (board[i][y])
                     {
-                        return 8 * i + y;
-                    }
-                    else if (board[i][y] == wQ)
-                    {
-                        attackers_index[0] = 8 * i + y;
-                    }
-                    else if (i == x + 1 && board[i][y] == wK)
-                    {
-                        attackers_index[1] = 8 * i + y;
+                        case wR:
+                            return 8 * i + y;
+                        case wQ:
+                            attackers_index[0] = 8 * i + y;
+                            break;
+                        case wK:
+                            if (i == x + 1)
+                                attackers_index[1] = 8 * i + y;
+                            break;
                     }
                     break;
                 }
@@ -205,19 +205,18 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[x][i] != __)
                 {
-                    if (board[x][i] == wR)
+                    switch (board[x][i])
                     {
-                        return 8 * x + i;
+                        case wR:
+                            return 8 * x + i;
+                        case wQ:
+                            attackers_index[0] = 8 * x + i;
+                            break;
+                        case wK:
+                            if (i == y - 1)
+                                attackers_index[1] = 8 * x + i;
+                            break;
                     }
-                    else if (board[x][i] == wQ)
-                    {
-                        attackers_index[0] = 8 * x + i;
-                    }
-                    else if (i == y - 1 && board[x][i] == wK)
-                    {
-                        attackers_index[1] = 8 * x + i;
-                    }
-
                     break;
                 }
             }
@@ -227,17 +226,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[x][i] != __)
                 {
-                    if (board[x][i] == wR)
+                    switch (board[x][i])
                     {
-                        return 8 * x + i;
-                    }
-                    else if (board[x][i] == wQ)
-                    {
-                        attackers_index[0] = 8 * x + i;
-                    }
-                    else if (i == y + 1 && board[x][i] == wK)
-                    {
-                        attackers_index[1] = 8 * x + i;
+                        case wR:
+                            return 8 * x + i;
+                        case wQ:
+                            attackers_index[0] = 8 * x + i;
+                            break;
+                        case wK:
+                            if (i == y + 1)
+                                attackers_index[1] = 8 * x + i;
+                            break;
                     }
                     break;
                 }
@@ -248,17 +247,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[i][y] != __)
                 {
-                    if (board[i][y] == wR)
+                    switch (board[i][y])
                     {
-                        return 8 * i + y;
-                    }
-                    else if (board[i][y] == wQ)
-                    {
-                        attackers_index[0] = 8 * i + y;
-                    }
-                    else if (i == x - 1 && board[i][y] == wK)
-                    {
-                        attackers_index[1] = 8 * i + y;
+                        case wR:
+                            return 8 * i + y;
+                        case wQ:
+                            attackers_index[0] = 8 * i + y;
+                            break;
+                        case wK:
+                            if (i == x - 1)
+                                attackers_index[1] = 8 * i + y;
+                            break;
                     }
                     break;
                 }
@@ -334,17 +333,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x - i][y - i] != __)
                 {
-                    if (board[x - i][y - i] == bB)
+                    switch (board[x - i][y - i])
                     {
-                        return 8 * (x - i) + (y - i);
-                    }
-                    else if (board[x - i][y - i] == bQ)
-                    {
-                        attackers_index[0] = 8 * (x - i) + (y - i);
-                    }
-                    else if (i == 1 && board[x - i][y - i] == bK)
-                    {
-                        attackers_index[1] = 8 * (x - i) + (y - i);
+                        case bB:
+                            return 8 * (x - i) + (y - i);
+                        case bQ:
+                            attackers_index[0] = 8 * (x - i) + (y - i);
+                            break;
+                        case bK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x - i) + (y - i);
+                            break;
                     }
                     break;
                 }
@@ -359,17 +358,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x - i][y + i] != __)
                 {
-                    if (board[x - i][y + i] == bB)
+                    switch (board[x - i][y + i])
                     {
-                        return 8 * (x - i) + (y + i);
-                    }
-                    else if (board[x - i][y + i] == bQ)
-                    {
-                        attackers_index[0] = 8 * (x - i) + (y + i);
-                    }
-                    else if (i == 1 && board[x - i][y + i] == bK)
-                    {
-                        attackers_index[1] = 8 * (x - i) + (y + i);
+                        case bB:
+                            return 8 * (x - i) + (y + i);
+                        case bQ:
+                            attackers_index[0] = 8 * (x - i) + (y + i);
+                            break;
+                        case bK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x - i) + (y + i);
+                            break;
                     }
                     break;
                 }
@@ -384,17 +383,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x + i][y - i] != __)
                 {
-                    if (board[x + i][y - i] == bB)
+                    switch (board[x + i][y - i])
                     {
-                        return 8 * (x + i) + (y - i);
-                    }
-                    else if (board[x + i][y - i] == bQ)
-                    {
-                        attackers_index[0] = 8 * (x + i) + (y - i);
-                    }
-                    else if (i == 1 && board[x + i][y - i] == bK)
-                    {
-                        attackers_index[1] = 8 * (x + i) + (y - i);
+                        case bB:
+                            return 8 * (x + i) + (y - i);
+                        case bQ:
+                            attackers_index[0] = 8 * (x + i) + (y - i);
+                            break;
+                        case bK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x + i) + (y - i);
+                            break;
                     }
                     break;
                 }
@@ -409,17 +408,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
                 }
                 if (board[x + i][y + i] != __)
                 {
-                    if (board[x + i][y + i] == bB)
+                    switch (board[x + i][y + i])
                     {
-                        return 8 * (x + i) + (y + i);
-                    }
-                    else if (board[x + i][y + i] == bQ)
-                    {
-                        attackers_index[0] = 8 * (x + i) + (y + i);
-                    }
-                    else if (i == 1 && board[x + i][y + i] == bK)
-                    {
-                        attackers_index[1] = 8 * (x + i) + (y + i);
+                        case bB:
+                            return 8 * (x + i) + (y + i);
+                        case bQ:
+                            attackers_index[0] = 8 * (x + i) + (y + i);
+                            break;
+                        case bK:
+                            if (i == 1)
+                                attackers_index[1] = 8 * (x + i) + (y + i);
+                            break;
                     }
                     break;
                 }
@@ -430,17 +429,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[i][y] != __)
                 {
-                    if (board[i][y] == bR)
+                    switch (board[i][y])
                     {
-                        return 8 * i + y;
-                    }
-                    else if (board[i][y] == bQ)
-                    {
-                        attackers_index[0] = 8 * i + y;
-                    }
-                    else if (i == x - 1 && board[i][y] == bK)
-                    {
-                        attackers_index[1] = 8 * i + y;
+                        case bR:
+                            return 8 * i + y;
+                        case bQ:
+                            attackers_index[0] = 8 * i + y;
+                            break;
+                        case bK:
+                            if (i == x - 1)
+                                attackers_index[1] = 8 * i + y;
+                            break;
                     }
                     break;
                 }
@@ -451,19 +450,18 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[x][i] != __)
                 {
-                    if (board[x][i] == bR)
+                    switch (board[x][i])
                     {
-                        return 8 * x + i;
+                        case bR:
+                            return 8 * x + i;
+                        case bQ:
+                            attackers_index[0] = 8 * x + i;
+                            break;
+                        case bK:
+                            if (i == y - 1)
+                                attackers_index[1] = 8 * x + i;
+                            break;
                     }
-                    else if (board[x][i] == bQ)
-                    {
-                        attackers_index[0] = 8 * x + i;
-                    }
-                    else if (i == y - 1 && board[x][i] == bK)
-                    {
-                        attackers_index[1] = 8 * x + i;
-                    }
-
                     break;
                 }
             }
@@ -473,17 +471,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[x][i] != __)
                 {
-                    if (board[x][i] == bR)
+                    switch (board[x][i])
                     {
-                        return 8 * x + i;
-                    }
-                    else if (board[x][i] == bQ)
-                    {
-                        attackers_index[0] = 8 * x + i;
-                    }
-                    else if (i == y + 1 && board[x][i] == bK)
-                    {
-                        attackers_index[1] = 8 * x + i;
+                        case bR:
+                            return 8 * x + i;
+                        case bQ:
+                            attackers_index[0] = 8 * x + i;
+                            break;
+                        case bK:
+                            if (i == y + 1)
+                                attackers_index[1] = 8 * x + i;
+                            break;
                     }
                     break;
                 }
@@ -494,17 +492,17 @@ static int get_smallest_attacker(unsigned char board[8][8], int x, int y, int co
             {
                 if (board[i][y] != __)
                 {
-                    if (board[i][y] == bR)
+                    switch (board[i][y])
                     {
-                        return 8 * i + y;
-                    }
-                    else if (board[i][y] == bQ)
-                    {
-                        attackers_index[0] = 8 * i + y;
-                    }
-                    else if (i == x + 1 && board[i][y] == bK)
-                    {
-                        attackers_index[1] = 8 * i + y;
+                        case bR:
+                            return 8 * i + y;
+                        case bQ:
+                            attackers_index[0] = 8 * i + y;
+                            break;
+                        case bK:
+                            if (i == x + 1)
+                                attackers_index[1] = 8 * i + y;
+                            break;
                     }
                     break;
                 }
