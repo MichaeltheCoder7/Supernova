@@ -183,6 +183,7 @@ int main()
     init_zobrist();
 
     // define position and depth here
+    // use position 2 depth 5 for accuracy
     int depth = 5;
     init_board2(&pos);
 
@@ -196,6 +197,8 @@ int main()
     t = clock() - t;
     time_taken += ((double)t) / CLOCKS_PER_SEC;
 
+    // if the node count is incorrect according to the above,
+    // then move gen failed
     printf("Node count: %lld\n", nodes);
     printf("Move gen time: %f sec\n", time_taken);
 
