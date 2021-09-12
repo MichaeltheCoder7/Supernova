@@ -4,16 +4,16 @@ Supernova is an open-source UCI chess engine written in C. It can be used on Win
 
 Installation
 ------------
-You can download the Windows and Linux binaries from the latest release. Alternatively, if the binaries are not compatible, you can download the compressed source code file provided by the release, go to the Supernova directory that contains src and bin directories, and compile natively using GCC, then the binary should appear in the bin directory. 
+You can download the Windows binary from the latest release. Alternatively, for Linux users, or if the binary is not compatible, you can download the compressed source code file provided by the release, go to the Supernova directory that contains src and bin directories, and compile natively using GCC, then the binary should appear in the bin directory. 
 
 Windows:
 ```
-gcc -std=c99 -static -flto -Ofast src/*.c src/Fathom/tbprobe.c -lpthread -lm -o bin/Supernova_2.3.exe
+gcc -std=c99 -static -flto -Ofast src/*.c src/Fathom/tbprobe.c -lpthread -lm -o bin/Supernova_2.4.exe
 ```
 
 Linux:
 ```
-gcc -std=c99 -static -flto -Ofast src/*.c src/Fathom/tbprobe.c -lpthread -lm -o bin/Supernova_2.3_linux
+gcc -std=c99 -static -flto -Ofast src/*.c src/Fathom/tbprobe.c -lpthread -lm -o bin/Supernova_2.4_linux
 ```
 
 Note that GCC version 10 or above is preferable, and compiling might fail for GCC versions below 5.
