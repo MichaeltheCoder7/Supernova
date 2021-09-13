@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "thread.h"
@@ -111,4 +112,16 @@ inline int getTotalTbhits()
     }
 
     return count;
-} 
+}
+
+inline void wait_for_search()
+{
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    pthread_mutex_unlock(&mutex);
+}
+
+inline void signal_uci_thread()
+{
+    pthread_cond_signal(&cond);
+}

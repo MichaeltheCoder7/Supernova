@@ -1311,26 +1311,7 @@ static void *iterative_deepening(void *arg)
                 break;
         }
     }
-    
-    if (thread->index == MAINTHREAD)
-    {
-        // send move to GUI
-        if (!strncmp(thread->BestMove, "", 5))
-        {
-            printf("bestmove 0000\n");
-        }
-        else if (!strncmp(pv_table[1], "", 5))
-        {
-            printf("bestmove %s\n", thread->BestMove);
-        }
-        else
-        {
-            printf("bestmove %s ponder %s\n", thread->BestMove, pv_table[1]);
-        }
 
-        fflush(stdout);
-    }
-    
     return NULL;
 }
 
@@ -1386,4 +1367,23 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
     {
         setAge(); // otherwise, age tt
     }
+
+    // send move to GUI
+    if (!strncmp(threads[0].BestMove, "", 5))
+    {
+        printf("bestmove 0000\n");
+    }
+    else if (!strncmp(pv_table[1], "", 5))
+    {
+        printf("bestmove %s\n", threads[0].BestMove);
+    }
+    else
+    {
+        printf("bestmove %s ponder %s\n", threads[0].BestMove, pv_table[1]);
+    }
+
+    fflush(stdout);
+
+    // if a quit command was received, signal the uci thread so it exits properly
+    signal_uci_thread();
 }

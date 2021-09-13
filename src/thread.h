@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <setjmp.h>
+#include <pthread.h>
 #include "board.h"
 #include "move.h"
 #include "transposition.h"
@@ -10,6 +11,8 @@
 #define MAINTHREAD 0
 
 extern int search_depth;
+extern pthread_mutex_t mutex;
+extern pthread_cond_t cond;
 
 typedef struct {
 
@@ -48,3 +51,7 @@ int getTotalTbhits();
 struct Pawn *probePawnTT(unsigned long long key, THREAD *thread);
 
 void storePawnTT(unsigned long long key, short eval_mg, short eval_eg, THREAD *thread);
+
+void wait_for_search();
+
+void signal_uci_thread();

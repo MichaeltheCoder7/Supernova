@@ -6,13 +6,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <assert.h>
-
-#ifdef __linux__
-#include <unistd.h>
-#else
-#include <windows.h>
-#endif
-
 #include "board.h"
 #include "move.h"
 #include "checkmove.h"
@@ -22,7 +15,7 @@
 #include "Fathom/tbprobe.h"
 #include "thread.h"
 
-#define VERSION "test"
+#define VERSION "test2"
 
 // global variables
 // specify color for engine
@@ -34,6 +27,8 @@ BOARD pos_info;
 char op_move[6] = "";
 int thread_num = 1;
 unsigned long long history_log[800];
+pthread_cond_t cond  = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *engine()
 {
@@ -114,6 +109,7 @@ void handle_options(char *input)
         clearTT();
         clearEvalTT();
         cleanupSearch();
+        printf("info string Hash tables cleared.\n");
     }
     else if (!strncmp("SyzygyPath", input, 10))
     {
@@ -122,13 +118,14 @@ void handle_options(char *input)
         tb_init(input);
         if (TB_LARGEST > 0)
         {
-            printf("info string Syzygy Path set to %s.\n", input);
+            printf("info string Syzygy path set to %s.\n", input);
         }
     }
     else if (!strncmp("SyzygyProbeDepth", input, 16))
     {
         sscanf(input, "SyzygyProbeDepth value %s\n", buffer);
         TB_DEPTH = atoi(buffer);
+        printf("info string Syzygy probe depth set to %d.\n", TB_DEPTH);
     }
     else if (!strncmp("Threads", input, 7))
     {
@@ -569,11 +566,8 @@ void uci_loop()
         {
             stop = true;
 
-            #ifdef __linux__
-            sleep(1);
-            #else
-            Sleep(400); // wait till all threads are done
-            #endif
+            // wait till all threads are done
+            wait_for_search();
 
             // free tts
             if (tt != NULL)
@@ -628,6 +622,7 @@ int main()
     HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
     clearTT();
+    
     // default eval tt (8MB)
     EVALHASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct Eval)) * 8);
     Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
