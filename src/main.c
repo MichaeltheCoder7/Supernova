@@ -29,6 +29,7 @@ int thread_num = 1;
 unsigned long long history_log[800];
 pthread_cond_t cond  = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+bool search_finished = true;
 
 void *engine()
 {

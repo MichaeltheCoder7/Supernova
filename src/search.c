@@ -45,7 +45,6 @@ bool time_management;
 bool node_mode;
 int search_nodes;
 bool stop_search;
-bool search_finished;
 
 inline void init_lmr()
 {
