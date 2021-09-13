@@ -45,6 +45,7 @@ bool time_management;
 bool node_mode;
 int search_nodes;
 bool stop_search;
+bool search_finished;
 
 inline void init_lmr()
 {
@@ -1319,6 +1320,7 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
 {
     // get the starting time
     gettimeofday(&starting_time, NULL);
+    search_finished = false;
 
     MOVE probedMove;
     char move[6];
@@ -1332,6 +1334,9 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
         printf("info depth 1 score cp %d nodes 0 time 0 nps 0 tbhits 1 pv %s\n", score, move);
         printf("bestmove %s\n", move);
         fflush(stdout);
+        
+        signal_uci_thread();
+        search_finished = true;
         return;
     }
 
@@ -1386,4 +1391,5 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
 
     // if a quit command was received, signal the uci thread so it exits properly
     signal_uci_thread();
+    search_finished = true;
 }

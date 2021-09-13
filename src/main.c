@@ -567,7 +567,8 @@ void uci_loop()
             stop = true;
 
             // wait till all threads are done
-            wait_for_search();
+            if (!search_finished)
+                wait_for_search();
 
             // free tts
             if (tt != NULL)
