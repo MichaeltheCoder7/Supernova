@@ -1386,6 +1386,6 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
     }
     else
     {
-        setAge(); // age tt
+        setAge(); // otherwise, age tt
     }
 }
