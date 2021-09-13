@@ -109,7 +109,6 @@ void handle_options(char *input)
         clearTT();
         clearEvalTT();
         cleanupSearch();
-        printf("info string Hash tables cleared.\n");
     }
     else if (!strncmp("SyzygyPath", input, 10))
     {
@@ -125,7 +124,6 @@ void handle_options(char *input)
     {
         sscanf(input, "SyzygyProbeDepth value %s\n", buffer);
         TB_DEPTH = atoi(buffer);
-        printf("info string Syzygy probe depth set to %d.\n", TB_DEPTH);
     }
     else if (!strncmp("Threads", input, 7))
     {
