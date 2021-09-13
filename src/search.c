@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <math.h>
 #include <pthread.h>
+#include <setjmp.h>
 #include "attack.h"
 #include "search.h"
 #include "board.h"
@@ -266,7 +267,7 @@ static int quiescence(THREAD *thread, BOARD *pos, int ply, int color, int alpha,
     // exit if time is up
     timeUp(thread);
     if (stop_search)
-        return 0;
+        longjmp(thread->buf, 1);
 
     thread->nodes++;
 
@@ -364,9 +365,6 @@ static int quiescence(THREAD *thread, BOARD *pos, int ply, int color, int alpha,
 
         value = -quiescence(thread, &pos_copy, ply + 1, -color, -beta, -alpha);
 
-        if (stop_search)
-            return 0;
-
         if (value > best)
         {
             best = value;
@@ -414,7 +412,7 @@ static int pvs(THREAD *thread, BOARD *pos, int depth, int ply, int color, int al
     // exit if time is up
     timeUp(thread);
     if (stop_search)
-        return 0;
+        longjmp(thread->buf, 1);
 
     // mate distance pruning
     if (alpha < -mate_value)
@@ -547,9 +545,6 @@ static int pvs(THREAD *thread, BOARD *pos, int depth, int ply, int color, int al
             make_nullmove(&pos_copy);
 
             int nullVal = -pvs(thread, &pos_copy, depth - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
-
-            if (stop_search)
-                return 0;
 
             if (nullVal >= beta)
             {
@@ -759,9 +754,6 @@ skip_pruning:
             }
         }
 
-        if (stop_search)
-            return 0;
-
         if (value > best)
         {
             best = value;
@@ -831,7 +823,7 @@ MOVE internalID(THREAD *thread, BOARD *pos, int depth, int ply, int color, int a
     // exit if time is up
     timeUp(thread);
     if (stop_search)
-        return bm;
+        longjmp(thread->buf, 1);
 
     thread->nodes++;
 
@@ -1184,8 +1176,14 @@ static void *iterative_deepening(void *arg)
     for (current_depth = 1; current_depth <= depth; current_depth++)
     {
         clear_move(&thread->searched_move);
+        
         // search starts
-        val = pvs_root(thread, current_depth, color, alpha, beta);
+        if (!setjmp(thread->buf))
+        {
+            val = pvs_root(thread, current_depth, color, alpha, beta);
+        }
+
+        // jump here if search is stopped
 
         // check time
         gettimeofday(&ending_time, NULL);
@@ -1204,7 +1202,7 @@ static void *iterative_deepening(void *arg)
         {
             // allow partial search results if at least one move searched and it's within the bounds/not failed low
             // only do this in main thread
-            if (thread->searched_move.from != NOMOVE && !failed_low && val > alpha && val < beta && thread->index == MAINTHREAD)
+            if (thread->index == MAINTHREAD && thread->searched_move.from != NOMOVE && !failed_low && val > alpha && val < beta)
             {
                 valid_partial_search = true;
             }
@@ -1361,7 +1359,7 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
     prepareSearch(pos, piece_color, op_move, history_log);
 
     // search
-    // start helper threads
+    // start helper threads (lazy SMP)
     for (int i = 1; i < thread_num; i++) {
         pthread_create(&pthreads[i], NULL, iterative_deepening, &threads[i]);
     }
