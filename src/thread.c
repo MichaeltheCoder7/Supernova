@@ -44,6 +44,7 @@ inline void prepareSearch(BOARD *pos, int piece_color, char op_move[6], unsigned
     }
 }
 
+// pawn transposition table
 inline struct Pawn *probePawnTT(unsigned long long key, THREAD *thread)
 {
     int hashIndex = key % PAWNHASHSIZE;
