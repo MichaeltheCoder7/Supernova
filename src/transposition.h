@@ -46,7 +46,7 @@ struct Pawn
 
 extern struct DataItem *tt;
 extern struct Eval *Evaltt;
-extern struct Pawn Pawntt[PAWNHASHSIZE];
+//extern struct Pawn Pawntt[PAWNHASHSIZE];
 
 unsigned long long llrand();
 
@@ -73,11 +73,5 @@ void storeEvalTT(unsigned long long key, int evaluation);
 void clearEvalTT();
 
 unsigned long long getPawnHash(unsigned char board[8][8]);
-
-struct Pawn *probePawnTT(unsigned long long key);
-
-void storePawnTT(unsigned long long key, short eval_mg, short eval_eg);
-
-void clearPawnTT();
 
 #endif

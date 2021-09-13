@@ -2,6 +2,7 @@
 #define EVALUATE_H
 
 #include "board.h"
+#include "thread.h"
 
 #define CONNECTEDPAWN   10
 #define PHALANX         20
@@ -24,6 +25,6 @@
 #define RETURNINGBISHOP 30
 #define TEMPO           10
 
-int evaluate(BOARD *pos, unsigned char board[8][8], int color);
+int evaluate(THREAD *thread, BOARD *pos, unsigned char board[8][8], int color);
 
 #endif

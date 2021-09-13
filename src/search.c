@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <math.h>
+#include <pthread.h>
 #include "attack.h"
 #include "search.h"
 #include "board.h"
@@ -27,26 +28,18 @@
 #define INFINITE    20000
 
 // global variables:
-int nodes, tbhits;
 struct timeval starting_time;
-char BestMove[6];
-MOVE searched_move;
 char pv_table[MAXDEPTH][6];
 int lmr_table[64][64];
 
 // global variables in header
-unsigned long long history_log[800];
 int history_index;
 bool stop;
-MOVE killers[MAXDEPTH][2];
-COUNTERMOVE counterMoves[12][64];
 double search_time;
-int history[2][64][64];
 bool ponderhit;
 double ponder_time;
 bool extra_time;
 bool analyze;
-int search_depth;
 bool time_management;
 bool node_mode;
 int search_nodes;
@@ -64,52 +57,52 @@ inline void init_lmr()
 }
 
 // save killer moves
-static inline void saveKiller(MOVE move, int ply)
+static inline void saveKiller(MOVE move, int ply, THREAD *thread)
 {
     // make sure killer moves are different
-    if (!compareMove(&killers[ply][0], &move))
+    if (!compareMove(&(thread->killers[ply][0]), &move))
     {
-        killers[ply][1] = killers[ply][0];
+        thread->killers[ply][1] = thread->killers[ply][0];
     }
     // save killer move
-    killers[ply][0] = move;
+    thread->killers[ply][0] = move;
 }
 
 // clear killer moves table
-static inline void clearKiller()
+inline void clearKiller(THREAD *thread)
 {
     for (int x = 0; x < MAXDEPTH; x++)
     {
-        clear_move(&killers[x][0]);
-        clear_move(&killers[x][1]);
+        clear_move(&(thread->killers[x][0]));
+        clear_move(&(thread->killers[x][1]));
     }
 }
 
 // save data in the counter move heuristic table for move ordering
-static inline void saveCounterMove(BOARD *pos, MOVE move)
+static inline void saveCounterMove(THREAD *thread, BOARD *pos, MOVE move)
 {
     if (pos->last_move.piece != NOMOVE)
     {
-        counterMoves[pos->last_move.piece][pos->last_move.to].piece = pos->board[move.from / 8][move.from % 8];
-        counterMoves[pos->last_move.piece][pos->last_move.to].to = move.to;
+        thread->counterMoves[pos->last_move.piece][pos->last_move.to].piece = pos->board[move.from / 8][move.from % 8];
+        thread->counterMoves[pos->last_move.piece][pos->last_move.to].to = move.to;
     }
 }
 
 // clear counter move table
-inline void clearCounterMoveTable()
+inline void clearCounterMoveTable(THREAD *thread)
 {
     for (int a = 0; a < 12; a++)
     {
         for (int b = 0; b < 64; b++)
         {
-            counterMoves[a][b].piece = NOMOVE;
-            counterMoves[a][b].to = NOMOVE;
+            thread->counterMoves[a][b].piece = NOMOVE;
+            thread->counterMoves[a][b].to = NOMOVE;
         }
     }
 }
 
 // age history heuristic array
-static inline void ageHistory()
+inline void ageHistory(THREAD *thread)
 {
     for (int x = 0; x < 2; x++)
     {
@@ -117,14 +110,14 @@ static inline void ageHistory()
         {
             for (int z = 0; z < 64; z++)
             {
-                history[x][y][z] = history[x][y][z] / 8;
+                thread->history[x][y][z] = thread->history[x][y][z] / 8;
             }
         }
     }
 }
 
 // prevent history heuristic array to overflow 
-static inline void preventOverflow()
+static inline void preventOverflow(THREAD *thread)
 {
     for (int d = 0; d < 2; d++)
     {
@@ -132,30 +125,30 @@ static inline void preventOverflow()
         {
             for (int f = 0; f < 64; f++)
             {
-                history[d][e][f] = history[d][e][f] / 2;
+                thread->history[d][e][f] = thread->history[d][e][f] / 2;
             }
         }
     }
 }
 
 // save data in the history heuristic table for move ordering
-static inline void saveHistory(MOVE move, int depth, int color)
+static inline void saveHistory(MOVE move, int depth, int color, THREAD *thread)
 {
     int a = (color == 1) ? 1 : 0;
     int b = move.from;
     int c = move.to;
 
     // increase score for this move
-    history[a][b][c] += depth * depth;
+    thread->history[a][b][c] += depth * depth;
 
     // prevent overflow
-    if (history[a][b][c] > 80000000)
+    if (thread->history[a][b][c] > 80000000)
     {
-        preventOverflow();
+        preventOverflow(thread);
     }
 }
 
-static inline void adjustHistory(MOVE moveList[256], int moveIndex, int depth, int color)
+static inline void adjustHistory(MOVE moveList[256], int moveIndex, int depth, int color, THREAD *thread)
 {
     int a = (color == 1) ? 1 : 0;
     int b, c;
@@ -168,21 +161,22 @@ static inline void adjustHistory(MOVE moveList[256], int moveIndex, int depth, i
             b = moveList[i].from;
             c = moveList[i].to;
 
-            history[a][b][c] -= depth * depth;
+            thread->history[a][b][c] -= depth * depth;
             
             // prevent overflow
-            if (history[a][b][c] < -80000000)
+            if (thread->history[a][b][c] < -80000000)
             {
-                preventOverflow();
+                preventOverflow(thread);
             }
         }
     }
 }
 
 // check for time up or stop command from GUI every 1024 nodes
-static inline void timeUp()
+static inline void timeUp(THREAD *thread)
 {
-    if (!stop_search && !(nodes & 1023))
+    // only check for main thread
+    if (!stop_search && !(thread->nodes & 1023) && thread->index == MAINTHREAD)
     {
         struct timeval ending_time;
         gettimeofday(&ending_time, NULL);
@@ -192,21 +186,21 @@ static inline void timeUp()
         {
             stop_search = true;
         }
-        if (node_mode && nodes >= search_nodes)
+        if (node_mode && getTotalNodes() >= search_nodes)
         {
             stop_search = true;
         }
     }
 }
 
-static inline bool check_repetition(unsigned long long key, int counter, int ply)
+static inline bool check_repetition(THREAD *thread, unsigned long long key, int counter, int ply)
 {
     // store the current position key into the history table
-    history_log[history_index + ply] = key;
+    thread->history_log[history_index + ply] = key;
     // check positions till a capture or a pawn move
     for (int x = history_index + ply - 2; x >= history_index + ply - counter; x -= 2)
     {
-        if (key == history_log[x])
+        if (key == thread->history_log[x])
         {
             return true;
         }
@@ -254,7 +248,7 @@ static inline bool nonPawnMaterial(BOARD *pos, int color)
 }
 
 // fail-soft quiescence search with captures and queen promotion
-static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
+static int quiescence(THREAD *thread, BOARD *pos, int ply, int color, int alpha, int beta)
 {
     int value = -INFINITE;
     int length;
@@ -270,11 +264,11 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
     __builtin_prefetch(&tt[pos->key % (HASHSIZE - 1)]);
 
     // exit if time is up
-    timeUp();
+    timeUp(thread);
     if (stop_search)
         return 0;
 
-    nodes++;
+    thread->nodes++;
 
     int TTeval;
     short eval = VALUENONE;
@@ -304,7 +298,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
         eval = entry->statEval;
     }
 
-    int standing_pat = ((eval != VALUENONE)? eval : evaluate(pos, pos->board, color));
+    int standing_pat = ((eval != VALUENONE)? eval : evaluate(thread, pos, pos->board, color));
 
     if (standing_pat >= beta)
     {
@@ -368,7 +362,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
                 continue;
         }
 
-        value = -quiescence(&pos_copy, ply + 1, -color, -beta, -alpha);
+        value = -quiescence(thread, &pos_copy, ply + 1, -color, -beta, -alpha);
 
         if (stop_search)
             return 0;
@@ -393,7 +387,7 @@ static int quiescence(BOARD *pos, int ply, int color, int alpha, int beta)
 }
 
 // fail-soft principal variation search
-static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV, int isCheck)
+static int pvs(THREAD *thread, BOARD *pos, int depth, int ply, int color, int alpha, int beta, bool DoNull, bool is_PV, int isCheck)
 {
     int value = -INFINITE;
     int best = -INFINITE;
@@ -418,7 +412,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     __builtin_prefetch(&tt[pos->key % (HASHSIZE - 1)]);
 
     // exit if time is up
-    timeUp();
+    timeUp(thread);
     if (stop_search)
         return 0;
 
@@ -437,19 +431,19 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     }
 
     // check draw of repetition
-    if (check_repetition(pos->key, pos->halfmove_counter, ply))
+    if (check_repetition(thread, pos->key, pos->halfmove_counter, ply))
     {
-        nodes++;
+        thread->nodes++;
         return contempt(pos, ply);
     }
 
     // if depth reaches the end
     if (depth == 0)
     {
-        return quiescence(pos, ply, color, alpha, beta);
+        return quiescence(thread, pos, ply, color, alpha, beta);
     }
 
-    nodes++;
+    thread->nodes++;
 
     int TTeval;
     short eval = VALUENONE;
@@ -488,7 +482,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     // probe Syzygy tablebases
     if ((tbprobe = tablebasesProbeWDL(pos, depth, color)) != TB_RESULT_FAILED)
     {
-        tbhits++;
+        thread->tbhits++;
 
         switch (tbprobe)
         {
@@ -522,13 +516,13 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
     // get static eval
     if (eval == VALUENONE)
     {
-        eval = evaluate(pos, pos->board, color);
+        eval = evaluate(thread, pos, pos->board, color);
     }
 
     // razoring
     if (depth == 1 && eval <= alpha - 300)
     {
-        return quiescence(pos, ply, color, alpha, beta);
+        return quiescence(thread, pos, ply, color, alpha, beta);
     }
 
     // static null move / reverse futility pruning
@@ -552,7 +546,7 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             pos_copy = *pos;
             make_nullmove(&pos_copy);
 
-            int nullVal = -pvs(&pos_copy, depth - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
+            int nullVal = -pvs(thread, &pos_copy, depth - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
 
             if (stop_search)
                 return 0;
@@ -603,13 +597,13 @@ static int pvs(BOARD *pos, int depth, int ply, int color, int alpha, int beta, b
             }
 
             // verify first with qsearch
-            probcutVal = -quiescence(&pos_copy, ply + 1, -color, -probcutBeta, -probcutBeta + 1);
+            probcutVal = -quiescence(thread, &pos_copy, ply + 1, -color, -probcutBeta, -probcutBeta + 1);
 
             if (probcutVal >= probcutBeta)
-            {
+            {   
                 // reduced depth search to confirm the value is above beta
                 giveCheck = ifCheck(&pos_copy, -color);
-                probcutVal = -pvs(&pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false, giveCheck);
+                probcutVal = -pvs(thread, &pos_copy, depth - 4, ply + 1, -color, -probcutBeta, -probcutBeta + 1, true, false, giveCheck);
             }
             if (probcutVal >= probcutBeta)
             {
@@ -629,7 +623,7 @@ skip_pruning:
     // internal iterative deepening
     if (is_PV && !isCheck && depth >= 6 && hash_move.from == NOMOVE)
     {
-        hash_move = internalID(pos, depth - depth / 4 - 1, ply, color, alpha, beta);
+        hash_move = internalID(thread, pos, depth - depth / 4 - 1, ply, color, alpha, beta);
     }
 
     // initialize for move generation
@@ -652,7 +646,7 @@ skip_pruning:
         {
             if (start_moveGen)
                 hashMoveType = moves[0].move_type;
-            length = moveGen(pos, moves, scores, ply, color);
+            length = moveGen(thread, pos, moves, scores, ply, color);
             skipHashMove(moves, scores, length, &hash_move, hashMoveType, x);
         }
 
@@ -723,7 +717,7 @@ skip_pruning:
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
-            hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
+            hist_score = thread->history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
 
             // reduce less for pv nodes
             if (is_PV)
@@ -744,24 +738,24 @@ skip_pruning:
         if (moves_made == 1)
         {
             // full depth normal window search for the 1st move
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, is_PV, giveCheck);
+            value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, is_PV, giveCheck);
         }
         else
         {
             // null window search
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
 
             // search again with null window and full depth if lmr failed
             if (reduction_depth && value > alpha)
             {
                 new_depth += reduction_depth;
-                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+                value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
             }
 
             // full depth normal window search
             if (value > alpha && value < beta)
             {
-                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
+                value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
 
@@ -782,13 +776,13 @@ skip_pruning:
                 {
                     if (!isTactical)
                     {
-                        saveKiller(moves[x], ply);
-                        saveCounterMove(pos, moves[x]);
-                        saveHistory(moves[x], depth, color);
+                        saveKiller(moves[x], ply, thread);
+                        saveCounterMove(thread, pos, moves[x]);
+                        saveHistory(moves[x], depth, color, thread);
                     }
                     if (quietCount)
                     {
-                        adjustHistory(moves, x, depth, color);
+                        adjustHistory(moves, x, depth, color, thread);
                     }
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
@@ -821,7 +815,7 @@ skip_pruning:
 }
 
 // internal iterative deepening
-MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
+MOVE internalID(THREAD *thread, BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 {
     int value = -INFINITE;
     int best = -INFINITE;
@@ -835,16 +829,16 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
     bm.from = NOMOVE;
 
     // exit if time is up
-    timeUp();
+    timeUp(thread);
     if (stop_search)
         return bm;
 
-    nodes++;
+    thread->nodes++;
 
     // generate moves
     MOVE moves[256];
     int scores[256];
-    length = moveGen(pos, moves, scores, ply, color);
+    length = moveGen(thread, pos, moves, scores, ply, color);
 
     for (int x = 0; x < length; x++)
     {
@@ -877,7 +871,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
-            hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
+            hist_score = thread->history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
 
             // reduce less for pv nodes
             reduction_depth--;
@@ -897,24 +891,24 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
         if (moves_made == 1)
         {
             // full depth normal window search for the 1st move
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
+            value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
         }
         else
         {
             // null window search
-            value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
 
             // search again with null window and full depth if lmr failed
             if (reduction_depth && value > alpha)
             {
                 new_depth += reduction_depth;
-                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+                value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
             }
 
             // full depth normal window search
             if (value > alpha && value < beta)
             {
-                value = -pvs(&pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
+                value = -pvs(thread, &pos_copy, new_depth, ply + 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
 
@@ -936,13 +930,13 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
                 {
                     if (!isTactical)
                     {
-                        saveKiller(moves[x], ply);
-                        saveCounterMove(pos, moves[x]);
-                        saveHistory(moves[x], depth, color);
+                        saveKiller(moves[x], ply, thread);
+                        saveCounterMove(thread, pos, moves[x]);
+                        saveHistory(moves[x], depth, color, thread);
                     }
                     if (quietCount)
                     {
-                        adjustHistory(moves, x, depth, color);
+                        adjustHistory(moves, x, depth, color, thread);
                     }
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
@@ -963,7 +957,7 @@ MOVE internalID(BOARD *pos, int depth, int ply, int color, int alpha, int beta)
 }
 
 // principal variation search at root
-static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
+static int pvs_root(THREAD *thread, int depth, int color, int alpha, int beta)
 {
     int value = -INFINITE;
     int best = -INFINITE;
@@ -973,12 +967,13 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     int reduction_depth, new_depth;
     int isTactical, giveCheck, hist_score;
     int moves_made = 0, quietCount = 0;
+    BOARD *pos = &thread->pos;
     BOARD pos_copy;
     MOVE bm, hash_move;
     bm.from = NOMOVE;
     clear_move(&hash_move);
 
-    nodes++;
+    thread->nodes++;
 
     // transposition table look up
     entry = probeTT(pos->key);
@@ -991,9 +986,9 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
     MOVE moves[256];
     int scores[256];
     // get the best move from last iteration if any
-    MOVE pv_move = string_to_move(BestMove);
+    MOVE pv_move = string_to_move(thread->BestMove);
 
-    length = moveGen(pos, moves, scores, 0, color);
+    length = moveGen(thread, pos, moves, scores, 0, color);
     int sorted = orderMove_root(moves, scores, length, &pv_move, &hash_move);
 
     for (int x = 0; x < length; x++)
@@ -1028,7 +1023,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         {
             reduction_depth = lmr_table[MIN(new_depth, 63)][MIN(moves_made, 63)];
 
-            hist_score = history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
+            hist_score = thread->history[(color == 1) ? 1 : 0][moves[x].from][moves[x].to];
 
             // reduce less for pv nodes
             reduction_depth--;
@@ -1048,24 +1043,24 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         if (moves_made == 1)
         {
             // full depth normal window search for the 1st move
-            value = -pvs(&pos_copy, new_depth, 1, -color, -beta, -alpha, true, true, giveCheck);
+            value = -pvs(thread, &pos_copy, new_depth, 1, -color, -beta, -alpha, true, true, giveCheck);
         }
         else
         {
             // null window search
-            value = -pvs(&pos_copy, new_depth, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+            value = -pvs(thread, &pos_copy, new_depth, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
 
             // search again with null window and full depth if lmr failed
             if (reduction_depth && value > alpha)
             {
                 new_depth += reduction_depth;
-                value = -pvs(&pos_copy, new_depth, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
+                value = -pvs(thread, &pos_copy, new_depth, 1, -color, -alpha - 1, -alpha, true, false, giveCheck);
             }
 
             // full depth normal window search
             if (value > alpha && value < beta)
             {
-                value = -pvs(&pos_copy, new_depth, 1, -color, -beta, -alpha, true, true, giveCheck);
+                value = -pvs(thread, &pos_copy, new_depth, 1, -color, -beta, -alpha, true, true, giveCheck);
             }
         }
 
@@ -1087,13 +1082,13 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
                 {
                     if (!isTactical)
                     {
-                        saveKiller(moves[x], 0);
-                        saveCounterMove(pos, moves[x]);
-                        saveHistory(moves[x], depth, color);
+                        saveKiller(moves[x], 0, thread);
+                        saveCounterMove(thread, pos, moves[x]);
+                        saveHistory(moves[x], depth, color, thread);
                     }
                     if (quietCount)
                     {
-                        adjustHistory(moves, x, depth, color);
+                        adjustHistory(moves, x, depth, color, thread);
                     }
                     entryFlag = LOWERBOUND;
                     break; // beta cut-off
@@ -1102,7 +1097,7 @@ static int pvs_root(BOARD *pos, int depth, int color, int alpha, int beta)
         }
     }
 
-    searched_move = bm; // save the best move to play
+    thread->searched_move = bm; // save the best move to play
     // transposition table store:  
     storeTT(pos->key, best, VALUENONE, depth, &bm, entryFlag);
     return best;
@@ -1167,7 +1162,7 @@ static inline bool isRecapture(char move[6], char op_move[6])
 }
 
 // iterative deepening
-static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6])
+static void *iterative_deepening(void *arg)
 {
     int current_depth;
     int alpha = -INFINITE;
@@ -1180,12 +1175,17 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
     bool failed_low = false;
     bool eazy_move = true;
     char move[6];
+    THREAD *thread = arg;
+    BOARD *pos = &thread->pos;
+    int depth = thread->depth;
+    int color = thread->color;
+    int nodes, tbhits;
 
     for (current_depth = 1; current_depth <= depth; current_depth++)
     {
-        clear_move(&searched_move);
+        clear_move(&thread->searched_move);
         // search starts
-        val = pvs_root(pos, current_depth, color, alpha, beta);
+        val = pvs_root(thread, current_depth, color, alpha, beta);
 
         // check time
         gettimeofday(&ending_time, NULL);
@@ -1195,7 +1195,7 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         {
             stop_search = true;
         }
-        if (node_mode && nodes >= search_nodes)
+        if (node_mode && getTotalNodes() >= search_nodes)
         {
             stop_search = true;
         }
@@ -1203,7 +1203,8 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         if (stop_search)
         {
             // allow partial search results if at least one move searched and it's within the bounds/not failed low
-            if (searched_move.from != NOMOVE && !failed_low && val > alpha && val < beta)
+            // only do this in main thread
+            if (thread->searched_move.from != NOMOVE && !failed_low && val > alpha && val < beta && thread->index == MAINTHREAD)
             {
                 valid_partial_search = true;
             }
@@ -1219,7 +1220,8 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
             alpha = -INFINITE;
             beta = INFINITE;
             // search longer if failed low
-            if (more_time && extra_time)
+            // only in main thread
+            if (more_time && extra_time && thread->index == MAINTHREAD)
             {
                 if (secs >= (search_time / 8))
                 {
@@ -1251,16 +1253,30 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         alpha = val - ASWINDOW;
         beta = val + ASWINDOW;
 
-        // get the pv line and best move
-        memset(pv_table, 0, sizeof(pv_table));
-        getPVline(pos, &searched_move, current_depth);
-        move_to_string(&searched_move, move);
-        if (current_depth != 1 && strncmp(BestMove, move, 5))
+        // get best move
+        move_to_string(&thread->searched_move, move);
+
+        // If depth is not 1 and the best move from the last depth is not the same as the best move from this depth,
+        // then don't reduce thinking time
+        if (current_depth != 1 && strncmp(thread->BestMove, move, 5))
         {
             eazy_move = false;
         }
-        strncpy(BestMove, move, 6);
-        BestMove[5] = '\0';
+
+        // copy the best move so the next search will know
+        strncpy(thread->BestMove, move, 6); // needed for every thread
+        thread->BestMove[5] = '\0';
+
+        // skip the rest if not main thread
+        if (thread->index != MAINTHREAD)
+            continue;
+
+        // get the pv line
+        memset(pv_table, 0, sizeof(pv_table));
+        getPVline(pos, &thread->searched_move, current_depth);
+
+        nodes = getTotalNodes();
+        tbhits = getTotalTbhits();
 
         // send info to GUI
         if (val > 19000)
@@ -1293,28 +1309,34 @@ static void iterative_deepening(BOARD *pos, int depth, int color, char op_move[6
         // easy move if the best move is a recapture and has not changed after depth 12
         if (time_management && eazy_move && current_depth >= 12 && secs >= (search_time / 16))
         {
-            if (isRecapture(BestMove, op_move))
+            if (isRecapture(thread->BestMove, thread->op_move))
                 break;
         }
     }
-    // send move to GUI
-    if (!strncmp(BestMove, "", 5))
+    
+    if (thread->index == MAINTHREAD)
     {
-        printf("bestmove 0000\n");
-    }
-    else if (!strncmp(pv_table[1], "", 5))
-    {
-        printf("bestmove %s\n", BestMove);
-    }
-    else
-    {
-        printf("bestmove %s ponder %s\n", BestMove, pv_table[1]);
-    }
+        // send move to GUI
+        if (!strncmp(thread->BestMove, "", 5))
+        {
+            printf("bestmove 0000\n");
+        }
+        else if (!strncmp(pv_table[1], "", 5))
+        {
+            printf("bestmove %s\n", thread->BestMove);
+        }
+        else
+        {
+            printf("bestmove %s ponder %s\n", thread->BestMove, pv_table[1]);
+        }
 
-    fflush(stdout);
+        fflush(stdout);
+    }
+    
+    return NULL;
 }
 
-void search(BOARD *pos, int piece_color, char op_move[6])
+void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsigned long long *history_log)
 {
     // get the starting time
     gettimeofday(&starting_time, NULL);
@@ -1322,6 +1344,8 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     MOVE probedMove;
     char move[6];
     int score;
+    pthread_t pthreads[thread_num];
+
     // probe Syzygy tablebases at root
     if (!analyze && tablebasesProbeDTZ(pos, &probedMove, &score, piece_color))
     {
@@ -1333,23 +1357,32 @@ void search(BOARD *pos, int piece_color, char op_move[6])
     }
 
     // prepare to search
-    ageHistory();
-    clearKiller(); // clear killer move table
-    memset(BestMove, 0, sizeof(BestMove));
     stop_search = false;
-    nodes = 0, tbhits = 0;
+    prepareSearch(pos, piece_color, op_move, history_log);
 
     // search
-    iterative_deepening(pos, (search_depth == -1) ? MAXDEPTH : search_depth, piece_color, op_move);
+    // start helper threads
+    for (int i = 1; i < thread_num; i++) {
+        pthread_create(&pthreads[i], NULL, iterative_deepening, &threads[i]);
+    }
+
+    // use this thread as main thread
+    iterative_deepening(&threads[0]);
+
+    // stop helper threads
+    stop_search = true;
+
+    // wait for helper threads to finish
+    for (int i = 1; i < thread_num; i++) {
+        pthread_join(pthreads[i], NULL);
+    }
 
     // clear tables in analyze mode
     if (analyze)
     {
         clearTT(); // clear main hash table
         clearEvalTT(); // clear evaluation hash table
-        clearPawnTT(); // clear pawn hash table
-        clearCounterMoveTable(); // clear counter move table
-        memset(history, 0, sizeof(history)); // clear history heuristic table
+        cleanupSearch();
     }
     else
     {

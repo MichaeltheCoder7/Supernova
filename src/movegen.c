@@ -17,7 +17,7 @@ const int king_moves_y[8] = { -1,  0,  1, -1,  1, -1,  0,  1 };
 
 // generate all pseudo-legal moves
 // assign scores for each move
-int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
+int moveGen(THREAD *thread, BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
 {
     int index = 0;
     int index_x;
@@ -131,7 +131,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * (index_x + 1) + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x + 1, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x + 1, index_y, ply, color);
                         index++;
                     }
                 }
@@ -143,7 +143,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 24 + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, 3, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, 3, index_y, ply, color);
                         index++;
                     }
                 }
@@ -168,7 +168,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -202,7 +202,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -233,7 +233,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -264,7 +264,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -295,7 +295,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -328,7 +328,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[j][index_y]))
@@ -353,7 +353,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[index_x][j]))
@@ -378,7 +378,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[index_x][j]))
@@ -403,7 +403,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[j][index_y]))
@@ -442,7 +442,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -467,7 +467,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[j][index_y]))
@@ -498,7 +498,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -523,7 +523,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[index_x][j]))
@@ -548,7 +548,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[index_x][j]))
@@ -579,7 +579,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -604,7 +604,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[j][index_y]))
@@ -635,7 +635,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isWhitePiece(pos->board[x][y]))
@@ -691,7 +691,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * x + y;
                     all_moves[index].promotion = NONE;
-                    sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                    sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                     index++;
                 }
                 else if (isWhitePiece(pos->board[x][y]))
@@ -808,7 +808,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * (index_x - 1) + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x - 1, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x - 1, index_y, ply, color);
                         index++;
                     }
                 }
@@ -820,7 +820,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 32 + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, 4, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, 4, index_y, ply, color);
                         index++;
                     }
                 }
@@ -845,7 +845,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -879,7 +879,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -910,7 +910,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -941,7 +941,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -972,7 +972,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -1005,7 +1005,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[j][index_y]))
@@ -1030,7 +1030,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[index_x][j]))
@@ -1055,7 +1055,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[index_x][j]))
@@ -1080,7 +1080,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[j][index_y]))
@@ -1119,7 +1119,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -1144,7 +1144,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[j][index_y]))
@@ -1175,7 +1175,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -1200,7 +1200,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[index_x][j]))
@@ -1225,7 +1225,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * index_x + j;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, index_x, j, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, index_x, j, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[index_x][j]))
@@ -1256,7 +1256,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -1281,7 +1281,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * j + index_y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, j, index_y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, j, index_y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[j][index_y]))
@@ -1312,7 +1312,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                         all_moves[index].from = origin;
                         all_moves[index].to = 8 * x + y;
                         all_moves[index].promotion = NONE;
-                        sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                        sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                         index++;
                     }
                     else if (isBlackPiece(pos->board[x][y]))
@@ -1368,7 +1368,7 @@ int moveGen(BOARD *pos, MOVE all_moves[256], int sort[256], int ply, int color)
                     all_moves[index].from = origin;
                     all_moves[index].to = 8 * x + y;
                     all_moves[index].promotion = NONE;
-                    sort[index] = quietMove_score(pos, &all_moves[index], origin, x, y, ply, color);
+                    sort[index] = quietMove_score(thread, pos, &all_moves[index], origin, x, y, ply, color);
                     index++;
                 }
                 else if (isBlackPiece(pos->board[x][y]))

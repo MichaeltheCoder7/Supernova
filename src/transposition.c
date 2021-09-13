@@ -22,7 +22,7 @@ long HASHSIZE;
 long EVALHASHSIZE;
 struct DataItem *tt;
 struct Eval *Evaltt;
-struct Pawn Pawntt[PAWNHASHSIZE];
+//struct Pawn Pawntt[PAWNHASHSIZE];
 
 // return a 64 bit random number
 inline unsigned long long llrand()
@@ -262,40 +262,4 @@ inline unsigned long long getPawnHash(unsigned char board[8][8])
     }
 
     return h;
-}
-
-inline struct Pawn *probePawnTT(unsigned long long key)
-{
-    int hashIndex = key % PAWNHASHSIZE;
-
-    if (Pawntt[hashIndex].valid == true && Pawntt[hashIndex].key == key)
-    {
-        return &Pawntt[hashIndex];
-    }
-    else
-    {
-        return NULL;
-    }
-
-}
-
-inline void storePawnTT(unsigned long long key, short eval_mg, short eval_eg)
-{
-    int hashIndex = key % PAWNHASHSIZE;
-
-    Pawntt[hashIndex].key = key;
-    Pawntt[hashIndex].eval_mg = eval_mg;
-    Pawntt[hashIndex].eval_eg = eval_eg;
-    Pawntt[hashIndex].valid = true;
-}
-
-inline void clearPawnTT()
-{
-    for (int x = 0; x < PAWNHASHSIZE; x++)
-    {
-        Pawntt[x].key = 0;
-        Pawntt[x].eval_mg = 0;
-        Pawntt[x].eval_eg = 0;
-        Pawntt[x].valid = false;
-    }
 }

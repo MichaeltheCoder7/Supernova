@@ -2,6 +2,7 @@
 #define ORDERMOVE_H
 
 #include "move.h"
+#include "thread.h"
 
 #define BESTMOVE    100000000
 #define HASHMOVE    90000000
@@ -21,7 +22,7 @@ static const int mvv_score[13] = { 100, 200, 300, 400, 500, 0, 100, 200, 300, 40
 
 int capMove_score(unsigned char piece, unsigned char op_piece, unsigned char board[8][8], int x1, int y1, int x2, int y2, int color);
 
-int quietMove_score(BOARD *pos, MOVE *move, int origin, int x, int y, int ply, int color);
+int quietMove_score(THREAD *thread, BOARD *pos, MOVE *move, int origin, int x, int y, int ply, int color);
 
 int capQsearch_score(unsigned char piece, unsigned char op_piece);
 

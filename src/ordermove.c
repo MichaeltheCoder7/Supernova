@@ -135,11 +135,11 @@ inline int capMove_score(unsigned char piece, unsigned char op_piece, unsigned c
 }
 
 // return 1 if counter moves are the same, 0 otherwise
-static inline int compareCounterMove(BOARD *pos, MOVE *move)
+static inline int compareCounterMove(THREAD *thread, BOARD *pos, MOVE *move)
 {
     if (pos->last_move.piece != NOMOVE
-        && counterMoves[pos->last_move.piece][pos->last_move.to].piece == pos->board[move->from / 8][move->from % 8]
-        && counterMoves[pos->last_move.piece][pos->last_move.to].to == move->to)
+        && thread->counterMoves[pos->last_move.piece][pos->last_move.to].piece == pos->board[move->from / 8][move->from % 8]
+        && thread->counterMoves[pos->last_move.piece][pos->last_move.to].to == move->to)
     {
         return 1;
     }
@@ -148,23 +148,23 @@ static inline int compareCounterMove(BOARD *pos, MOVE *move)
 }
 
 // quiet move ordering based on killer moves, counter move, and history heuristic
-inline int quietMove_score(BOARD *pos, MOVE *move, int origin, int x, int y, int ply, int color)
+inline int quietMove_score(THREAD *thread, BOARD *pos, MOVE *move, int origin, int x, int y, int ply, int color)
 {
-    if (compareMove(&killers[ply][0], move))
+    if (compareMove(&(thread->killers[ply][0]), move))
     {
         return KILLER1;
     }
-    else if (compareMove(&killers[ply][1], move))
+    else if (compareMove(&(thread->killers[ply][1]), move))
     {
         return KILLER2;
     }
-    else if (compareCounterMove(pos, move))
+    else if (compareCounterMove(thread, pos, move))
     {
         return COUNTER;
     }
     else
     {
-        return history[(color == 1) ? 1 : 0][origin][8 * x + y];
+        return thread->history[(color == 1) ? 1 : 0][origin][8 * x + y];
     }
 }
 

@@ -14,7 +14,7 @@
 
 // 1: black
 // -1: white
-int evaluate(BOARD *pos, unsigned char board[8][8], int color)
+int evaluate(THREAD *thread, BOARD *pos, unsigned char board[8][8], int color)
 {
     // eval tt probe
     struct Eval *entry = probeEvalTT(pos->key);
@@ -44,7 +44,7 @@ int evaluate(BOARD *pos, unsigned char board[8][8], int color)
     wattack_count = battack_count = wattack_weight = battack_weight = 0;
 
     // pawn tt probe
-    struct Pawn *pEntry = probePawnTT(pos->pawn_key);
+    struct Pawn *pEntry = probePawnTT(pos->pawn_key, thread);
     if (pEntry != NULL)
     {
         pawn_mg = pEntry->eval_mg;
@@ -320,7 +320,7 @@ int evaluate(BOARD *pos, unsigned char board[8][8], int color)
         pawn_eg = bpawn_eg - wpawn_eg;
 
         // pawn tt store
-        storePawnTT(pos->pawn_key, pawn_mg, pawn_eg);
+        storePawnTT(pos->pawn_key, pawn_mg, pawn_eg, thread);
     }
 
     // white rook

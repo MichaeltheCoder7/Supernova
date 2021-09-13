@@ -11,6 +11,7 @@
 #include "../src/attack.h"
 #include "../src/transposition.h"
 #include "../src/checkmove.h"
+#include "../src/thread.h"
 
 // position 1
 // depth 5: 4865609 nodes
@@ -108,7 +109,7 @@ const unsigned char index_board2[64] = {
 
 };
 
-static unsigned long long perft(BOARD *pos, int depth, int color)
+static unsigned long long perft(THREAD *thread, BOARD *pos, int depth, int color)
 {
     unsigned long long nodes = 0;
     int length;
@@ -120,7 +121,7 @@ static unsigned long long perft(BOARD *pos, int depth, int color)
     // generate moves
     MOVE moves[256];
     int scores[256];
-    length = moveGen(pos, moves, scores, 0, color);
+    length = moveGen(thread, pos, moves, scores, 0, color);
 
     for (int x = 0; x < length; x++)
     {
@@ -135,7 +136,7 @@ static unsigned long long perft(BOARD *pos, int depth, int color)
             continue;
         }
 
-        nodes += perft(&pos_copy, depth - 1, -color);
+        nodes += perft(thread, &pos_copy, depth - 1, -color);
     }
 
     return nodes;
@@ -180,12 +181,21 @@ int main()
     BOARD pos;
     clock_t t;
     double time_taken = 0;
+    unsigned long long history_log[800];
+
     init_zobrist();
+
+    // create thread
+    createThreads(1);
+    
+    cleanupSearch();
 
     // define position and depth here
     // use position 2 depth 5 for accuracy
     int depth = 5;
     init_board2(&pos);
+
+    prepareSearch(&pos, -1, "     ", &history_log[0]);
 
     printf("Testing move gen with perft...\n");
     printf("Depth: %d\n", depth);
@@ -193,7 +203,7 @@ int main()
     displayboard(pos.board);
 
     t = clock();
-    long long nodes = perft(&pos, depth, -1);
+    long long nodes = perft(&threads[0], &pos, depth, -1);
     t = clock() - t;
     time_taken += ((double)t) / CLOCKS_PER_SEC;
 
@@ -201,6 +211,9 @@ int main()
     // then move gen failed
     printf("Node count: %lld\n", nodes);
     printf("Move gen time: %f sec\n", time_taken);
+
+    // free the memory
+    freeThreads(1);
 
     return 0;
 }

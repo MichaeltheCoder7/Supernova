@@ -20,8 +20,9 @@
 #include "transposition.h"
 #include "syzygy.h"
 #include "Fathom/tbprobe.h"
+#include "thread.h"
 
-#define VERSION "2.4"
+#define VERSION "test"
 
 // global variables
 // specify color for engine
@@ -31,10 +32,12 @@ int engine_color;
 int outofbook;
 BOARD pos_info;
 char op_move[6] = "";
+int thread_num = 1;
+unsigned long long history_log[800];
 
 void *engine()
 {
-    search(&pos_info, engine_color, op_move);
+    search(&pos_info, engine_color, op_move, thread_num, &history_log[0]);
 
     return NULL;
 }
@@ -46,6 +49,7 @@ void handle_uci()
     // options
     printf("option name Hash type spin default 32 min 1 max 4096\n");
     printf("option name Clear Hash type button\n");
+    printf("option name Threads type spin default 1 min 1 max 1024\n");
     printf("option name Ponder type check default false\n");
     printf("option name SyzygyPath type string default <empty>\n");
     printf("option name SyzygyProbeDepth type spin default 1 min 1 max 100\n");
@@ -109,9 +113,7 @@ void handle_options(char *input)
         // clear hash tables 
         clearTT();
         clearEvalTT();
-        clearPawnTT();
-        clearCounterMoveTable();
-        memset(history, 0, sizeof(history)); // clear history heuristic table
+        cleanupSearch();
     }
     else if (!strncmp("SyzygyPath", input, 10))
     {
@@ -128,6 +130,17 @@ void handle_options(char *input)
         sscanf(input, "SyzygyProbeDepth value %s\n", buffer);
         TB_DEPTH = atoi(buffer);
     }
+    else if (!strncmp("Threads", input, 7))
+    {
+        sscanf(input, "Threads value %s\n", buffer);
+        thread_num = atoi(buffer);
+
+        // make sure thread number is in range
+        thread_num = (thread_num > 1024) ? 1024 : (thread_num < 1) ? 1 : thread_num;
+
+        createThreads(thread_num);
+        printf("info string Threads set to %d.\n", thread_num);
+    }
 
     fflush(stdout);
 }
@@ -136,14 +149,12 @@ void handle_options(char *input)
 void handle_newgame()
 {
     init_zobrist(); // generate random Zobrist numbers
-    clearCounterMoveTable();
-    memset(history, 0, sizeof(history)); // clear history heuristic table
+    cleanupSearch(); 
     outofbook = 0;
 
     // clear hash tables
     clearTT();
     clearEvalTT();
-    clearPawnTT();
 }
 
 // parse fen notation
@@ -561,7 +572,7 @@ void uci_loop()
             #ifdef __linux__
             sleep(1);
             #else
-            Sleep(300); // wait till all threads are done
+            Sleep(400); // wait till all threads are done
             #endif
 
             // free tts
@@ -581,6 +592,10 @@ void uci_loop()
             {
                 tb_free();
             }
+
+            // free threads
+            freeThreads();
+
             break;
         }
         // non-UCI command
@@ -606,6 +621,9 @@ int main()
     init_setMask();
     init_lmr();
 
+    // set up threads
+    createThreads(thread_num);
+
     // default main tt (24MB)
     HASHSIZE = (unsigned long int)((1048576.0 / sizeof(struct DataItem)) * 24);
     tt = malloc(HASHSIZE * sizeof(struct DataItem));
@@ -615,9 +633,7 @@ int main()
     Evaltt = malloc(EVALHASHSIZE * sizeof(struct Eval));
     clearEvalTT();
 
-    clearCounterMoveTable();
-    memset(history, 0, sizeof(history));
-    clearPawnTT();
+    cleanupSearch();
 
     // start UCI loop
     uci_loop();
