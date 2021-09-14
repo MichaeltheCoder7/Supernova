@@ -1,6 +1,6 @@
 # Supernova
 
-Supernova is an open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Cutechess...) to function properly. Supernova appears on the [CCRL](http://ccrl.chessdom.com/ccrl/404/) rating list. Take a look at its Elo progression [here](http://ccrl.chessdom.com/ccrl/404/cgi/compare_engines.cgi?family=Supernova&print=Rating+list&print=Results+table&print=LOS+table&print=Ponder+hit+table&print=Eval+difference+table&print=Comopp+gamenum+table&print=Overlap+table&print=Score+with+common+opponents).
+Supernova is a strong open-source UCI chess engine written in C. It can be used on Windows and Linux and requires a UCI compatible graphical user interface (Arena, Cutechess...) to function properly. Supernova appears on the [CCRL](http://ccrl.chessdom.com/ccrl/404/) rating list. Take a look at its Elo progression [here](http://ccrl.chessdom.com/ccrl/404/cgi/compare_engines.cgi?family=Supernova&print=Rating+list&print=Results+table&print=LOS+table&print=Ponder+hit+table&print=Eval+difference+table&print=Comopp+gamenum+table&print=Overlap+table&print=Score+with+common+opponents).
 
 Installation
 ------------
@@ -51,6 +51,9 @@ Configure the hash table size to 1MB-4096MB. The default is 32MB.
 **Clear Hash**  
 Clear the hash tables.  
 
+**Threads**  
+Configure the number of CPUs to use. More CPUs would increase the strength of the engine. The default is 1 CPU.  
+
 **Ponder**  
 Does not change anything. It's there to notify the GUI that Supernova can ponder.  
 
@@ -67,6 +70,7 @@ Details
 * Piece Lists
 
 **Search** 
+* Lazy SMP
 * Transposition Table
 * Iterative Deepening with Aspiration Window
 * Principal Variation Search
