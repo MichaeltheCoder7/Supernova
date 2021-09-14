@@ -46,19 +46,19 @@ UCI Options
 * Analyze / Infinite  
   
 **Hash**  
-Configure the hash table size to 1MB-4096MB. The default is 32MB. 
+Configure the hash table size to 1MB-4096MB. The size of the hash table should depend on the time control of the chess game and number of CPUs used. Increase the size for longer games and more CPUs. The default is 32MB.  
 
 **Clear Hash**  
 Clear the hash tables.  
 
 **Threads**  
-Configure the number of CPUs to use. More CPUs would increase the strength of the engine. The default is 1 CPU.  
+Configure the number of CPUs to use. More CPUs would greatly increase the strength of the engine. The default is 1 CPU.  
 
 **Ponder**  
-Does not change anything. It's there to notify the GUI that Supernova can ponder.  
+Does not change anything. It's there to notify the GUI that Supernova can ponder. Pondering allows Supernova to think during the opponent's time so it can predict the opponent's move and act accordingly.  
 
 **SyzygyPath**  
-Path to the directory containing Syzygy tablebases files.  
+Path to the directory containing Syzygy tablebases files. Supernova supports up to 7-man Syzygy tablebases. These endgame tablebases can improve Supernova's endgame ability.     
 
 **SyzygyProbeDepth**  
 The minimum depth that enables Supernova to probe Syzygy tablebases in the search. The default is 1. You may need to increase it if the search speed is too slow.
