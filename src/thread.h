@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdbool.h>
-#include <setjmp.h>
 #include <pthread.h>
 #include "board.h"
 #include "move.h"
@@ -27,7 +26,6 @@ typedef struct {
     MOVE searched_move;
     unsigned long long history_log[800]; // log for repetition check
     struct Pawn Pawntt[PAWNHASHSIZE]; // pawn hash for each thread
-    jmp_buf buf;
 
     int index; // thread index
     int count; // total threads

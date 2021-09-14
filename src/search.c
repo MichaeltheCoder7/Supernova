@@ -8,7 +8,6 @@
 #include <assert.h>
 #include <math.h>
 #include <pthread.h>
-#include <setjmp.h>
 #include "attack.h"
 #include "search.h"
 #include "board.h"
@@ -267,7 +266,7 @@ static int quiescence(THREAD *thread, BOARD *pos, int ply, int color, int alpha,
     // exit if time is up
     timeUp(thread);
     if (stop_search)
-        longjmp(thread->buf, 1);
+        return 0;
 
     thread->nodes++;
 
@@ -365,6 +364,9 @@ static int quiescence(THREAD *thread, BOARD *pos, int ply, int color, int alpha,
 
         value = -quiescence(thread, &pos_copy, ply + 1, -color, -beta, -alpha);
 
+        if (stop_search)
+            return 0;
+
         if (value > best)
         {
             best = value;
@@ -412,7 +414,7 @@ static int pvs(THREAD *thread, BOARD *pos, int depth, int ply, int color, int al
     // exit if time is up
     timeUp(thread);
     if (stop_search)
-        longjmp(thread->buf, 1);
+        return 0;
 
     // mate distance pruning
     if (alpha < -mate_value)
@@ -545,6 +547,9 @@ static int pvs(THREAD *thread, BOARD *pos, int depth, int ply, int color, int al
             make_nullmove(&pos_copy);
 
             int nullVal = -pvs(thread, &pos_copy, depth - R, ply + 1, -color, -beta, -beta + 1, false, false, 0);
+
+            if (stop_search)
+                return 0;
 
             if (nullVal >= beta)
             {
@@ -754,6 +759,9 @@ skip_pruning:
             }
         }
 
+        if (stop_search)
+            return 0;
+
         if (value > best)
         {
             best = value;
@@ -823,7 +831,7 @@ MOVE internalID(THREAD *thread, BOARD *pos, int depth, int ply, int color, int a
     // exit if time is up
     timeUp(thread);
     if (stop_search)
-        longjmp(thread->buf, 1);
+        return bm;
 
     thread->nodes++;
 
@@ -1178,12 +1186,7 @@ static void *iterative_deepening(void *arg)
         clear_move(&thread->searched_move);
         
         // search starts
-        if (!setjmp(thread->buf))
-        {
-            val = pvs_root(thread, current_depth, color, alpha, beta);
-        }
-
-        // jump here if search is stopped
+        val = pvs_root(thread, current_depth, color, alpha, beta);
 
         // check time
         gettimeofday(&ending_time, NULL);
@@ -1360,18 +1363,6 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
         pthread_join(pthreads[i], NULL);
     }
 
-    // clear tables in analyze mode
-    if (analyze)
-    {
-        clearTT(); // clear main hash table
-        clearEvalTT(); // clear evaluation hash table
-        cleanupSearch();
-    }
-    else
-    {
-        setAge(); // otherwise, age tt
-    }
-
     // send move to GUI
     if (!strncmp(threads[0].BestMove, "", 5))
     {
@@ -1387,6 +1378,18 @@ void search(BOARD *pos, int piece_color, char op_move[6], int thread_num, unsign
     }
 
     fflush(stdout);
+
+    // clear tables in analyze mode
+    if (analyze)
+    {
+        clearTT(); // clear main hash table
+        clearEvalTT(); // clear evaluation hash table
+        cleanupSearch();
+    }
+    else
+    {
+        setAge(); // otherwise, age tt
+    }
 
     // if a quit command was received, signal the uci thread so it exits properly
     signal_uci_thread();
