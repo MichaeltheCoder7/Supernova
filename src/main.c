@@ -15,7 +15,7 @@
 #include "Fathom/tbprobe.h"
 #include "thread.h"
 
-#define VERSION "test2"
+#define VERSION "2.4"
 
 // global variables
 // specify color for engine
